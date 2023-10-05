@@ -1,29 +1,21 @@
-#let title = "Optimising Runway Sequences and De-Icing Schedules in Airports"
-
-#let student = (
-    name: "Indraneel Mahendrakumar",
-    email: "psyim3@nottingham.ac.uk",
-    id: 20372495,
-)
-
-#let supervisor = (
-    name: "Geert De Maere",
-    email: "geert.demaere@nottingham.ac.uk",
-)
+#let email(email) = link("mailto:" + email)
 
 #v(1fr)
 #align(center)[
-    #text(18pt, strong(title))
+    #text(18pt)[
+        *Optimising Aircraft Runway Sequences and De-Icing Schedules*
+    ]
 
     _Project Proposal_
 ]
 #align(right)[
-    #student.name \
-    #link("mailto:" + student.email) \
-    #student.id \
+    Indraneel Mahendrakumar \
+    #email("psyim3@nottingham.ac.uk")
+    20372495
 ]
 #v(1fr)
 
+// NOTE: Done after cover page since we don't want page numbers to show up on it
 #set page(
     numbering: "1",
     number-align: center,
@@ -33,3 +25,5 @@
 
 #outline()
 #pagebreak()
+
+= Introduction
