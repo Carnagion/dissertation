@@ -1,3 +1,13 @@
+#let todo(message: none) = raw(
+    if message == none {
+        "// TODO"
+    } else {
+        "// TODO: " + message
+    },
+    block: true,
+    lang: "rust",
+)
+
 #let email(email) = link("mailto:" + email, raw(email))
 
 #set text(font: "EB Garamond", size: 11pt)
@@ -30,13 +40,29 @@
 
 #set heading(numbering: "1.1")
 
+#set par(justify: true)
+
 #outline()
 #pagebreak()
 
 = Introduction
 
+Airports have a limited number of runways, which limits the number of aircraft that can take off or land at any given time frame while adhering to strict safety and operational requirements. The efficient scheduling of the take-off and landing of aircraft is thus critical for maximising the capacity of airports, and has a significant impact on operational costs, fuel emissions, and flight delays.
+
+De-icing further complicates this.
+
+Such algorithms must be fast enough and reliable enough to be used in highly dynamic, real-time environments where failure is not an option.
+
+#todo()
+
 = Objectives
+
+#todo()
 
 = Project Plan
 
+#todo()
+
 = References
+
+#todo()
