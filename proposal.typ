@@ -1,19 +1,24 @@
 #let email(email) = link("mailto:" + email, raw(email))
 
-#set text(font: "EB Garamond")
+#set text(font: "EB Garamond", size: 11pt)
 
 #v(1fr)
 #align(center)[
-    #text(size: 18pt)[
-        *Optimising Aircraft Runway Sequences and De-Icing Schedules*
-    ]
+    #text(size: 18pt)[*Optimising Aircraft Runway Sequences and De-Icing Schedules*]
 
     _Project Proposal_
-]
-#align(right)[
-    Indraneel Mahendrakumar \
-    #email("psyim3@nottingham.ac.uk") \
-    20372495 \
+
+    #v(0.1fr)
+
+    #stack(dir: ltr, spacing: 1fr)[
+        Indraneel Mahendrakumar\
+        20372495\
+        #email("psyim3@nottingham.ac.uk")\
+    ][
+        _Supervised By_\
+        Geert De Maere\
+        #email("geert.demaere@nottingham.ac.uk")\
+    ]
 ]
 #v(1fr)
 
@@ -32,6 +37,6 @@
 
 = Objectives
 
-= Plan
+= Project Plan
 
 = References
