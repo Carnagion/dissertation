@@ -27,3 +27,9 @@
 #pagebreak()
 
 = Introduction
+
+= Objectives
+
+= Plan
+
+= References
