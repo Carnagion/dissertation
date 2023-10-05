@@ -1,8 +1,10 @@
-#let email(email) = link("mailto:" + email)
+#let email(email) = link("mailto:" + email, raw(email))
+
+#set text(font: "EB Garamond")
 
 #v(1fr)
 #align(center)[
-    #text(18pt)[
+    #text(size: 18pt)[
         *Optimising Aircraft Runway Sequences and De-Icing Schedules*
     ]
 
@@ -11,7 +13,7 @@
 #align(right)[
     Indraneel Mahendrakumar \
     #email("psyim3@nottingham.ac.uk") \
-    20372495
+    20372495 \
 ]
 #v(1fr)
 
