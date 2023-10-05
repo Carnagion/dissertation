@@ -10,7 +10,7 @@
 ]
 #align(right)[
     Indraneel Mahendrakumar \
-    #email("psyim3@nottingham.ac.uk")
+    #email("psyim3@nottingham.ac.uk") \
     20372495
 ]
 #v(1fr)
