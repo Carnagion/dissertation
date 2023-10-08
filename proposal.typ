@@ -1,13 +1,3 @@
-#let todo(message: none) = raw(
-    if message == none {
-        "// TODO"
-    } else {
-        "// TODO: " + message
-    },
-    block: true,
-    lang: "rust",
-)
-
 #let email(email) = link("mailto:" + email, raw(email))
 
 #set text(font: "EB Garamond", size: 11pt)
@@ -15,8 +5,6 @@
 #v(1fr)
 #align(center)[
     #text(size: 18pt)[*Integrated Aircraft Runway Sequencing and De-Icing*]
-
-    // Integrated Runway Sequencing and De-Icing
 
     _Project Proposal_
 
@@ -49,28 +37,30 @@
 
 = Introduction
 
-Airports have a limited number of runways, serving as a bottleneck to the number of aircraft that can take off or land at any given time frame while adhering to strict safety and operational requirements. The efficient scheduling of the take-off and landing of aircraft is thus critical for maximising the capacity of airports, and has a significant impact on operational costs, fuel emissions, and flight delays.
+// Airports have a limited number of runways, serving as a bottleneck to the number of aircraft that can take off or land at any given time frame while adhering to strict safety and operational requirements. The efficient scheduling of the take-off and landing of aircraft is thus critical for maximising the capacity of airports, and has a significant impact on operational costs, fuel emissions, and flight delays.
 
-#todo(message: "Tweak first para, maybe mention previous approaches to runway sequencing")
+// De-icing further complicates this.
 
-De-icing further complicates this.
-
-#todo(message: "Research more, expand on de-icing")
-
-Such algorithms must be fast enough and reliable enough to be used in highly dynamic, real-time environments where failure is not an option.
-
-#todo(message: "Add references")
+// Such algorithms must be fast enough and reliable enough to be used in highly dynamic, real-time environments where failure is not an option.
 
 = Objectives
 
-#todo()
+1. Investigate previous approaches used for runway sequencing. The mathematical models and formulations proposed in prior research may not be directly applicable to this problem, as there have been few efforts until now to attempt to solve runway sequencing and de-icing in an integrated fashion. Thus, there will be a need to understand and then adapt or extend the formulations so they are suitable and accurate for the integrated version.
+
+2.
+
+3.
+
+4.
+
+5. Develop a tool for visualising the outputs, and possibly intermediate data, produced by the algorithm. This will provide a more intuitive, human-friendly view of the algorithm's workings, intended to aid users' understanding.
 
 // 1. Problem definintion
 // Mathematically model or define what's possible
 // Look at Time Indexed Formulations - maybe extend some of the models proposed there
 // Continuous formuation done by Beasley for aircraft landing - if A takes of at Ta and B takes off after A, then Ta + (sep between A and b) <= Tb
 // Working with Beasley's formuation might be easier
-// Furine
+// Furini
 // Lieder
 
 // 2. Investigate B&B
@@ -78,7 +68,7 @@ Such algorithms must be fast enough and reliable enough to be used in highly dyn
 // Integrate within a rolling window
 
 // 3. Comparison with mathematical programming
-// Extend Syntef's formulation
+// Extend Sintef's formulation
 
 // 4. Vehicle Routing Problem
 // Depending on size of aircraft being de-iced, the de-icing rakes may have to travel more and have insufficient fuel - small aircraft maybe 4, large maybe 3
@@ -105,13 +95,10 @@ Such algorithms must be fast enough and reliable enough to be used in highly dyn
 
 = Project Plan
 
-#todo(message: "Start with simple runway sequencing (branch & bound) and then move on to de-icing?")
-
 = References
 
-#todo()
-
-// Partial integrated = Barry Smith, using some of the constraints from problem A to solve problem B
+// Partial integrated = using some of the constraints from problem A to solve problem B
+// Barry Smith
 // Impose one constraint or characteristic manipulated in an earlier step to improve a later step
 // Flight scheduling, fleet assignment, aircraft routing, crew scheduling
 // FS = match capacity to demands (lot of demand for a route = put a big aircraft on it)
