@@ -57,6 +57,14 @@ The key goals of this project can therefore be expanded as follows:
 
 4. Develop a tool for visualising the outputs and possibly intermediate data produced by the algorithm. This will provide a more intuitive, human-friendly view intended to aid users' understanding.
 
+= Plan
+
+= References
+
+// Notes
+
+// 6-10-2023
+
 // 1. Problem definintion
 // Mathematically model or define what's possible
 // Look at Time Indexed Formulations - maybe extend some of the models proposed there
@@ -105,7 +113,3 @@ The key goals of this project can therefore be expanded as follows:
 
 // Mathematical Modelling
 // Model Building in Mathematical Programming, 5e
-
-= Plan
-
-= References
