@@ -23,10 +23,7 @@
 #v(1fr)
 
 // NOTE: Done after cover page since we don't want page numbers to show up on it
-#set page(
-    numbering: "1",
-    number-align: center,
-)
+#set page(numbering: "1")
 
 #set heading(numbering: "1.1")
 
@@ -45,15 +42,15 @@
 
 = Objectives
 
-The primary aim of this project is to investigate the integrated runway sequencing and de-icing problem and develop an algorithm capable of solving it. By comparing this algorithm with existing ones, it will be possible to gain a deeper insight into runway sequencing and de-icing scheduling, and the potential benefits of integrating their solutions.
+The primary aim of this project is to investigate the integrated runway sequencing and de-icing problem and develop an algorithm capable of solving it. This will provide a deeper insight into the problem's fundamental characteristics and the interactions between runway sequencing and de-icing, as well as the potential benefits of integrating their solutions.
 
-The key goals of this project can therefore be expanded as follows:
+The key objectives are thus as follows:
 
-1. Investigate previous approaches used for runway sequencing. The mathematical models and formulations proposed in prior research may not be directly applicable to this project, as there have been few efforts until now to attempt to solve runway sequencing and de-icing in an integrated fashion. Thus, there will be a need to understand and then adapt or extend the formulations so they are suitable for the integrated problem.
+1. Investigate previous approaches to runway sequencing. The mathematical models and formulations proposed in prior research may not be directly applicable to this project, as there have been few efforts until now to tackle runway sequencing and de-icing in an integrated fashion. Thus, there will be a need to understand and then adapt or extend these models so they are suitable for the integrated problem.
 
-2. Design and implement an algorithm that provides optimal solutions for the integrated runway sequencing and de-icing problem, following the model(s) proposed in the previous step.
+2. Design and implement an algorithm that provides optimal solutions for the integrated runway sequencing and de-icing problem. The algorithm must be generic enough to work with data from different sources (i.e. different airports and datasets), by using a set of common features and characteristics in the data. Additionally, it must be fast and reliable enough to be viable in highly dynamic, real-time situations where unexpected failure is not an option.
 
-3. Evaluate the performance of the algorithm. This will involve benchmarking it on known and available datasets, and comparing it to existing solutions. A simulation that is more representative of real-world data and use cases will also be used to run the algorithm on multiple problem instances over a long period of time. This will help expose any issues, such as instability in the generated sequences, that may not be visible in individual runs.
+3. Evaluate the performance of the algorithm. This will involve benchmarking it on known and available datasets, and comparing it to existing solutions. A simulation that is more representative of real-world data and use cases will also be used to run the algorithm on multiple problem instances over a longer period of time. This will help expose any issues, such as instability in the generated sequences, that may not be visible in individual runs.
 
 4. Develop a tool for visualising the outputs and possibly intermediate data produced by the algorithm. This will provide a more intuitive, human-friendly view intended to aid users' understanding.
 
