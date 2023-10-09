@@ -45,15 +45,17 @@
 
 = Objectives
 
-1. Investigate previous approaches used for runway sequencing. The mathematical models and formulations proposed in prior research may not be directly applicable to this problem, as there have been few efforts until now to attempt to solve runway sequencing and de-icing in an integrated fashion. Thus, there will be a need to understand and then adapt or extend the formulations so they are suitable and accurate for the integrated version.
+The primary aim of this project is to investigate the integrated runway sequencing and de-icing problem and develop an algorithm capable of solving it. By comparing this algorithm with existing ones, it will be possible to gain a deeper insight into runway sequencing and de-icing scheduling, and the potential benefits of integrating their solutions.
 
-2.
+The key goals of this project can therefore be expanded as follows:
 
-3.
+1. Investigate previous approaches used for runway sequencing. The mathematical models and formulations proposed in prior research may not be directly applicable to this project, as there have been few efforts until now to attempt to solve runway sequencing and de-icing in an integrated fashion. Thus, there will be a need to understand and then adapt or extend the formulations so they are suitable for the integrated problem.
 
-4.
+2. Design and implement an algorithm that provides optimal solutions for the integrated runway sequencing and de-icing problem, following the model(s) proposed in the previous step.
 
-5. Develop a tool for visualising the outputs, and possibly intermediate data, produced by the algorithm. This will provide a more intuitive, human-friendly view of the algorithm's workings, intended to aid users' understanding.
+3. Evaluate the performance of the algorithm. This will involve benchmarking it on known and available datasets, and comparing it to existing solutions. A simulation that is more representative of real-world data and use cases will also be used to run the algorithm on multiple problem instances over a long period of time. This will help expose any issues, such as instability in the generated sequences, that may not be visible in individual runs.
+
+4. Develop a tool for visualising the outputs and possibly intermediate data produced by the algorithm. This will provide a more intuitive, human-friendly view intended to aid users' understanding.
 
 // 1. Problem definintion
 // Mathematically model or define what's possible
@@ -93,10 +95,6 @@
 // Look at what happens over time instead of solving a single instance
 // Could result in instability in sequences
 
-= Project Plan
-
-= References
-
 // Partial integrated = using some of the constraints from problem A to solve problem B
 // Barry Smith
 // Impose one constraint or characteristic manipulated in an earlier step to improve a later step
@@ -107,3 +105,7 @@
 
 // Mathematical Modelling
 // Model Building in Mathematical Programming, 5e
+
+= Plan
+
+= References
