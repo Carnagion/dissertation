@@ -34,19 +34,27 @@
 
 = Introduction
 
-// Airports have a limited number of runways, serving as a bottleneck to the number of aircraft that can take off or land at any given time frame while adhering to strict safety and operational requirements. The efficient scheduling of the take-off and landing of aircraft is thus critical for maximising the capacity of airports, and has a significant impact on operational costs, fuel emissions, and flight delays.
+Airports have a limited number of runways, serving as a bottleneck to the number of aircraft that can take off or land at any given time frame while adhering to strict safety and operational requirements. The efficient scheduling of the take-off and landing of aircraft is thus critical for maximising the capacity of airports, and has a significant impact on operational costs, fuel emissions, and flight delays.
 
-// De-icing further complicates this.
+De-icing further complicates this.
 
-// Such algorithms must be fast enough and reliable enough to be used in highly dynamic, real-time environments where failure is not an option.
+// TODO: Add more about de-icing
+
+Such algorithms must be fast enough and reliable enough to be used in highly dynamic, real-time environments where failure is not an option.
+
+// TODO: Finish introduction and link to objectives?
 
 = Objectives
 
 The primary aim of this project is to investigate the integrated runway sequencing and de-icing problem and develop an algorithm capable of solving it. This will provide a deeper insight into the problem's fundamental characteristics and the interactions between runway sequencing and de-icing, as well as the potential benefits of integrating their solutions.
 
+// TODO: Should insights be mentioned above?
+
 The key objectives are thus as follows:
 
 1. Investigate previous approaches to runway sequencing. The mathematical models and formulations proposed in prior research may not be directly applicable to this project, as there have been few efforts until now to tackle runway sequencing and de-icing in an integrated fashion. Thus, there will be a need to understand and then adapt or extend these models so they are suitable for the integrated problem.
+
+// TODO: Maybe find a way to avoid saying "runway sequencing and de-icing" a dozen times
 
 2. Design and implement an algorithm that provides optimal solutions for the integrated runway sequencing and de-icing problem. The algorithm must be generic enough to work with data from different sources (i.e. different airports and datasets), by using a set of common features and characteristics in the data. Additionally, it must be fast and reliable enough to be viable in highly dynamic, real-time situations where unexpected failure is not an option.
 
@@ -57,6 +65,8 @@ The key objectives are thus as follows:
 = Plan
 
 = References
+
+// TODO: Add citations where needed
 
 // Notes
 
@@ -110,3 +120,5 @@ The key objectives are thus as follows:
 
 // Mathematical Modelling
 // Model Building in Mathematical Programming, 5e
+
+// TODO: Ask if we will be looking at both takeoffs and landings or just one of the two
