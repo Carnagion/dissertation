@@ -26,6 +26,7 @@
 #set page(numbering: "1")
 
 #set heading(numbering: "1.1")
+#show heading: set block(above: 2em, below: 1.3em)
 
 #set par(justify: true)
 
