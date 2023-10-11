@@ -35,15 +35,18 @@
 
 = Introduction
 
-Airports have a limited number of runways, serving as a bottleneck to the number of aircraft that can take off or land at any given time frame while adhering to strict safety and operational requirements. The efficient scheduling of the take-off and landing of aircraft is thus critical for maximising the capacity of airports, and has a significant impact on operational costs, fuel emissions, and flight delays.
+When an aircraft takes off or lands, it produces air turbulence that affects the following aircraft. The impact of this turbulence depends on the aircraft's class, which is based on its size and weight. // FROM: Lieder, dynamic programming
+Aircraft are also assigned a specific window of time for taking off or landing, based on surrounding air traffic. // FROM: Lieder, scheduling aircraft
+Runway schedules must therefore meet strict separation requirements that depend on the type of operation (taking off or landing), aircraft class of the preceding and succeeding operation, the allocated time frame for the operation, and the number of available runways during that time. // FROM: Lieder, scheduling aircraft
+Additionally, each crew member may also only be trained to operate certain kinds of aircraft, and may be forced to wait for long periods of time after completing a flight if another aircraft of the same kind is not yet available for them. // TODO: Add source
 
-De-icing further complicates this.
+Thus, determining an optimal runway sequence requires consideration of all the aforementioned factors, while keeping operational costs, fuel emissions, and flight delays to a minimum.
 
-// TODO: Add more about de-icing
-
-Such algorithms must be fast enough and reliable enough to be used in highly dynamic, real-time environments where failure is not an option.
+// TODO: Talk about crew and fleet scheduling
 
 // TODO: Finish introduction and link to objectives?
+
+// TODO: Reconsider use of the word "optimal"?
 
 = Objectives
 
