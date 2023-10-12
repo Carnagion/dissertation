@@ -70,6 +70,83 @@ The key objectives are thus as follows:
 
 = Plan
 
+#import "@preview/timeliney:0.0.1": *
+
+#timeline(show-grid: true, {
+    headerline(group(([*2023*], 3)), group(([*2024*], 4)))
+    let months = ("Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr")
+    headerline(..months.map(group))
+
+    let task-line-style = (stroke: 3pt + gray)
+
+    // 1 = approx 30 days
+    // 0.1 = approx 3 days
+
+    taskgroup({
+        // Write project proposal
+        task("A", (0, 0.86), style: task-line-style)
+
+        // Investigate previous approaches
+        task("B", (0, 1.23), style: task-line-style)
+
+        // Implement branch-and-bound
+        task("C", (0.7, 1.43), style: task-line-style)
+
+        // Implement rolling window
+        task("D", (1.43, 2.13), style: task-line-style)
+
+        // Write interim report
+        task("E", (1.43, 2.36), style: task-line-style)
+
+        // Christmas break
+        task("F", (2.5, 3.5), style: task-line-style)
+
+        // Exam preparation
+        task("G", (2.9, 3.9), style: task-line-style)
+
+        // Integrate de-icing
+        task("H", (3.9, 4.6), style: task-line-style)
+
+        // Evaluate performance
+        task("I", (4.6, 5.1), style: task-line-style)
+
+        // Implement visualiser
+        task("J", (4.9, 5.5), style: task-line-style)
+
+        // Write final dissertation
+        task("K", (5.1, 6.63), style: task-line-style)
+    })
+
+    let milestone-line-style = (stroke: (dash: "dashed"))
+
+    milestone(
+        at: 0.86,
+        style: milestone-line-style,
+        align(center)[
+            *Project Proposal*\
+            26 Oct
+        ],
+    )
+
+    milestone(
+        at: 2.36,
+        style: milestone-line-style,
+        align(center)[
+            *Interim Report*\
+            8 Dec
+        ],
+    )
+
+    milestone(
+        at: 6.63,
+        style: milestone-line-style,
+        align(center)[
+            *Final Dissertation*\
+            19 Apr
+        ],
+    )
+})
+
 = References
 
 // TODO: Add citations where needed
