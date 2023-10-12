@@ -37,10 +37,12 @@
 
 Although it is possible to construct additional runways or airports, it may not always be feasible due to the high infrastructure and planning costs and the (lack of) availability of land. Therefore, efficient scheduling of runway operations is crucial in maximising the capacity of existing runways and airports.
 
-This requires careful consideration of multiple factors including the type of operation (taking off or landing), aircraft class of the preceding and succeeding operation, the allocated time frame for the operation, and the number of available runways during that time. When an aircraft takes off or lands, it produces air turbulence that affects the following aircraft. The impact of this turbulence depends on the aircraft's class, which is based on its size and weight. // FROM: Lieder, dynamic programming
+This requires careful consideration of multiple factors including the type of operation (i.e. taking off or landing), aircraft class of the preceding and succeeding operation, the allocated time frame for the operation, and the number of available runways during that time. When an aircraft takes off or lands, it produces air turbulence that affects the following aircraft. The impact of this turbulence depends on the aircraft's class, which is based on its size and weight. // FROM: Lieder, dynamic programming
 Aircraft are also assigned a specific window of time for taking off or landing, based on surrounding air traffic. // FROM: Lieder, scheduling aircraft
-Additionally, each crew member may also only be trained to operate certain kinds of aircraft, and may be forced to wait for long periods of time after completing a flight if another aircraft of the same kind is not yet available for them. // TODO: Source?
+Furthermore, each crew member may also only be trained to operate certain kinds of aircraft, and may be forced to wait for long periods of time after completing a flight if another aircraft of the same kind is not yet available for them. // TODO: Source?
 Runway sequences must therefore meet strict separation requirements that depend on the aforementioned factors, while minimising operational costs, fuel emissions, flight delays, and crew wait time. // FROM: Lieder, scheduling aircraft
+
+However, de-icing presents an additional challenge to this.
 
 // TODO: Talk about crew and fleet scheduling
 
