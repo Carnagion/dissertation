@@ -70,6 +70,23 @@ The key objectives are thus as follows:
 
 = Plan
 
+The overall work plan is to start off by investigating previous approaches to the problem and establishing a mathematical model, as any further work will be reliant on this. Development will initially consist of developing a simple branch-and-bound algorithm that follows the model, and later extend it with a rolling window. De-icing will then be integrated into the algorithm after the interim report deadline. Finally, the algorithm will be evaluated and simulated, and the visualisation tool will be developed before writing the final dissertation.
+
+The following Gantt chart outlines the plan along with timelines:
+
+/ A: Write the project prposal
+/ B: Research previous approaches into runway sequencing and de-icing
+/ C: Implement a naive branch-and-bound algorithm for runway sequencing
+/ D: Extend the algorithm with a rolling window
+/ E: Write the interim report
+/ F: Christmas break
+/ G: Prepare for exams
+/ H: Integrate de-icing into the algorithm
+/ I: Evaluate the performance of the algorithm and run simulations
+/ J: Implement the visualisation tool
+/ K: Easter break
+/ L: Write the final dissertation
+
 #import "@preview/timeliney:0.0.1": *
 
 #timeline(show-grid: true, {
@@ -113,8 +130,11 @@ The key objectives are thus as follows:
         // Implement visualiser
         task("J", (4.9, 5.5), style: task-line-style)
 
+        // Easter break
+        task("K", (5.93, 6.96), style: task-line-style)
+
         // Write final dissertation
-        task("K", (5.1, 6.63), style: task-line-style)
+        task("L", (5.1, 6.63), style: task-line-style)
     })
 
     let milestone-line-style = (stroke: (dash: "dashed"))
