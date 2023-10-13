@@ -70,7 +70,7 @@ The key objectives are thus as follows:
 
 = Plan
 
-The overall work plan is to start off by investigating previous approaches to the problem and establishing a mathematical model, as any further work will be reliant on this. Development will initially consist of developing a simple branch-and-bound algorithm that follows the model, and later extend it with a rolling window. De-icing will then be integrated into the algorithm after the interim report deadline. Finally, the algorithm will be evaluated and simulated, and the visualisation tool will be developed before writing the final dissertation.
+The overall work plan is to start off by investigating previous approaches to the problem and establishing a mathematical model, as any further work will be reliant on this. Development will initially consist of implementing a simple branch-and-bound algorithm that follows the model, and later extending it with a rolling window. De-icing will then be integrated into the algorithm after the interim report deadline. Finally, the algorithm will be evaluated and simulated, and the visualisation tool will be developed before writing the final dissertation.
 
 The following Gantt chart outlines the plan along with timelines:
 
