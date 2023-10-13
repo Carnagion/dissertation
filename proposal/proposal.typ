@@ -84,8 +84,8 @@ The following Gantt chart outlines the plan along with timelines:
 / H: Integrate de-icing into the algorithm
 / I: Evaluate the performance of the algorithm and run simulations
 / J: Implement the visualisation tool
-/ K: Easter break
-/ L: Write the final dissertation
+/ K: Write the final dissertation
+/ L: Easter break
 
 #import "@preview/timeliney:0.0.1": *
 
@@ -130,11 +130,11 @@ The following Gantt chart outlines the plan along with timelines:
         // Implement visualiser
         task("J", (4.9, 5.5), style: task-line-style)
 
-        // Easter break
-        task("K", (5.93, 6.96), style: task-line-style)
-
         // Write final dissertation
-        task("L", (5.1, 6.63), style: task-line-style)
+        task("K", (5.1, 6.63), style: task-line-style)
+
+        // Easter break
+        task("L", (5.93, 6.96), style: task-line-style)
     })
 
     let milestone-line-style = (stroke: (dash: "dashed"))
