@@ -225,3 +225,37 @@ The following Gantt chart outlines the plan along with timelines:
 // Model Building in Mathematical Programming, 5e
 
 // TODO: Ask if we will be looking at both takeoffs and landings or just one of the two
+
+// 13-10-2023
+
+// Put first line of objectives into intro
+// 4 different solutions to the integrated problem
+
+// Heuristic decisions:
+// Sequential
+// De-icing based on TOBT
+// De-icing based on CTOT
+// De-icing based on runway seqeuncing
+
+// Methods:
+// Mathematic programming (relatively easy)
+// Branch and Bound (tried and tested)
+// Rolling Window
+// Dynamic programming (we know that this is good, but have never integrated Pushback Sequencing into it, stretch goal)
+
+// How am I going to approach the probleM? (What order are aircraft going to de-ice in?)
+// How am I going to solve that problem? (B&B, DP, MP)
+
+// Decomposed (solve either RS or DI first and then solution of the first goes into the second)
+// Partial Integration (when solving A independently we take into account side factors that we know will give us an improved solution for B)
+
+// Leave "naive" out
+
+// De-icing should be integrated into the algorithms right from the beginning
+// It is a key goal so not right to only start it from the second semester
+
+// Visualisation tool, evaluation, and final diss will probably be throughout the year
+
+// For de-icing we want stable solutions
+
+// Intro = these are the problems, this is how it works, this is why it's important to combine them
