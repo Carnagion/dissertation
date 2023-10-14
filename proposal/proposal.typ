@@ -74,73 +74,85 @@ The overall work plan is to start off by investigating previous approaches to th
 
 The following Gantt chart outlines the plan along with timelines:
 
-/ A: Write the project prposal
+/ A: Write the project proposal
 / B: Research previous approaches into runway sequencing and de-icing
-/ C: Implement a naive branch-and-bound algorithm for runway sequencing
-/ D: Extend the algorithm with a rolling window
-/ E: Write the interim report
-/ F: Christmas break
-/ G: Prepare for exams
-/ H: Integrate de-icing into the algorithm
-/ I: Evaluate the performance of the algorithm and run simulations
-/ J: Implement the visualisation tool
-/ K: Write the final dissertation
-/ L: Easter break
+/ C: Implement a branch-and-bound algorithm
+/ D: Extend the branch-and-bound algorithm with a rolling window
+/ E: Implement a mathematical programming algorithm
+/ F: Implement a dynamic programming algorithm
+/ G: Develop the visualisation tool
+/ H: Evaluate the performance of the algorithm and run simulations
+/ I: Write the interim report
+/ J: Christmas break
+/ K: Prepare for exams
+/ L: Write the final dissertation
+/ M: Easter break
 
 #import "@preview/timeliney:0.0.1": *
 
 #timeline(show-grid: true, {
-    headerline(group(([*2023*], 3)), group(([*2024*], 4)))
     let months = ("Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr")
+
+    let day(day) = {
+        let avg-month-days = 213 / 7
+        day / avg-month-days
+    }
+
+    let proposal-day = day(26)
+    let interim-day = day(69)
+    let diss-day = day(203)
+
+    headerline(group(([*2023*], 3)), group(([*2024*], 4)))
     headerline(..months.map(group))
 
-    let task-line-style = (stroke: 3pt + gray)
+    let work-line-style = (stroke: 3pt + gray)
 
-    // 1 = approx 30 days
-    // 0.1 = approx 3 days
-
+    // Note: Each month assumed to be approximately 30 days
     taskgroup({
-        // Write project proposal
-        task("A", (0, 0.86), style: task-line-style)
+        // Write the project proposal
+        task("A", (0, proposal-day), style: work-line-style)
 
-        // Investigate previous approaches
-        task("B", (0, 1.23), style: task-line-style)
+        // Research previous approaches into runway sequencing and de-icing
+        task("B", (0, day(39)), style: work-line-style)
 
-        // Implement branch-and-bound
-        task("C", (0.7, 1.43), style: task-line-style)
+        // Implement a branch-and-bound algorithm
+        task("C", (day(20), day(31)), style: work-line-style)
 
-        // Implement rolling window
-        task("D", (1.43, 2.13), style: task-line-style)
+        // Extend the branch-and-bound algorithm with a rolling window
+        task("D", (day(31), day(52)), style: work-line-style)
 
-        // Write interim report
-        task("E", (1.43, 2.36), style: task-line-style)
+        // Implement a mathematical programming algorithm
+        task("E", (day(61), day(133)), style: work-line-style)
+
+        // Implement a dynamic programming algorithm
+        task("F", (day(140), day(168)), style: work-line-style)
+
+        // Develop the visualisation tool
+        task("G", (day(20), day(175)), style: work-line-style)
+
+        // Evaluate the performance of the algorithm and run simulations
+        task("H", (day(20), day(182)), style: work-line-style)
+
+        // Write the interim report
+        task("I", (proposal-day, interim-day), style: work-line-style)
 
         // Christmas break
-        task("F", (2.5, 3.5), style: task-line-style)
+        task("J", (day(77), day(107)), style: work-line-style)
 
-        // Exam preparation
-        task("G", (2.9, 3.9), style: task-line-style)
+        // Prepare for exams
+        task("K", (day(84), day(119)), style: work-line-style)
 
-        // Integrate de-icing
-        task("H", (3.9, 4.6), style: task-line-style)
-
-        // Evaluate performance
-        task("I", (4.6, 5.1), style: task-line-style)
-
-        // Implement visualiser
-        task("J", (4.9, 5.5), style: task-line-style)
-
-        // Write final dissertation
-        task("K", (5.1, 6.63), style: task-line-style)
+        // Write the final dissertation
+        task("L", (interim-day, diss-day), style: work-line-style)
 
         // Easter break
-        task("L", (5.93, 6.96), style: task-line-style)
+        task("M", (day(181), day(212)), style: work-line-style)
     })
 
     let milestone-line-style = (stroke: (dash: "dashed"))
 
     milestone(
-        at: 0.86,
+        at: proposal-day,
         style: milestone-line-style,
         align(center)[
             *Project Proposal*\
@@ -149,7 +161,7 @@ The following Gantt chart outlines the plan along with timelines:
     )
 
     milestone(
-        at: 2.36,
+        at: interim-day,
         style: milestone-line-style,
         align(center)[
             *Interim Report*\
@@ -158,7 +170,7 @@ The following Gantt chart outlines the plan along with timelines:
     )
 
     milestone(
-        at: 6.63,
+        at: diss-day,
         style: milestone-line-style,
         align(center)[
             *Final Dissertation*\
