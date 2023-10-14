@@ -77,15 +77,15 @@ The following Gantt chart outlines the plan along with timelines:
 / A: Write the project proposal
 / B: Research previous approaches into runway sequencing and de-icing
 / C: Implement a branch-and-bound algorithm
-/ D: Extend the branch-and-bound algorithm with a rolling window
-/ E: Implement a mathematical programming algorithm
-/ F: Implement a dynamic programming algorithm
-/ G: Develop the visualisation tool
-/ H: Evaluate the performance of the algorithm and run simulations
-/ I: Write the interim report
-/ J: Christmas break
-/ K: Prepare for exams
-/ L: Write the final dissertation
+/ D: Develop the visualisation tool
+/ E: Evaluate the performance of the algorithm and run simulations
+/ F: Write the interim report
+/ G: Extend the branch-and-bound algorithm with a rolling window
+/ H: Implement a mathematical programming algorithm
+/ I: Write the final dissertation
+/ J: Implement a dynamic programming algorithm
+/ K: Christmas break
+/ L: Prepare for exams
 / M: Easter break
 
 #import "@preview/timeliney:0.0.1": *
@@ -105,12 +105,14 @@ The following Gantt chart outlines the plan along with timelines:
     headerline(group(([*2023*], 3)), group(([*2024*], 4)))
     headerline(..months.map(group))
 
-    let work-line-style = (stroke: 3pt + gray)
+    let break-line-style = (stroke: 3pt + gray)
+    let doc-line-style = (stroke: 3pt + gray.darken(25%))
+    let work-line-style = (stroke: 3pt)
 
     // Note: Each month assumed to be approximately 30 days
     taskgroup({
         // Write the project proposal
-        task("A", (0, proposal-day), style: work-line-style)
+        task("A", (0, proposal-day), style: doc-line-style)
 
         // Research previous approaches into runway sequencing and de-icing
         task("B", (0, day(39)), style: work-line-style)
@@ -118,35 +120,35 @@ The following Gantt chart outlines the plan along with timelines:
         // Implement a branch-and-bound algorithm
         task("C", (day(20), day(31)), style: work-line-style)
 
-        // Extend the branch-and-bound algorithm with a rolling window
-        task("D", (day(31), day(52)), style: work-line-style)
-
-        // Implement a mathematical programming algorithm
-        task("E", (day(61), day(133)), style: work-line-style)
-
-        // Implement a dynamic programming algorithm
-        task("F", (day(140), day(168)), style: work-line-style)
-
         // Develop the visualisation tool
-        task("G", (day(20), day(175)), style: work-line-style)
+        task("D", (day(20), day(175)), style: work-line-style)
 
         // Evaluate the performance of the algorithm and run simulations
-        task("H", (day(20), day(182)), style: work-line-style)
+        task("E", (day(20), day(182)), style: work-line-style)
 
         // Write the interim report
-        task("I", (proposal-day, interim-day), style: work-line-style)
+        task("F", (proposal-day, interim-day), style: doc-line-style)
 
-        // Christmas break
-        task("J", (day(77), day(107)), style: work-line-style)
+        // Extend the branch-and-bound algorithm with a rolling window
+        task("G", (day(31), day(52)), style: work-line-style)
 
-        // Prepare for exams
-        task("K", (day(84), day(119)), style: work-line-style)
+        // Implement a mathematical programming algorithm
+        task("H", (day(61), day(133)), style: work-line-style)
 
         // Write the final dissertation
-        task("L", (interim-day, diss-day), style: work-line-style)
+        task("I", (interim-day, diss-day), style: doc-line-style)
+
+        // Implement a dynamic programming algorithm
+        task("J", (day(140), day(168)), style: work-line-style)
+
+        // Christmas break
+        task("K", (day(77), day(107)), style: break-line-style)
+
+        // Prepare for exams
+        task("L", (day(84), day(119)), style: break-line-style)
 
         // Easter break
-        task("M", (day(181), day(212)), style: work-line-style)
+        task("M", (day(181), day(212)), style: break-line-style)
     })
 
     let milestone-line-style = (stroke: (dash: "dashed"))
