@@ -70,9 +70,15 @@ The key objectives are thus as follows:
 
 = Plan
 
-The overall work plan is to start off by investigating previous approaches to the problem and establishing a mathematical model, as any further work will be reliant on this. Development will initially consist of implementing a simple branch-and-bound algorithm that follows the model, and later extending it with a rolling window. De-icing will then be integrated into the algorithm after the interim report deadline. Finally, the algorithm will be evaluated and simulated, and the visualisation tool will be developed before writing the final dissertation.
+// TODO: Clean up
 
-The following Gantt chart outlines the plan along with timelines:
+The overall work plan is to start off by investigating previous approaches to the problem and establishing a mathematical model, as any further work will be reliant on this. Then, the branch-and-bound algorithm to solve the problem according to the model will be implemented and later extended with a rolling window, followed by the mathematical programming and dynamic programming algorithms.
+
+Analysis and evaluation of the implemented algorithms will take place throughout the year. The development of the visualisation tool will therefore also start early in order to assist with the analysis.
+
+Likewise, the document deliverables - project proposal, interim report, and final dissertation - will start being written very early on to enable noting down the tasks carried out and key observations during the year. This will help prevent crunch time closer to their deadlines.
+
+An outline of this plan is depicted in the following Gantt chart:
 
 / A: Write the project proposal
 / B: Research previous approaches into runway sequencing and de-icing
@@ -83,9 +89,9 @@ The following Gantt chart outlines the plan along with timelines:
 / G: Extend the branch-and-bound algorithm with a rolling window
 / H: Implement a mathematical programming algorithm
 / I: Write the final dissertation
-/ J: Implement a dynamic programming algorithm
-/ K: Christmas break
-/ L: Prepare for exams
+/ J: Christmas break
+/ K: Prepare for exams
+/ L: Implement a dynamic programming algorithm
 / M: Easter break
 
 #import "@preview/timeliney:0.0.1": *
@@ -138,14 +144,14 @@ The following Gantt chart outlines the plan along with timelines:
         // Write the final dissertation
         task("I", (interim-day, diss-day), style: doc-line-style)
 
-        // Implement a dynamic programming algorithm
-        task("J", (day(140), day(168)), style: work-line-style)
-
         // Christmas break
-        task("K", (day(77), day(107)), style: break-line-style)
+        task("J", (day(77), day(107)), style: break-line-style)
 
         // Prepare for exams
-        task("L", (day(84), day(119)), style: break-line-style)
+        task("K", (day(84), day(119)), style: break-line-style)
+
+        // Implement a dynamic programming algorithm
+        task("L", (day(140), day(168)), style: work-line-style)
 
         // Easter break
         task("M", (day(181), day(212)), style: break-line-style)
@@ -180,6 +186,8 @@ The following Gantt chart outlines the plan along with timelines:
         ],
     )
 })
+
+The plan also includes gaps after the implementation of the rolling window and mathematical programming, and towards the very end just before the Easter break, where no work other than writing documents and analysing the algorithms is carried out. This attempts to account for unexpected delays to the schedule such as underestimation of the time or work involved, slowdown due to Christmas break and exams, or unforseen issues in the implementations.
 
 = References
 
