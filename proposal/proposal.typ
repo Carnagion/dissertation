@@ -35,6 +35,14 @@
 
 = Introduction
 
+This project explores the integrated version of the aircraft runway sequencing and de-icing problem, which consists of assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set, in a way that complies with strict safety and operational requirements while minimising operational costs, fuel emissions, flight delays, and crew connection times.
+
+This is important because there have been few efforts until now to tackle runway sequencing and de-icing in an integrated fashion -- indeed, existing solutions focus on generating either runway sequences or de-icing schedules only and combining them afterwards.
+
+// What this project is ... "Integrated runway sequencing and de-icing" ...
+
+// What runway sequencing and de-icing is and why it's important ...
+
 // Although it is possible to construct additional runways or airports, it may not always be feasible due to the high infrastructure and planning costs and the (lack of) availability of land. Therefore, efficient scheduling of runway operations is crucial in maximising the capacity of existing runways and airports.
 
 // This requires careful consideration of multiple factors including the type of operation (i.e. taking off or landing), aircraft class of the preceding and succeeding operation, the allocated time frame for the operation, and the number of available runways during that time. When an aircraft takes off or lands, it produces air turbulence that affects the following aircraft. The impact of this turbulence depends on the aircraft's class, which is based on its size and weight. // FROM: Lieder, dynamic programming
@@ -62,7 +70,7 @@ Its key objectives are thus as follows:
 
 1. *Investigate previous approaches to runway sequencing*. The mathematical models and formulations proposed in prior research may not be directly applicable to this project, as there have been few efforts until now to tackle runway sequencing and de-icing in an integrated fashion. Thus, there will be a need to understand and then adapt or extend these models so they are suitable for the integrated problem.
 
-2. *Design and implement three algorithms* --- B&B, B&B with a rolling window, and MP --- *using four different de-icing ordering approaches* --- sequential, based on COBT, based on CTOT, and based on runway sequences. The algorithms must be generic enough to work with data from different sources (i.e. different airports and datasets), by using a set of common features and characteristics in the data. Additionally, they must be fast and reliable enough to be viable in highly dynamic, real-time situations where unexpected failure is not an option. If time permits, a fourth algorithm --- dynamic programming --- may also be explored, since it is known to work well for runway sequencing but its effectiveness at de-icing is yet to be evaluated.
+2. *Design and implement three algorithms* -- B&B, B&B with a rolling window, and MP -- *using four different de-icing ordering approaches* -- sequential, based on COBT, based on CTOT, and based on runway sequences. The algorithms must be generic enough to work with data from different sources (i.e. different airports and datasets), by using a set of common features and characteristics in the data. Additionally, they must be fast and reliable enough to be viable in highly dynamic, real-time situations where unexpected failure is not an option. If time permits, a fourth algorithm -- dynamic programming -- may also be explored, since it is known to work well for runway sequencing but its effectiveness at de-icing is yet to be evaluated.
 
 3. *Analyse the algorithms' performance and outputs*. This will involve benchmarking them on known and available datasets, and comparing them with existing solutions as well as with each other. A simulation that is more representative of real-world data and use cases will also be used to run the algorithms on multiple problem instances over a longer period of time. This will help expose any issues, such as instability in the generated sequences, that may not be visible in individual runs.
 
@@ -187,7 +195,7 @@ An outline of this plan is depicted in the following Gantt chart:
     )
 })
 
-The plan also includes gaps after the implementation of the rolling window and mathematical programming, and towards the very end just before the Easter break, where no work other than writing documents and analysing the algorithms is carried out. This attempts to account for unexpected delays to the schedule such as underestimation of the time or work involved, slowdown due to Christmas break and exams, or unforseen issues in the implementations.
+This plan also includes gaps after the implementations of the rolling window and mathematical programming, and towards the very end just before the Easter break, where no work other than writing documents and analysing the algorithms is carried out. This attempts to account for unexpected delays to the schedule such as underestimation of the time or work involved, slowdown due to Christmas break and exams, or unforseen issues in the implementations.
 
 = References
 
