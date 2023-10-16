@@ -49,6 +49,8 @@ Aircraft taking off or landing on a given runway must adhere to strict separatio
 
 Prior research into runway sequencing has focused mainly on generating either runway sequences or de-icing only, using either fully decomposed or partially integrated methods. Indeed, there have been few efforts until now to tackle runway sequencing and de-icing in an integrated fashion. Investigating the integrated problem will thus make it possible to gain fundamental insights into its innate characteristcs and inte interactions between runway sequencing and de-icing -- which can then be used as a starting point in further research to design solutions that improve upon the ones implemented in this project. Additionally, it will reveal the potential advantages of integrating them compared to fully decomposed or partially integrated methods.
 
+// TODO: Talk about approaches used in previous research and cite their papers?
+
 = Objectives
 
 // TODO: Clean up
@@ -135,10 +137,10 @@ An outline of this plan is depicted in the following Gantt chart:
         task("F", (proposal-day, interim-day), style: doc-line-style)
 
         // Extend the branch-and-bound algorithm with a rolling window
-        task("G", (day(31), day(52)), style: work-line-style)
+        task("G", (day(31), day(50)), style: work-line-style)
 
         // Implement a mathematical programming algorithm
-        task("H", (day(61), day(133)), style: work-line-style)
+        task("H", (day(57), day(126)), style: work-line-style)
 
         // Write the final dissertation
         task("I", (interim-day, diss-day), style: doc-line-style)
@@ -150,7 +152,7 @@ An outline of this plan is depicted in the following Gantt chart:
         task("K", (day(84), day(119)), style: break-line-style)
 
         // Implement a dynamic programming algorithm
-        task("L", (day(140), day(168)), style: work-line-style)
+        task("L", (day(133), day(168)), style: work-line-style)
 
         // Easter break
         task("M", (day(181), day(212)), style: break-line-style)
