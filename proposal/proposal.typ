@@ -35,28 +35,19 @@
 
 = Introduction
 
+// TODO: CLean up
+
 This project explores the integrated version of the aircraft runway sequencing and de-icing problem, which consists of assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set, in a way that complies with strict safety and operational requirements while minimising operational costs, fuel emissions, flight delays, and crew connection times.
 
-This is important because there have been few efforts until now to tackle runway sequencing and de-icing in an integrated fashion -- indeed, existing solutions focus on generating either runway sequences or de-icing schedules only and combining them afterwards.
+Aircraft taking off or landing on a given runway must adhere to strict separation requirements that are dictated by the type of operation (i.e. taking off or landing), the aircraft class of the preceding and succeeding operation, the allocated time frame for the operation/* TODO: Mention COBT and CTOT */. The maximum capacity of an airport -- the number of aircraft taking off or landing per unit of time -- is thus bounded by its runway capacity. Although it is possible to construct additional runways or airports, this is not always feasible due to the high infrastrucure and land costs associated with it. Therefore, efficient use and scheduling of runway operations is crucial in maximising the capacity of existing runways and airports.
 
-// What this project is ... "Integrated runway sequencing and de-icing" ...
+// TODO: What is aircraft class?
 
-// What runway sequencing and de-icing is and why it's important ...
+// TODO: What role does de-icing play on the runway?
 
-// Although it is possible to construct additional runways or airports, it may not always be feasible due to the high infrastructure and planning costs and the (lack of) availability of land. Therefore, efficient scheduling of runway operations is crucial in maximising the capacity of existing runways and airports.
+// TODO: Crew scheduling?
 
-// This requires careful consideration of multiple factors including the type of operation (i.e. taking off or landing), aircraft class of the preceding and succeeding operation, the allocated time frame for the operation, and the number of available runways during that time. When an aircraft takes off or lands, it produces air turbulence that affects the following aircraft. The impact of this turbulence depends on the aircraft's class, which is based on its size and weight. // FROM: Lieder, dynamic programming
-// Aircraft are also assigned a specific window of time for taking off or landing, based on surrounding air traffic. // FROM: Lieder, scheduling aircraft
-// Furthermore, each crew member may also only be trained to operate certain kinds of aircraft, and may be forced to wait for long periods of time after completing a flight if another aircraft of the same kind is not yet available for them. // TODO: Source?
-// Runway sequences must therefore meet strict separation requirements that depend on the aforementioned factors, while minimising operational costs, fuel emissions, flight delays, and crew wait time. // FROM: Lieder, scheduling aircraft
-
-// However, de-icing presents an additional challenge to this.
-
-// TODO: Talk about crew and fleet scheduling
-
-// TODO: Talk about fundamental insights
-
-// TODO: Reconsider use of the word "optimal"?
+Prior research into runway sequencing has focused mainly on generating either runway sequences or de-icing only, using either fully decomposed or partially integrated methods. Indeed, there have been few efforts until now to tackle runway sequencing and de-icing in an integrated fashion. Investigating the integrated problem will thus make it possible to gain fundamental insights into its innate characteristcs and inte interactions between runway sequencing and de-icing -- which can then be used as a starting point in further research to design solutions that improve upon the ones implemented in this project. Additionally, it will reveal the potential advantages of integrating them compared to fully decomposed or partially integrated methods.
 
 = Objectives
 
