@@ -107,8 +107,8 @@ An outline of this plan is depicted in the following Gantt chart:
         day / avg-month-days
     }
 
-    let proposal-day = day(26)
-    let interim-day = day(69)
+    let proposal-day = day(25)
+    let interim-day = day(72)
     let diss-day = day(203)
 
     headerline(group(([*2023*], 3)), group(([*2024*], 4)))
@@ -167,7 +167,7 @@ An outline of this plan is depicted in the following Gantt chart:
         style: milestone-line-style,
         align(center)[
             *Project Proposal*\
-            26 Oct
+            25 Oct
         ],
     )
 
@@ -176,7 +176,7 @@ An outline of this plan is depicted in the following Gantt chart:
         style: milestone-line-style,
         align(center)[
             *Interim Report*\
-            8 Dec
+            11 Dec
         ],
     )
 
