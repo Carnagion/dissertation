@@ -39,7 +39,10 @@
 
 This project explores the integrated version of the aircraft runway sequencing and de-icing problem, which consists of assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set in a way that complies with strict safety and operational requirements @lieder-scheduling-aircraft while minimising operational costs, fuel emissions, flight delays, and crew connection times.
 
-Aircraft taking off or landing on a given runway must adhere to strict separation requirements that are dictated by the type of operation (i.e. taking off or landing), the aircraft class of the preceding and succeeding operation, and the allocated time frame for the operation #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming") De-icing must also be accounted for -- aircraft may be de-iced inside hangars or on the runway before takeoff, and this can push back the take-off time of the aircraft depending on the number of de-icing stations or rakes available at the time. The maximum capacity of an airport -- the number of aircraft taking off or landing per unit of time -- is thus bounded by its runway capacity @lieder-dynamic-programming. Although it is possible to construct additional runways or airports, this is not always feasible due to the high infrastrucure and land costs associated with it. Therefore, efficient use and scheduling of runway operations is crucial in maximising the capacity of existing runways and airports #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming").
+Aircraft taking off from or landing on a given airport must adhere to strict separation requirements that are dictated by the type of operation (i.e. taking off or landing), the aircraft class of the preceding and succeeding operation, and the allocated time frame for the operation #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming"). De-icing must also be accounted for -- aircraft may be de-iced inside hangars or on the runway before takeoff, which pushes back the take-off time of the aircraft depending on the number of de-icing stations or rakes available at the time.
+An airport's maximum capacity -- the number of aircraft taking off or landing per unit of time -- is thus bounded by its runway capacity @lieder-dynamic-programming. Although it is possible to construct additional runways or airports, this is not always feasible due to the high infrastrucure and land costs associated with it. Therefore, efficient use and scheduling of runway operations is crucial in maximising the capacity of existing runways and airports #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming").
+
+Prior research into runway sequencing has focused mainly on generating either runway sequences or de-icing schedules only. Indeed, there have been few efforts until now to address runway sequencing and de-icing in an integrated fashion. Investigating the integrated problem will thus provide more fundamental insights into its innate characteristcs and the interactions between runway sequencing and de-icing -- which can then be used as a starting point in further research to design solutions that improve upon the ones implemented in this project. Additionally, it will reveal the potential advantages of integrating them compared to fully decomposed or partially integrated methods.
 
 // TODO: What is aircraft class?
 
@@ -49,8 +52,6 @@ Aircraft taking off or landing on a given runway must adhere to strict separatio
 
 // TODO: Mention COBT and CTOT?
 
-Prior research into runway sequencing has focused mainly on generating either runway sequences or de-icing schedules only. Indeed, there have been few efforts until now to address runway sequencing and de-icing in an integrated fashion. Investigating the integrated problem will thus provide more fundamental insights into its innate characteristcs and the interactions between runway sequencing and de-icing -- which can then be used as a starting point in further research to design solutions that improve upon the ones implemented in this project. Additionally, it will reveal the potential advantages of integrating them compared to fully decomposed or partially integrated methods.
-
 // TODO: Talk about approaches used in previous research and cite their papers?
 
 = Objectives
@@ -58,8 +59,6 @@ Prior research into runway sequencing has focused mainly on generating either ru
 // TODO: Clean up
 
 The primary aim of this project is to investigate the integrated runway sequencing and de-icing problem by developing three algorithms that explore four different approaches to the order of aircraft de-icing. This will provide a deeper insight into the problem's fundamental characteristics and the interactions between runway sequencing and de-icing, as well as the potential benefits of integrating their solutions.
-
-// TODO: Should insights be mentioned above?
 
 Its key objectives are thus as follows:
 
