@@ -37,9 +37,9 @@
 
 // TODO: Clean up
 
-This project explores the integrated version of the aircraft runway sequencing and de-icing problem, which consists of assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set, in a way that complies with strict safety and operational requirements while minimising operational costs, fuel emissions, flight delays, and crew connection times.
+This project explores the integrated version of the aircraft runway sequencing and de-icing problem, which consists of assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set in a way that complies with strict safety and operational requirements @lieder-scheduling-aircraft while minimising operational costs, fuel emissions, flight delays, and crew connection times.
 
-Aircraft taking off or landing on a given runway must adhere to strict separation requirements that are dictated by the type of operation (i.e. taking off or landing), the aircraft class of the preceding and succeeding operation, the allocated time frame for the operation/* TODO: Mention COBT and CTOT */. The maximum capacity of an airport -- the number of aircraft taking off or landing per unit of time -- is thus bounded by its runway capacity. Although it is possible to construct additional runways or airports, this is not always feasible due to the high infrastrucure and land costs associated with it. Therefore, efficient use and scheduling of runway operations is crucial in maximising the capacity of existing runways and airports.
+Aircraft taking off or landing on a given runway must adhere to strict separation requirements that are dictated by the type of operation (i.e. taking off or landing), the aircraft class of the preceding and succeeding operation, and the allocated time frame for the operation #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming") De-icing must also be accounted for -- aircraft may be de-iced inside hangars or on the runway before takeoff, and this can push back the take-off time of the aircraft depending on the number of de-icing stations or rakes available at the time. The maximum capacity of an airport -- the number of aircraft taking off or landing per unit of time -- is thus bounded by its runway capacity @lieder-dynamic-programming. Although it is possible to construct additional runways or airports, this is not always feasible due to the high infrastrucure and land costs associated with it. Therefore, efficient use and scheduling of runway operations is crucial in maximising the capacity of existing runways and airports #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming").
 
 // TODO: What is aircraft class?
 
@@ -47,9 +47,9 @@ Aircraft taking off or landing on a given runway must adhere to strict separatio
 
 // TODO: Crew scheduling?
 
-// TODO: Talk about approaches to be used?
+// TODO: Mention COBT and CTOT?
 
-Prior research into runway sequencing has focused mainly on generating either runway sequences or de-icing schedules only. Indeed, there have been few efforts until now to address runway sequencing and de-icing in an integrated fashion. Investigating the integrated problem will thus make it possible to gain fundamental insights into its innate characteristcs and inte interactions between runway sequencing and de-icing -- which can then be used as a starting point in further research to design solutions that improve upon the ones implemented in this project. Additionally, it will reveal the potential advantages of integrating them compared to fully decomposed or partially integrated methods.
+Prior research into runway sequencing has focused mainly on generating either runway sequences or de-icing schedules only. Indeed, there have been few efforts until now to address runway sequencing and de-icing in an integrated fashion. Investigating the integrated problem will thus provide more fundamental insights into its innate characteristcs and the interactions between runway sequencing and de-icing -- which can then be used as a starting point in further research to design solutions that improve upon the ones implemented in this project. Additionally, it will reveal the potential advantages of integrating them compared to fully decomposed or partially integrated methods.
 
 // TODO: Talk about approaches used in previous research and cite their papers?
 
@@ -124,7 +124,7 @@ An outline of this plan is depicted in the following Gantt chart:
         task("A", (0, proposal-day), style: doc-line-style)
 
         // Research previous approaches into runway sequencing and de-icing
-        task("B", (0, day(39)), style: work-line-style)
+        task("B", (0, day(50)), style: work-line-style)
 
         // Implement a branch-and-bound algorithm
         task("C", (day(20), day(31)), style: work-line-style)
@@ -190,8 +190,8 @@ An outline of this plan is depicted in the following Gantt chart:
     )
 })
 
-This plan also includes gaps after the implementations of the rolling window and mathematical programming, and towards the very end just before the Easter break, where no work other than writing documents and analysing the algorithms is carried out. This attempts to account for unexpected delays to the schedule such as underestimation of the time or work involved, slowdown due to Christmas break and exams, or unforseen issues in the implementations.
+This plan also includes gaps after the implementations of the rolling window and mathematical programming, and towards the very end just before the Easter break. This attempts to account for unexpected delays to the schedule such as underestimation of the time or work involved, slowdown due to Christmas break and exams, or unforseen issues in the implementations.
 
 = References
 
-// TODO: Add citations where needed
+#bibliography("references.yml", title: none)

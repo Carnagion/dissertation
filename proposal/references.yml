@@ -1,0 +1,30 @@
+lieder-dynamic-programming:
+  type: article
+  title: "A dynamic programming approach for the aircraft landing problem with aircraft classes"
+  author:
+    - "Lieder, Alexander"
+    - "Briskorn, Dirk"
+    - "Stolletz, Raik"
+  date: 2015
+  doi: "10.1016/j.ejor.2014.11.027"
+  parent:
+    title: "European Journal of Operational Research"
+    publisher: "Elsevier"
+    volume: 88
+    page-range: 61-69
+    issn: 0377-2217
+
+lieder-scheduling-aircraft:
+  type: article
+  title: "Scheduling aircraft take-offs and landings on interdependent and heterogeneous runways"
+  author:
+    - "Lieder, Alexander"
+    - "Stolletz, Raik"
+  date: 2016
+  doi: "10.1016/j.tre.2016.01.015"
+  parent:
+    title: "Transportation Research Part E: Logistics and Transportation Review"
+    publisher: "Elsevier"
+    volume: 88
+    page-range: 167-188
+    issn: 1366-5545
