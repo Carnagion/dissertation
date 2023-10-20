@@ -35,7 +35,7 @@
 
 = Introduction
 
-// TODO: CLean up
+// TODO: Clean up
 
 This project explores the integrated version of the aircraft runway sequencing and de-icing problem, which consists of assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set, in a way that complies with strict safety and operational requirements while minimising operational costs, fuel emissions, flight delays, and crew connection times.
 
