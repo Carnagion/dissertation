@@ -1,3 +1,35 @@
+beasley-scheduling-aircraft:
+  type: article
+  title: "Scheduling Aircraft Landings - The Static Case"
+  author:
+    - "Beasley, John E."
+    - "Krishnamoorthy, Mohan"
+    - "Sharaiha, Yazid M."
+    - "Abramson, David"
+  date: 2000
+  doi: "10.1287/trsc.34.2.180.12302"
+  parent:
+    title: "Transportation Science"
+    publisher: "INFORMS"
+    volume: 34
+    page-range: 180-197
+
+furini-rolling-horizon:
+  type: article
+  title: "Improved rolling horizon approaches to the aircraft sequencing problem"
+  author:
+    - "Furini, Fabio"
+    - "Kidd, Martin P."
+    - "Persiani, Carlo A."
+    - "Toth, Paolo"
+  date: 2015
+  doi: "10.1007/s10951-014-0415-8"
+  parent:
+    title: "Journal of Scheduling"
+    publisher: "Springer"
+    volume: 18
+    page-range: 435-447
+
 lieder-dynamic-programming:
   type: article
   title: "A dynamic programming approach for the aircraft landing problem with aircraft classes"
@@ -12,7 +44,6 @@ lieder-dynamic-programming:
     publisher: "Elsevier"
     volume: 88
     page-range: 61-69
-    issn: 0377-2217
 
 lieder-scheduling-aircraft:
   type: article
@@ -27,4 +58,3 @@ lieder-scheduling-aircraft:
     publisher: "Elsevier"
     volume: 88
     page-range: 167-188
-    issn: 1366-5545
