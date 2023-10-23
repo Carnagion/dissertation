@@ -30,46 +30,42 @@
 
 #set par(justify: true)
 
-#outline()
+#outline(indent: auto)
 #pagebreak()
 
 = Introduction
 
-// TODO: Clean up
+This project explores the integrated version of the aircraft runway sequencing and de-icing problem. It is an NP-hard problem @demaere-pruning-rules which involves assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set in a way that complies with safety and operational requirements @lieder-scheduling-aircraft while minimising operational costs, fuel emissions, flight delays, and crew connection times.
 
-This project explores the integrated version of the aircraft runway sequencing and de-icing problem, which is an NP-hard problem that consists of assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set in a way that complies with safety and operational requirements @lieder-scheduling-aircraft while minimising operational costs, fuel emissions, flight delays, and crew connection times.
+== Background
 
-Aircraft taking off from or landing on a given airport must adhere to strict separation requirements that are dictated by the type of operation (i.e., taking off or landing), the aircraft class of the preceding and succeeding operation, and the allocated time frame for the operation #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming"). De-icing must also be accounted for -- aircraft may be de-iced inside hangars or on the runway before take-off, which pushes back the take-off time of the aircraft depending on the number of de-icing stations or rakes available at the time.
-An airport's maximum capacity -- the number of aircraft taking off or landing per unit of time -- is thus bounded by its runway capacity @lieder-dynamic-programming. Although it is possible to construct additional runways or airports, this is not always feasible due to the high costs of infrastructure and land. Therefore, efficient use and scheduling of runway operations is crucial for maximising the capacity of existing runways and airports #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming").
+Aircraft taking off from or landing on a given airport must adhere to strict separation requirements that are dictated by the type of operation (i.e., taking off or landing), the aircraft classes of the preceding and succeeding operations, and the allocated time frame for the operation #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming"). De-icing must also be accounted for -- aircraft may be de-iced inside gates or at de-icing pads, which pushes back the take-off time of the aircraft (and consequently, those of the rest of the sequence) depending on the number of de-icing stations or rigs available at the time.
+An airport's maximum capacity and throughput -- the number of aircraft taking off or landing per unit of time -- is thus bounded by its runway capacity @lieder-dynamic-programming. Although it is possible to construct additional runways or airports, this is not always feasible due to the high costs of infrastructure and land. Therefore, efficient use and scheduling of runway operations is crucial for maximising the capacity of existing runways and airports #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming").
 
-Previous approaches to runway sequencing have employed a variety of methods -- both exact and heuristic-based -- such as first-come-first-serve (FCFS) @furini-rolling-horizon, branch-and-bound, linear programming (LP) based tree search @beasley-scheduling-aircraft, dynamic programming #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming"), and mixed-integer programming (MIP) @lieder-dynamic-programming. Many have also incorporated a rolling horizon approach to lower the exponential computation time required for large problem instances #cite("furini-rolling-horizon", "beasley-scheduling-aircraft") and to adapt to highly dynamic scenarios @lieder-dynamic-programming.
+== Motivation
 
-However, these approaches have focused mainly on generating either runway sequences or de-icing schedules only. Indeed, there have been few efforts until now to address runway sequencing and de-icing in an integrated fashion, and as such, the problem is ripe for investigation.
-This project is thus one of the first of its kind, and investigates four distinct approaches to determining the order of de-icing -- sequential, based on the Calculated Off-Block Time (COBT), based on the Calculated Take-Off Time (CTOT), and based on already generated runway sequences -- using three different algorithms -- branch-and-bound, branch-and-bound with a rolling horizon, and mathematical programming.
+Prior approaches to runway sequencing have employed a variety of methods -- both exact and heuristic-based -- such as first-come-first-serve (FCFS) @furini-rolling-horizon, branch-and-bound, linear programming (LP) based tree search @beasley-scheduling-aircraft, dynamic programming #cite("lieder-scheduling-aircraft", "lieder-dynamic-programming"), and mixed-integer programming (MIP) #cite("lieder-dynamic-programming", "avella-time-indexed"). Some have also incorporated a rolling horizon to lower the exponential computation time required for large problem instances #cite("furini-rolling-horizon", "beasley-scheduling-aircraft").
 
-In doing so, this project will provide more fundamental insights into the innate characteristics of and interactions between runway sequencing and de-icing -- which can then be used as a starting point for further research. Additionally, it will reveal the potential advantages of the integrated solution, as compared to using fully decomposed or partially integrated methods proposed in existing literature.
+However, these approaches have focused primarily on generating optimal runway sequences or de-icing schedules in isolation or in a decomposed manner (i.e., generating solutions for the two problems independently of each other). There is a possibility that integrating the solutions of runway sequencing and de-icing yields more optimal results, and as such, the problem is ripe for investigation.
+This project is thus one of the first of its kind, and investigates four distinct approaches to determining the order of de-icing using three different algorithms.
 
-// TODO: Elaborate more on - aircraft class, de-icing, COBT and CTOT?
+In doing so, this project will provide fundamental insights into the innate characteristics of and interactions between runway sequencing and de-icing -- which can then be used as a starting point for further research. Additionally, it will reveal the potential advantages of an integrated solution, as compared to using fully decomposed or partially integrated methods proposed in existing literature.
 
 = Objectives
 
-// TODO: Clean up
+The primary aim of this project is to investigate the integrated runway sequencing and de-icing problem by developing three algorithms that explore four different approaches to the order of aircraft de-icing. This will provide deeper insights into the problem's fundamental characteristics and the interactions between runway sequencing and de-icing, as well as the potential benefits of integrating their solutions.
 
-The primary aim of this project is to investigate the integrated runway sequencing and de-icing problem by developing three algorithms that explore four different approaches to the order of aircraft de-icing. This will provide a deeper insight into the problem's fundamental characteristics and the interactions between runway sequencing and de-icing, as well as the potential benefits of integrating their solutions.
-
-Its key objectives are thus as follows:
+Its key objectives are as follows:
 
 1. *Investigate previous approaches to runway sequencing*. The mathematical models and formulations proposed in prior research may not be directly applicable to this project, as they focus on only runway sequencing or only de-icing. Thus, there will be a need to understand and then adapt or extend these models so they are suitable for the integrated problem.
 
-2. *Design and implement three algorithms* -- branch-and-bound, branch-and-bound with a rolling window, and mathematical programming -- *using four different de-icing ordering approaches* -- sequential, based on COBT, based on CTOT, and based on runway sequences. The algorithms must be generic enough to work with data from different sources (i.e., different airports and datasets), by using a set of common features and characteristics in the data. Additionally, they must be fast and reliable enough to be viable in highly dynamic, real-time situations where unexpected failure is not an option. If time permits, a fourth algorithm -- dynamic programming -- may also be explored, since it is known to work well for runway sequencing @lieder-dynamic-programming but its effectiveness at de-icing is yet to be evaluated.
+2. *Design and implement three algorithms* -- branch-and-bound, branch-and-bound with a rolling window, and mathematical programming -- *using four different de-icing ordering approaches* -- sequential, based on the Target Off-Block Time (TOBT), based on the Calculated Take-Off Time (CTOT), and based on runway sequences. The algorithms must be generic enough to work with data from different sources (i.e., different airports and datasets), by using a set of common features and characteristics in the data. Additionally, they must be fast and reliable enough to be viable in highly dynamic, real-time situations where unexpected failure is not an option @demaere-pruning-rules. If time permits, a fourth algorithm -- dynamic programming -- may also be explored, since it is known to work well for runway sequencing @lieder-dynamic-programming but its effectiveness at de-icing is yet to be evaluated.
 
 3. *Analyse the algorithms' performance and outputs*. This will involve benchmarking them on known and available datasets and comparing them with existing solutions as well as with each other. A simulation that is more representative of real-world data and use cases will also be used to run the algorithms on multiple problem instances over a longer period of time. This will help expose any issues, such as instability in the generated sequences, that may not be visible in individual runs.
 
 4. *Develop a tool for visualising the outputs and intermediate results produced by the algorithms*. This will provide a more intuitive, human-friendly view intended to aid users' understanding, which will not only be useful for an end user, but also for the analysis of the algorithms themselves.
 
 = Plan
-
-// TODO: Clean up
 
 The overall work plan is to start off by investigating previous approaches to the problem and establishing a mathematical model, as any further work will be reliant on this. Then, the branch-and-bound algorithm to solve the problem according to the model will be implemented and later extended with a rolling window, followed by the mathematical programming and dynamic programming algorithms.
 
