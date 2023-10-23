@@ -58,3 +58,34 @@ lieder-scheduling-aircraft:
     publisher: "Elsevier"
     volume: 88
     page-range: 167-188
+
+avella-time-indexed:
+  type: article
+  title: "Time-Indexed Formulations for the Runway Scheduling Problem"
+  author:
+    - "Avella, Pasquale"
+    - "Boccia, Maurizio"
+    - "Mannino, Carlo"
+    - "Vasilyev, Igor"
+  date: 2017
+  doi: "10.1287/trsc.2017.0750"
+  parent:
+    title: "Transportation Science"
+    publisher: "INFORMS"
+    volume: 51
+    page-range: 1196-1209
+
+demaere-pruning-rules:
+  type: article
+  title: "Pruning Rules for Optimal Runway Sequencing"
+  author:
+    - "De Maere, Geert"
+    - "Atkin, Jason A. D."
+    - "Burke, Edmund K."
+  date: 2017
+  doi: "10.1287/trsc.2016.0733"
+  parent:
+    title: "Transportation Science"
+    publisher: "INFORMS"
+    volume: 52
+    page-range: 898-916
