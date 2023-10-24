@@ -63,7 +63,7 @@ The primary aim of this project is to investigate the integrated runway sequenci
 
 Its key objectives are as follows:
 
-1. *Investigate previous approaches to runway sequencing*. The mathematical models and formulations proposed in prior research may not be directly applicable to this project, as they focus on only runway sequencing or only de-icing. Thus, there will be a need to understand and then adapt or extend these models so they are suitable for the integrated problem.
+1. *Investigate prior approaches to runway sequencing*. The mathematical models and formulations proposed in prior research may not be directly applicable to this project, as they focus on only runway sequencing or only de-icing. Thus, there will be a need to understand and then adapt or extend these models so they are suitable for the integrated problem.
 
 2. *Design and implement three algorithms* -- branch-and-bound, branch-and-bound with a rolling window, and mathematical programming -- *using four different de-icing ordering approaches* -- sequential, based on the Target Off-Block Time (TOBT), based on the Calculated Take-Off Time (CTOT), and based on runway sequences. The algorithms must be generic enough to work with data from different sources (i.e., different airports and datasets), by using a set of common features and characteristics in the data. Additionally, they must be fast and reliable enough to be viable in highly dynamic, real-time situations where unexpected failure is not an option @demaere-pruning-rules. If time permits, a fourth algorithm -- dynamic programming -- may also be explored, since it is known to work well for runway sequencing @lieder-dynamic-programming but its effectiveness at de-icing is yet to be evaluated.
 
@@ -73,7 +73,7 @@ Its key objectives are as follows:
 
 = Plan
 
-The overall work plan is to start off by investigating previous approaches to the problem and establishing a mathematical model, as any further work will be reliant on this. Then, the branch-and-bound algorithm to solve the problem according to the model will be implemented and later extended with a rolling window, followed by the mathematical programming and dynamic programming algorithms.
+The overall work plan is to first investigate prior approaches to the problem and establish a mathematical model, as any further work will be reliant on this. Then, the branch-and-bound algorithm to solve the problem according to the model will be implemented and later extended with a rolling window, followed by the mathematical programming and dynamic programming algorithms.
 
 Analysis and evaluation of the implemented algorithms will take place throughout the development process. The development of the visualisation tool will therefore also start early in order to assist with the analysis.
 
@@ -82,7 +82,7 @@ Likewise, the document deliverables --- the project proposal, interim report, an
 An outline of this plan is depicted in the following Gantt chart:
 
 / A: Write the project proposal
-/ B: Research previous approaches into runway sequencing and de-icing
+/ B: Research prior approaches into runway sequencing and de-icing
 / C: Implement a branch-and-bound algorithm
 / D: Develop the visualisation tool
 / E: Evaluate the performance of the algorithm and run simulations
@@ -121,7 +121,7 @@ An outline of this plan is depicted in the following Gantt chart:
         // Write the project proposal
         task("A", (0, proposal-day), style: doc-line-style)
 
-        // Research previous approaches into runway sequencing and de-icing
+        // Research prior approaches into runway sequencing and de-icing
         task("B", (0, day(50)), style: work-line-style)
 
         // Implement a branch-and-bound algorithm
