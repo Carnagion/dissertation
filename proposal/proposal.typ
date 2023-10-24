@@ -6,9 +6,9 @@
 #align(center)[
     #text(size: 18pt)[*Integrated Aircraft Runway Sequencing and De-Icing*]
 
-    _Project Proposal_
+    #text(size: 13pt)[_COMP3003 Project Proposal_]
 
-    #v(1.3em)
+    #v(0.2fr)
 
     #stack(dir: ltr, spacing: 1fr)[
         Indraneel Mahendrakumar\
@@ -19,6 +19,12 @@
         Geert De Maere\
         #email("geert.demaere@nottingham.ac.uk")\
     ]
+
+    #v(0.2fr)
+
+    MSci. Hons. Computer Science with Artificial Intelligence\
+    University of Nottingham\
+    2023-2024
 ]
 #v(1fr)
 
