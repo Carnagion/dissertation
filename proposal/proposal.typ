@@ -11,12 +11,14 @@
     #v(0.2fr)
 
     #stack(dir: ltr, spacing: 1fr)[
+        _By_\
         Indraneel Mahendrakumar\
         20372495\
         #email("psyim3@nottingham.ac.uk")\
     ][
         _Supervised By_\
         Geert De Maere\
+        Assistant Professor\
         #email("geert.demaere@nottingham.ac.uk")\
     ]
 
@@ -59,9 +61,9 @@ In doing so, this project will provide fundamental insights into the innate char
 
 = Objectives
 
-The primary aim of this project is to investigate the integrated runway sequencing and de-icing problem by developing three algorithms that explore four different approaches to the order of aircraft de-icing. This will provide deeper insights into the problem's fundamental characteristics and the interactions between runway sequencing and de-icing, as well as the potential benefits of integrating their solutions.
+The primary aim of this project is to investigate the integrated runway sequencing and de-icing problem by developing three algorithms that explore four different approaches to the order of aircraft de-icing. The investigation and implementation of these algorithms will provide deeper insights into the problem's fundamental characteristics and the interactions between runway sequencing and de-icing, as well as the potential benefits of integrating their solutions.
 
-Its key objectives are as follows:
+The project's key objectives are as follows:
 
 1. *Investigate prior approaches to runway sequencing*. The mathematical models and formulations proposed in prior research may not be directly applicable to this project, as they focus on only runway sequencing or only de-icing. Thus, there will be a need to understand and then adapt or extend these models so they are suitable for the integrated problem.
 
@@ -98,49 +100,57 @@ An outline of this plan is depicted in the following Gantt chart:
 #import "@preview/timeliney:0.0.1": *
 
 #timeline(show-grid: true, {
-    let months = ("Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr")
+    // NOTE: Technically 28 weeks and 5 days
+    let num-weeks = 29
+    let days-in-week = 7
 
-    let day(day) = {
-        let avg-month-days = 213 / 7
-        day / avg-month-days
-    }
+    let day(day) = day / days-in-week
 
     let proposal-day = day(25)
     let interim-day = day(72)
-    let diss-day = day(203)
+    let diss-day = day(201)
 
-    headerline(group(([*2023*], 3)), group(([*2024*], 4)))
-    headerline(..months.map(group))
+    // NOTE: 0.0001 subtracted because timeliney gets stuck if the group length exceeds total length even by a little
+    headerline(group(([*2023*], day(92))), group(([*2024*], num-weeks - day(92) - 0.0001)))
+    headerline(
+        group(("Oct", day(31))),
+        group(("Nov", day(30))),
+        group(("Dec", day(31))),
+        group(("Jan", day(31))),
+        group(("Feb", day(29))),
+        group(("Mar", day(31))),
+        group(("Apr", day(20) - 0.0001)), // NOTE: See above
+    )
+    headerline(..range(1, num-weeks + 1).map(week => group(str(week))))
 
     let break-line-style = (stroke: 3pt + gray)
     let doc-line-style = (stroke: 3pt + gray.darken(25%))
     let work-line-style = (stroke: 3pt)
 
-    // Note: Each month assumed to be approximately 30 days
     taskgroup({
         // Write the project proposal
         task("A", (0, proposal-day), style: doc-line-style)
 
         // Research prior approaches into runway sequencing and de-icing
-        task("B", (0, day(50)), style: work-line-style)
+        task("B", (0, day(49)), style: work-line-style)
 
         // Implement a branch-and-bound algorithm
-        task("C", (day(20), day(31)), style: work-line-style)
+        task("C", (day(21), day(31)), style: work-line-style)
 
         // Develop the visualisation tool
-        task("D", (day(20), day(175)), style: work-line-style)
+        task("D", (day(21), day(175)), style: work-line-style)
 
         // Evaluate the performance of the algorithm and run simulations
-        task("E", (day(20), day(182)), style: work-line-style)
+        task("E", (day(21), day(182)), style: work-line-style)
 
         // Write the interim report
         task("F", (proposal-day, interim-day), style: doc-line-style)
 
         // Extend the branch-and-bound algorithm with a rolling window
-        task("G", (day(31), day(50)), style: work-line-style)
+        task("G", (day(31), day(49)), style: work-line-style)
 
         // Implement a mathematical programming algorithm
-        task("H", (day(57), day(126)), style: work-line-style)
+        task("H", (day(56), day(126)), style: work-line-style)
 
         // Write the final dissertation
         task("I", (interim-day, diss-day), style: doc-line-style)
@@ -155,7 +165,7 @@ An outline of this plan is depicted in the following Gantt chart:
         task("L", (day(133), day(168)), style: work-line-style)
 
         // Easter break
-        task("M", (day(181), day(212)), style: break-line-style)
+        task("M", (day(181), day(203)), style: break-line-style)
     })
 
     let milestone-line-style = (stroke: (dash: "dashed"))
