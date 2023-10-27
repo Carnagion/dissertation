@@ -1,0 +1,8 @@
+# Papers used for references
+references/*
+
+# Helpful resources from Moodle
+guide/*
+
+# Typst output
+*.pdf
