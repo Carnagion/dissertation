@@ -1,6 +1,9 @@
 # Papers used for references
 references/*
 
+# Problem instance data
+instances/*
+
 # Helpful resources from Moodle
 guide/*
 
