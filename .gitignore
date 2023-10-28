@@ -1,11 +1,11 @@
 # Papers used for references
-references/*
+references/
 
 # Problem instance data
-instances/*
+instances/
 
 # Helpful resources from Moodle
-guide/*
+guide/
 
 # Typst output
 *.pdf
