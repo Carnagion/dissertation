@@ -1,2 +1,11 @@
-# Ignore Typst output and research papers
+# Papers used for references
+references/
+
+# Problem instance data
+instances/
+
+# Helpful resources from Moodle
+guide/
+
+# Typst output
 *.pdf
