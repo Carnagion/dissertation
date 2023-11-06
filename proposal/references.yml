@@ -14,7 +14,7 @@ beasley-scheduling-aircraft:
     volume: 34
     page-range: 180-197
 
-furini-rolling-horizon:
+furini-improved-horizon:
   type: article
   title: "Improved rolling horizon approaches to the aircraft sequencing problem"
   author:
