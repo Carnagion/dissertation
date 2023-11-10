@@ -9,3 +9,6 @@ guide/
 
 # Typst output
 *.pdf
+
+# Cargo compilation output
+target/
