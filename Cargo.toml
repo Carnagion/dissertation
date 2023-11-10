@@ -1,0 +1,8 @@
+[package]
+name = "dissertation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+thiserror = "1.0.50"
+time = { version = "0.3.30", features = ["macros", "parsing"] }
