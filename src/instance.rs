@@ -4,14 +4,15 @@ pub mod aircraft;
 pub use aircraft::{Aircraft, Model, Registration, SizeClass};
 
 mod op;
-pub use op::{Op, OpKind};
+pub use op::{AssignedOp, OpConstraint, OpKind};
 
 mod separation;
 pub use separation::{SeparationId, SeparationMatrix, SeparationRow};
 
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Instance {
     pub aircraft: Vec<Aircraft>,
-    pub operations: Vec<Op>,
+    pub op_constraints: Vec<OpConstraint>,
     pub separations: SeparationMatrix,
 }
 
