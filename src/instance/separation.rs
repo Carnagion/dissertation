@@ -13,3 +13,9 @@ pub struct SeparationRow {
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct SeparationId(u8);
+
+impl SeparationId {
+    pub fn new(id: u8) -> Self {
+        Self(id)
+    }
+}
