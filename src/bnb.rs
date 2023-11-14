@@ -28,6 +28,7 @@ fn branch_with_depth(
         let OpConstraint {
             kind,
             earliest_time,
+            ..
         } = instance.op_constraints[aircraft_idx];
 
         let assigned_time = match depth {

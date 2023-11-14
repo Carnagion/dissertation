@@ -1,3 +1,7 @@
+use std::str::FromStr;
+
+use thiserror::Error;
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Aircraft {
     pub registration: Registration,
@@ -27,4 +31,20 @@ impl Model {
 pub enum SizeClass {
     Medium,
     Large,
+}
+
+#[derive(Clone, Copy, Debug, Eq, Error, PartialEq)]
+#[error("invalid size class")]
+pub struct ParseClassError;
+
+impl FromStr for SizeClass {
+    type Err = ParseClassError;
+
+    fn from_str(string: &str) -> Result<Self, Self::Err> {
+        match string {
+            "M" => Ok(Self::Medium),
+            "L" => Ok(Self::Large),
+            _ => Err(ParseClassError),
+        }
+    }
 }
