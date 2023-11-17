@@ -4,7 +4,9 @@ pub fn branch_and_bound(instance: &Instance) {
     let sets = instance.separation_sets();
     let mut seq = Vec::with_capacity(instance.aircraft.len());
     let mut set_idxs = vec![0; sets.len()];
-    branch_with_depth(0, &mut seq, &mut set_idxs, &sets, instance)
+    let mut min_cost = f32::INFINITY;
+    branch_with_depth(0, &mut seq, &mut set_idxs, &sets, instance, &mut min_cost);
+    println!("{}", min_cost);
 }
 
 fn branch_with_depth(
@@ -13,9 +15,16 @@ fn branch_with_depth(
     set_idxs: &mut [usize],
     sets: &[Vec<usize>],
     instance: &Instance,
+    min_cost: &mut f32,
 ) {
     if depth >= instance.aircraft.len() {
-        println!("{:?}", seq);
+        let current_cost = cost(&seq, depth);
+        if current_cost < *min_cost {
+            *min_cost = current_cost;
+        }
+
+        debug_seq(&seq, depth);
+
         return;
     }
 
@@ -36,8 +45,8 @@ fn branch_with_depth(
             depth => {
                 let prev_op = seq[depth - 1];
                 let separation = instance
-                    .separation(prev_op.aircraft_idx, aircraft_idx)
-                    .unwrap();
+                    .separation(aircraft_idx, prev_op.aircraft_idx)
+                    .unwrap(); // PANICS: The indices will definitely be valid
                 (prev_op.time + separation).max(earliest_time)
             }
         };
@@ -55,44 +64,33 @@ fn branch_with_depth(
             seq[depth] = assigned_op;
         }
 
+        debug_seq(&seq, depth);
+
+        let current_cost = cost(&seq, depth);
+        if current_cost > *min_cost {
+            continue;
+        }
+
         set_idxs[set_idx] += 1;
-        branch_with_depth(depth + 1, seq, set_idxs, sets, instance);
+        branch_with_depth(depth + 1, seq, set_idxs, sets, instance, min_cost);
         set_idxs[set_idx] -= 1;
     }
 }
 
-// https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=844ef5ce7ea547d14ebdf526e14fa90b
+fn cost(seq: &[AssignedOp], depth: usize) -> f32 {
+    seq.into_iter()
+        .take(depth + 1)
+        .map(|op| (op.time - op.earliest_time).as_seconds_f32().powi(2))
+        .sum()
+}
 
-// pub fn branch_and_bound_breadth_first(instance: &Instance) -> Option<Vec<usize>> {
-//     let mut sequences = VecDeque::from([vec![]]);
-
-//     let mut best = None;
-//     let mut upper_bound = f32::INFINITY;
-
-//     while let Some(sequence) = sequences.pop_front() {
-//         let current_bound = bound(&sequence, instance);
-
-//         if current_bound < upper_bound {
-//             upper_bound = current_bound;
-//             best = Some(sequence.clone());
-//         }
-
-//         for sub_sequence in branch(&sequence, instance) {
-//             let sub_bound = bound(&sub_sequence, instance);
-//             if sub_bound > current_bound {
-//                 continue;
-//             }
-//             sequences.push_back(sub_sequence);
-//         }
-//     }
-
-//     best
-// }
-
-// fn branch(sequence: &[usize], instance: &Instance) -> impl IntoIterator<Item = Vec<usize>> {
-//     []
-// }
-
-// fn bound(sequence: &[usize], instance: &Instance) -> f32 {
-//     todo!()
-// }
+fn debug_seq(seq: &[AssignedOp], depth: usize) {
+    print!("[");
+    for op in seq.iter().take(depth) {
+        print!(
+            "{} ({} vs {}), ",
+            op.aircraft_idx, op.time, op.earliest_time,
+        );
+    }
+    println!("] at {} scoring {}", depth, cost(seq, depth));
+}
