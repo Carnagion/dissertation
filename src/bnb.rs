@@ -18,6 +18,7 @@ fn branch_with_depth(
     min_cost: &mut f32,
 ) {
     if depth >= instance.aircraft.len() {
+        // Update the best sequence
         let current_cost = cost(&seq, depth);
         if current_cost < *min_cost {
             *min_cost = current_cost;
@@ -25,6 +26,7 @@ fn branch_with_depth(
 
         debug_seq(&seq, depth);
 
+        // Return because no more branches are possible
         return;
     }
 
@@ -33,6 +35,7 @@ fn branch_with_depth(
             continue;
         }
 
+        // Get the
         let aircraft_idx = sets[set_idx][set_idxs[set_idx]];
         let OpConstraint {
             kind,
@@ -40,12 +43,13 @@ fn branch_with_depth(
             ..
         } = instance.op_constraints[aircraft_idx];
 
+        // Assign a time for the current aircraft being considered
         let assigned_time = match depth {
             0 => earliest_time,
             depth => {
                 let prev_op = seq[depth - 1];
                 let separation = instance
-                    .separation(aircraft_idx, prev_op.aircraft_idx)
+                    .separation(prev_op.aircraft_idx, aircraft_idx)
                     .unwrap(); // PANICS: The indices will definitely be valid
                 (prev_op.time + separation).max(earliest_time)
             }
@@ -58,14 +62,16 @@ fn branch_with_depth(
             time: assigned_time,
         };
 
+        // Insert or update the current aircraft being considered
         if depth >= seq.len() {
             seq.push(assigned_op);
         } else {
             seq[depth] = assigned_op;
         }
 
-        debug_seq(&seq, depth);
+        // debug_seq(&seq, depth);
 
+        // Avoid exploring sub-branches if the minimum cost of this branch is higher than the best cost
         let current_cost = cost(&seq, depth);
         if current_cost > *min_cost {
             continue;
