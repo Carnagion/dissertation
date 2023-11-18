@@ -30,3 +30,14 @@ pub struct OpConstraints {
     #[serde_as(as = "DurationMinutes")]
     pub lineup_dur: Duration,
 }
+
+impl OpConstraints {
+    pub fn target_off_block_time(&self) -> NaiveTime {
+        self.earliest_time
+            - (self.pushback_dur
+                + self.pre_de_ice_dur
+                + self.de_ice_dur
+                + self.post_de_ice_dur
+                + self.lineup_dur)
+    }
+}
