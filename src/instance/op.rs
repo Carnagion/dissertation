@@ -1,44 +1,32 @@
-use std::str::FromStr;
+use std::time::Duration;
 
-use thiserror::Error;
+use chrono::NaiveTime;
 
-use time::Time;
+use serde::{Deserialize, Serialize};
 
-use crate::instance::SeparationId;
+use serde_with::serde_as;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub struct OpConstraint {
-    pub kind: OpKind,
-    pub earliest_time: Time,
-    pub separation_id: SeparationId,
-}
+use crate::instance::duration::DurationMinutes;
 
-#[derive(Clone, Copy, Debug, Eq, Error, PartialEq)]
-#[error("invalid operation kind")]
-pub struct ParseOpKindError;
-
-impl FromStr for OpKind {
-    type Err = ParseOpKindError;
-
-    fn from_str(string: &str) -> Result<Self, Self::Err> {
-        match string {
-            "D" => Ok(Self::Departure),
-            "A" => Ok(Self::Arrival),
-            _ => Err(ParseOpKindError),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub struct AssignedOp {
-    pub aircraft_idx: usize,
-    pub kind: OpKind,
-    pub earliest_time: Time,
-    pub time: Time,
-}
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum OpKind {
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Op {
     Arrival,
     Departure,
+}
+
+#[serde_as] // NOTE: This must remain before the derive
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)] // NOTE: Theoretically could be Copy but is quite big
+pub struct OpConstraints {
+    pub earliest_time: NaiveTime,
+    #[serde_as(as = "DurationMinutes")]
+    pub pushback_dur: Duration,
+    #[serde_as(as = "DurationMinutes")]
+    pub pre_de_ice_dur: Duration,
+    #[serde_as(as = "DurationMinutes")]
+    pub de_ice_dur: Duration,
+    #[serde_as(as = "DurationMinutes")]
+    pub post_de_ice_dur: Duration,
+    #[serde_as(as = "DurationMinutes")]
+    pub lineup_dur: Duration,
 }

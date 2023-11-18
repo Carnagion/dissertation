@@ -1,9 +1,11 @@
+use std::str::FromStr;
+
 use dissertation::{bnb, instance::Instance};
 
 fn main() {
-    let aircraft_constraints = include_str!("../instances/test.constraints");
-    let separations = include_str!("../instances/sep/test.sep");
-    let instance = Instance::parse(aircraft_constraints, separations).unwrap();
-
-    bnb::branch_and_bound(&instance);
+    let instance = Instance::from_str(include_str!("../instances/instance.csv")).unwrap();
+    println!("{:#?}", bnb::branch_and_bound(&instance));
 }
+
+// TODO
+// - Kind of operation (arrival or departure) is not taken into account when scheduling

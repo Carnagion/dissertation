@@ -1,24 +1,34 @@
-use std::str::FromStr;
+use serde::{Deserialize, Serialize};
 
-use thiserror::Error;
-
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Aircraft {
-    pub registration: Registration,
+    pub reg: Registration,
     pub model: Model,
-    pub class: SizeClass,
+    pub size_class: SizeClass,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct Registration(String);
-
-impl Registration {
-    pub fn new(registration: impl Into<String>) -> Self {
-        Self(registration.into())
+impl Aircraft {
+    pub fn new(reg: Registration, model: Model, size_class: SizeClass) -> Self {
+        Self {
+            reg,
+            model,
+            size_class,
+        }
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[serde(transparent)]
+pub struct Registration(String);
+
+impl Registration {
+    pub fn new(reg: impl Into<String>) -> Self {
+        Self(reg.into())
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[serde(transparent)]
 pub struct Model(String);
 
 impl Model {
@@ -27,24 +37,10 @@ impl Model {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum SizeClass {
+    Small,
     Medium,
     Large,
-}
-
-#[derive(Clone, Copy, Debug, Eq, Error, PartialEq)]
-#[error("invalid size class")]
-pub struct ParseClassError;
-
-impl FromStr for SizeClass {
-    type Err = ParseClassError;
-
-    fn from_str(string: &str) -> Result<Self, Self::Err> {
-        match string {
-            "M" => Ok(Self::Medium),
-            "L" => Ok(Self::Large),
-            _ => Err(ParseClassError),
-        }
-    }
 }
