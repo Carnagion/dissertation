@@ -8,16 +8,9 @@ use serde_with::serde_as;
 
 use crate::instance::duration::DurationMinutes;
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-#[serde(rename_all = "lowercase")]
-pub enum Op {
-    Arrival,
-    Departure,
-}
-
 #[serde_as] // NOTE: This must remain before the derive
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)] // NOTE: Theoretically could be Copy but is quite big
-pub struct OpConstraints {
+pub struct DepartureConstraints {
     pub earliest_time: NaiveTime,
     #[serde_as(as = "DurationMinutes")]
     pub pushback_dur: Duration,
@@ -31,7 +24,7 @@ pub struct OpConstraints {
     pub lineup_dur: Duration,
 }
 
-impl OpConstraints {
+impl DepartureConstraints {
     pub fn target_off_block_time(&self) -> NaiveTime {
         self.earliest_time
             - (self.pushback_dur

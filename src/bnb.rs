@@ -3,12 +3,13 @@ use chrono::NaiveTime;
 use crate::instance::Instance;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub struct ScheduledOp {
+pub struct Departure {
     pub aircraft_idx: usize,
-    pub assigned_time: NaiveTime,
+    pub de_ice_time: NaiveTime,
+    pub take_off_time: NaiveTime,
 }
 
-pub fn branch_and_bound(instance: &Instance) -> Vec<ScheduledOp> {
+pub fn branch_and_bound(instance: &Instance) -> Vec<Departure> {
     let separation_sets = instance.separation_sets();
     let mut sequence = Vec::with_capacity(instance.rows().len());
     let mut last_set_indices = vec![0; separation_sets.len()];
@@ -27,7 +28,7 @@ pub fn branch_and_bound(instance: &Instance) -> Vec<ScheduledOp> {
 fn branch(
     instance: &Instance,
     separation_sets: &[Vec<usize>],
-    sequence: &mut Vec<ScheduledOp>,
+    sequence: &mut Vec<Departure>,
     last_set_indices: &mut [usize],
     lowest_bound: &mut f64,
     depth: usize,
@@ -49,13 +50,13 @@ fn branch(
             continue;
         }
 
-        // Insert or update the scheduled time for the current aircraft
+        // Insert or update the departure for the current aircraft
         let aircraft_idx = separation_set[last_set_idx];
-        let scheduled_op = schedule_op(instance, aircraft_idx, sequence, depth);
+        let departure = schedule_departure(instance, aircraft_idx, sequence, depth);
         if depth >= sequence.len() {
-            sequence.push(scheduled_op);
+            sequence.push(departure);
         } else {
-            sequence[depth] = scheduled_op;
+            sequence[depth] = departure;
         }
 
         // Avoid exploring sub-branches if the lower bound of this branch is higher than the lowest bound
@@ -79,12 +80,12 @@ fn branch(
     }
 }
 
-fn bound(instance: &Instance, sequence: &[ScheduledOp], depth: usize) -> f64 {
+fn bound(instance: &Instance, sequence: &[Departure], depth: usize) -> f64 {
     sequence
         .iter()
         .take(depth + 1)
         .map(|op| {
-            let minutes = (op.assigned_time
+            let minutes = (op.take_off_time
                 - instance.rows()[op.aircraft_idx].constraints.earliest_time)
                 .num_minutes() as f64;
             minutes.powi(2)
@@ -92,29 +93,29 @@ fn bound(instance: &Instance, sequence: &[ScheduledOp], depth: usize) -> f64 {
         .sum()
 }
 
-fn schedule_op(
+fn schedule_departure(
     instance: &Instance,
     aircraft_idx: usize,
-    sequence: &[ScheduledOp],
+    sequence: &[Departure],
     depth: usize,
-) -> ScheduledOp {
+) -> Departure {
     // Grab the constraints for the current aircraft
     let constraints = &instance.rows()[aircraft_idx].constraints;
 
-    // Assign a time for the current aircraft being considered
-    let assigned_time = match depth {
-        0 => constraints.earliest_time,
-        depth => {
-            let prev_op = &sequence[depth - 1];
+    // Assign a departure time for the current aircraft being considered
+    let take_off_time = match depth.checked_sub(1).and_then(|depth| sequence.get(depth)) {
+        None => constraints.earliest_time,
+        Some(prev_constraints) => {
             let separation = instance
-                .separation(prev_op.aircraft_idx, aircraft_idx)
+                .separation(prev_constraints.aircraft_idx, aircraft_idx)
                 .unwrap(); // PANICS: The indices will definitely be valid
-            (prev_op.assigned_time + separation).max(constraints.earliest_time)
+            (prev_constraints.take_off_time + separation).max(constraints.earliest_time)
         }
     };
 
-    ScheduledOp {
+    Departure {
         aircraft_idx,
-        assigned_time,
+        de_ice_time: take_off_time, // TODO: Assign de-icing time
+        take_off_time,
     }
 }

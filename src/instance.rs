@@ -12,10 +12,19 @@ pub mod aircraft;
 use aircraft::Aircraft;
 
 pub mod op;
-use op::{Op, OpConstraints};
+use op::DepartureConstraints;
 
 mod duration;
 use duration::DurationMinutes;
+
+#[serde_as] // NOTE: This must remain before the derive
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+pub struct InstanceRow {
+    pub aircraft: Aircraft,
+    pub constraints: DepartureConstraints,
+    #[serde_as(as = "Vec<DurationMinutes>")]
+    pub separations: Vec<Duration>,
+}
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(transparent)]
@@ -92,6 +101,8 @@ impl FromStr for Instance {
             .from_reader(string.as_bytes())
             .into_deserialize()
             .collect::<Result<Self, _>>()?;
+
+        // Check that the number of separations in each row equals the number of rows
         instance
             .0
             .iter()
@@ -108,14 +119,4 @@ impl FromIterator<InstanceRow> for Instance {
     {
         Self(Vec::from_iter(rows))
     }
-}
-
-#[serde_as] // NOTE: This must remain before the derive
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub struct InstanceRow {
-    pub aircraft: Aircraft,
-    pub op: Op,
-    pub constraints: OpConstraints,
-    #[serde_as(as = "Vec<DurationMinutes>")]
-    pub separations: Vec<Duration>,
 }
