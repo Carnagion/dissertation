@@ -11,8 +11,8 @@ use thiserror::Error;
 pub mod aircraft;
 use aircraft::Aircraft;
 
-pub mod op;
-use op::DepartureConstraints;
+pub mod constraints;
+use constraints::DepartureConstraints;
 
 mod duration;
 use duration::DurationMinutes;
