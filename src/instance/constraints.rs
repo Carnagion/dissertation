@@ -27,10 +27,14 @@ pub struct DepartureConstraints {
 impl DepartureConstraints {
     pub fn target_off_block_time(&self) -> NaiveTime {
         self.earliest_time
-            - (self.pushback_dur
-                + self.pre_de_ice_dur
-                + self.de_ice_dur
+            - (self.lineup_dur
                 + self.post_de_ice_dur
-                + self.lineup_dur)
+                + self.de_ice_dur
+                + self.pre_de_ice_dur
+                + self.pushback_dur)
+    }
+
+    pub fn target_de_ice_time(&self) -> NaiveTime {
+        self.earliest_time - (self.lineup_dur + self.post_de_ice_dur)
     }
 }

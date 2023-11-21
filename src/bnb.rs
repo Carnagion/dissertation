@@ -99,23 +99,50 @@ fn schedule_departure(
     sequence: &[Departure],
     depth: usize,
 ) -> Departure {
-    // Grab the constraints for the current aircraft
+    // Get the constraints for the current aircraft
     let constraints = &instance.rows()[aircraft_idx].constraints;
 
-    // Assign a departure time for the current aircraft being considered
-    let take_off_time = match depth.checked_sub(1).and_then(|depth| sequence.get(depth)) {
-        None => constraints.earliest_time,
-        Some(prev_constraints) => {
+    // Get the previous departure scheduled, if any
+    let prev_dep = depth.checked_sub(1).and_then(|depth| sequence.get(depth));
+
+    // Assign a de-ice time and departure time for the current aircraft being considered
+    let (de_ice_time, take_off_time) = match prev_dep {
+        // If there is no previous departure, this is the first aircraft
+        // i.e. its de-icing and take-off time are the earliest possible
+        None => (constraints.target_de_ice_time(), constraints.earliest_time),
+        Some(prev_dep) => {
+            // Calculate the required separation between the current and previous aircraft
             let separation = instance
-                .separation(prev_constraints.aircraft_idx, aircraft_idx)
+                .separation(prev_dep.aircraft_idx, aircraft_idx)
                 .unwrap(); // PANICS: The indices will definitely be valid
-            (prev_constraints.take_off_time + separation).max(constraints.earliest_time)
+
+            let prev_constraints = &instance.rows()[depth - 1].constraints;
+
+            // The de-ice time is the maximum of when that the aircraft can get there
+            // and when the previous aircraft finishes de-icing
+            let de_ice_time = constraints
+                .target_de_ice_time()
+                .max(prev_dep.de_ice_time + prev_constraints.de_ice_dur);
+
+            // The take-off time is the max of its earliest time,
+            // the time of the previous take-off plus separation,
+            // and the de-ice time plus the duration taken to get to the runway
+            let take_off_time = (prev_dep.take_off_time + separation)
+                .max(constraints.earliest_time)
+                .max(
+                    de_ice_time
+                        + constraints.de_ice_dur
+                        + constraints.post_de_ice_dur
+                        + constraints.lineup_dur,
+                );
+
+            (de_ice_time, take_off_time)
         }
     };
 
     Departure {
         aircraft_idx,
-        de_ice_time: take_off_time, // TODO: Assign de-icing time
+        de_ice_time,
         take_off_time,
     }
 }
