@@ -118,7 +118,7 @@ fn departure_cost(departure: &Departure, instance: &Instance) -> f64 {
 
 // TODO: Estimate the bound for remaining unsequenced aircraft
 fn estimated_remaining_bound(instance: &Instance, sequence: &[Departure], depth: usize) -> f64 {
-    let sequence = &sequence[..depth + 1];
+    let sequence = &sequence[..depth];
     todo!()
 }
 

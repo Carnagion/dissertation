@@ -35,6 +35,6 @@ impl DepartureConstraints {
     }
 
     pub fn target_de_ice_time(&self) -> NaiveTime {
-        self.earliest_time - (self.lineup_dur + self.post_de_ice_dur)
+        self.earliest_time - (self.lineup_dur + self.post_de_ice_dur + self.de_ice_dur)
     }
 }
