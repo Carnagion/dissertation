@@ -13,16 +13,31 @@ pub fn branch_and_bound(instance: &Instance) -> Vec<Departure> {
     let separation_sets = instance.separation_sets();
     let mut sequence = Vec::with_capacity(instance.rows().len());
     let mut last_set_indices = vec![0; separation_sets.len()];
-    let mut lower_bound = f64::INFINITY;
+    let mut bounds = Bounds::default();
     branch(
         instance,
         &separation_sets,
         &mut sequence,
         &mut last_set_indices,
-        &mut lower_bound,
+        &mut bounds,
         0,
     );
     sequence
+}
+
+#[derive(Clone, Copy, Debug)]
+struct Bounds {
+    pub lowest: f64,
+    pub current_lower: f64,
+}
+
+impl Default for Bounds {
+    fn default() -> Self {
+        Self {
+            lowest: f64::INFINITY,
+            current_lower: 0.0,
+        }
+    }
 }
 
 fn branch(
@@ -30,15 +45,12 @@ fn branch(
     separation_sets: &[Vec<usize>],
     sequence: &mut Vec<Departure>,
     last_set_indices: &mut [usize],
-    lowest_bound: &mut f64,
+    bounds: &mut Bounds,
     depth: usize,
 ) {
     if depth >= instance.rows().len() {
         // Update the cost with that of the best sequence found so far
-        let current_low_bound = bound(instance, sequence, depth);
-        if current_low_bound < *lowest_bound {
-            *lowest_bound = current_low_bound;
-        }
+        bounds.lowest = bounds.lowest.min(bounds.current_lower);
 
         return;
     }
@@ -59,38 +71,55 @@ fn branch(
             sequence[depth] = departure;
         }
 
+        // Calculate the cost for the current scheduled departure and its effect on the bound
+        let current_cost = departure_cost(&departure, instance);
+        let current_bound = bounds.current_lower + current_cost;
+
         // Avoid exploring sub-branches if the lower bound of this branch is higher than the lowest bound
         // i.e. it cannot produce a better solution than the known worst solution
-        let current_low_bound = bound(instance, sequence, depth);
-        if current_low_bound > *lowest_bound {
+        if current_bound > bounds.lowest {
             continue;
         }
 
-        // Branch on further sequences
+        // Update the bounds and indices
+        bounds.current_lower = current_bound;
         last_set_indices[set_idx] += 1;
+
+        // Branch on further sequences
         branch(
             instance,
             separation_sets,
             sequence,
             last_set_indices,
-            lowest_bound,
+            bounds,
             depth + 1,
         );
+
+        // Reset the bounds and indices to what they were before
+        bounds.current_lower -= current_cost;
         last_set_indices[set_idx] -= 1;
     }
 }
 
 fn bound(instance: &Instance, sequence: &[Departure], depth: usize) -> f64 {
-    sequence
+    sequence[..depth]
         .iter()
-        .take(depth + 1)
-        .map(|op| {
-            let minutes = (op.take_off_time
-                - instance.rows()[op.aircraft_idx].constraints.earliest_time)
-                .num_minutes() as f64;
-            minutes.powi(2)
-        })
+        .map(|departure| departure_cost(departure, instance))
         .sum()
+}
+
+fn departure_cost(departure: &Departure, instance: &Instance) -> f64 {
+    let earliest_take_off_time = instance.rows()[departure.aircraft_idx]
+        .constraints
+        .earliest_time;
+    let diff = (departure.take_off_time - earliest_take_off_time).num_minutes() as f64;
+    diff.powi(2)
+}
+
+// TODO: Estimate the bound for remaining unsequenced aircraft
+fn estimated_remaining_bound(instance: &Instance, sequence: &[Departure], depth: usize) -> f64 {
+    let sequence = &sequence[..depth + 1];
+    todo!()
 }
 
 fn schedule_departure(
