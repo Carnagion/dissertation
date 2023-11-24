@@ -14,14 +14,16 @@ pub fn branch_and_bound(instance: &Instance) -> Vec<Departure> {
     let mut sequence = Vec::with_capacity(instance.rows().len());
     let mut last_set_indices = vec![0; separation_sets.len()];
     let mut bounds = Bounds::default();
+    let mut best_sequence = sequence.clone();
     branch(
         instance,
         &separation_sets,
         &mut sequence,
         &mut last_set_indices,
         &mut bounds,
+        &mut best_sequence,
     );
-    sequence
+    best_sequence
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -45,10 +47,12 @@ fn branch(
     sequence: &mut Vec<Departure>,
     last_set_indices: &mut [usize],
     bounds: &mut Bounds,
+    best_sequence: &mut Vec<Departure>,
 ) {
     if sequence.len() == instance.rows().len() {
         // Update the cost with that of the best sequence found so far
         bounds.lowest = bounds.lowest.min(bounds.current_lower);
+        *best_sequence = sequence.clone();
 
         return;
     }
@@ -86,6 +90,7 @@ fn branch(
             sequence,
             last_set_indices,
             bounds,
+            best_sequence,
         );
 
         // Reset the sequence, bounds, and indices to what they were before
