@@ -119,8 +119,11 @@ fn departure_cost(departure: &Departure, instance: &Instance) -> f64 {
 }
 
 // TODO: Estimate the bound for remaining unsequenced aircraft
-fn estimated_remaining_bound(instance: &Instance, sequence: &[Departure], depth: usize) -> f64 {
-    let sequence = &sequence[..depth];
+fn estimated_remaining_bound(
+    instance: &Instance,
+    separation_sets: &[Vec<usize>],
+    last_set_indices: &[usize],
+) -> f64 {
     todo!()
 }
 
@@ -143,7 +146,8 @@ fn schedule_departure(
                 .separation(prev_dep.aircraft_idx, aircraft_idx)
                 .unwrap(); // PANICS: The indices will definitely be valid
 
-            let prev_constraints = &instance.rows()[sequence.len()].constraints;
+            // Get the constraints for the previous departure
+            let prev_constraints = &instance.rows()[prev_dep.aircraft_idx].constraints;
 
             // The de-ice time is the maximum of when that the aircraft can get there
             // and when the previous aircraft finishes de-icing
