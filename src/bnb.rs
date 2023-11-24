@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use chrono::NaiveTime;
 
 use crate::instance::Instance;
@@ -70,7 +72,9 @@ fn branch(
 
         // Calculate the cost for the current scheduled departure and its effect on the bound
         let current_cost = departure_cost(&departure, instance);
-        let current_bound = bounds.current_lower + current_cost;
+        let remaining_bound =
+            estimated_remaining_bound(instance, separation_sets, last_set_indices, &departure);
+        let current_bound = bounds.current_lower + current_cost + remaining_bound;
 
         // Avoid exploring sub-branches if the lower bound of this branch is higher than the lowest bound
         // i.e. it cannot produce a better solution than the known worst solution
@@ -95,14 +99,14 @@ fn branch(
 
         // Reset the sequence, bounds, and indices to what they were before
         sequence.pop();
-        bounds.current_lower -= current_cost;
+        bounds.current_lower -= current_cost + remaining_bound;
         last_set_indices[set_idx] -= 1;
     }
 }
 
-fn bound<'dep, S>(instance: &Instance, sequence: S) -> f64
+fn bound<S>(instance: &Instance, sequence: S) -> f64
 where
-    S: IntoIterator<Item = &'dep Departure>,
+    S: IntoIterator<Item = Departure>,
 {
     sequence
         .into_iter()
@@ -123,8 +127,40 @@ fn estimated_remaining_bound(
     instance: &Instance,
     separation_sets: &[Vec<usize>],
     last_set_indices: &[usize],
+    departure: &Departure,
 ) -> f64 {
-    todo!()
+    // Assume a separation of at least one minute between each aircraft
+    let assumed_separation = Duration::from_secs(60);
+
+    // Build an iterator of sequences of remaining departures by calculating their minimum departure times
+    // and then sum up the bounds of all those sequences
+    separation_sets
+        .iter()
+        .zip(last_set_indices)
+        .map(|(separation_set, &last_set_idx)| {
+            // Produce a sequence of remaining departures assuming their separations
+            separation_set[last_set_idx..].iter().scan(
+                *departure,
+                |last_departure, &aircraft_idx| {
+                    // Get the constraints for the current aircraft
+                    let constraints = &instance.rows()[aircraft_idx].constraints;
+
+                    // Increment the last de-icing and take-off times
+                    last_departure.take_off_time = constraints
+                        .earliest_time
+                        .max(last_departure.take_off_time + assumed_separation);
+                    last_departure.de_ice_time += assumed_separation;
+
+                    Some(Departure {
+                        aircraft_idx,
+                        de_ice_time: last_departure.de_ice_time,
+                        take_off_time: last_departure.take_off_time,
+                    })
+                },
+            )
+        })
+        .map(|remaining_sequence| bound(instance, remaining_sequence))
+        .sum()
 }
 
 fn schedule_departure(
