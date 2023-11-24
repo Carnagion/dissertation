@@ -20,7 +20,6 @@ pub fn branch_and_bound(instance: &Instance) -> Vec<Departure> {
         &mut sequence,
         &mut last_set_indices,
         &mut bounds,
-        0,
     );
     sequence
 }
@@ -46,9 +45,8 @@ fn branch(
     sequence: &mut Vec<Departure>,
     last_set_indices: &mut [usize],
     bounds: &mut Bounds,
-    depth: usize,
 ) {
-    if depth >= instance.rows().len() {
+    if sequence.len() == instance.rows().len() {
         // Update the cost with that of the best sequence found so far
         bounds.lowest = bounds.lowest.min(bounds.current_lower);
 
@@ -62,14 +60,9 @@ fn branch(
             continue;
         }
 
-        // Insert or update the departure for the current aircraft
+        // Calculate the departure for the current aircraft
         let aircraft_idx = separation_set[last_set_idx];
-        let departure = schedule_departure(instance, aircraft_idx, sequence, depth);
-        if depth >= sequence.len() {
-            sequence.push(departure);
-        } else {
-            sequence[depth] = departure;
-        }
+        let departure = schedule_departure(instance, aircraft_idx, sequence);
 
         // Calculate the cost for the current scheduled departure and its effect on the bound
         let current_cost = departure_cost(&departure, instance);
@@ -81,7 +74,8 @@ fn branch(
             continue;
         }
 
-        // Update the bounds and indices
+        // Update the sequence, bounds, and indices
+        sequence.push(departure);
         bounds.current_lower = current_bound;
         last_set_indices[set_idx] += 1;
 
@@ -92,19 +86,22 @@ fn branch(
             sequence,
             last_set_indices,
             bounds,
-            depth + 1,
         );
 
-        // Reset the bounds and indices to what they were before
+        // Reset the sequence, bounds, and indices to what they were before
+        sequence.pop();
         bounds.current_lower -= current_cost;
         last_set_indices[set_idx] -= 1;
     }
 }
 
-fn bound(instance: &Instance, sequence: &[Departure], depth: usize) -> f64 {
-    sequence[..depth]
-        .iter()
-        .map(|departure| departure_cost(departure, instance))
+fn bound<'dep, S>(instance: &Instance, sequence: S) -> f64
+where
+    S: IntoIterator<Item = &'dep Departure>,
+{
+    sequence
+        .into_iter()
+        .map(|departure| departure_cost(&departure, instance))
         .sum()
 }
 
@@ -126,16 +123,12 @@ fn schedule_departure(
     instance: &Instance,
     aircraft_idx: usize,
     sequence: &[Departure],
-    depth: usize,
 ) -> Departure {
     // Get the constraints for the current aircraft
     let constraints = &instance.rows()[aircraft_idx].constraints;
 
-    // Get the previous departure scheduled, if any
-    let prev_dep = depth.checked_sub(1).and_then(|depth| sequence.get(depth));
-
     // Assign a de-ice time and departure time for the current aircraft being considered
-    let (de_ice_time, take_off_time) = match prev_dep {
+    let (de_ice_time, take_off_time) = match sequence.last() {
         // If there is no previous departure, this is the first aircraft
         // i.e. its de-icing and take-off time are the earliest possible
         None => (constraints.target_de_ice_time(), constraints.earliest_time),
@@ -145,7 +138,7 @@ fn schedule_departure(
                 .separation(prev_dep.aircraft_idx, aircraft_idx)
                 .unwrap(); // PANICS: The indices will definitely be valid
 
-            let prev_constraints = &instance.rows()[depth - 1].constraints;
+            let prev_constraints = &instance.rows()[sequence.len()].constraints;
 
             // The de-ice time is the maximum of when that the aircraft can get there
             // and when the previous aircraft finishes de-icing
