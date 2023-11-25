@@ -1,15 +1,6 @@
 use std::time::Duration;
 
-use chrono::NaiveTime;
-
-use crate::instance::Instance;
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub struct Departure {
-    pub aircraft_idx: usize,
-    pub de_ice_time: NaiveTime,
-    pub take_off_time: NaiveTime,
-}
+use crate::{departure::Departure, instance::Instance};
 
 pub fn branch_and_bound(instance: &Instance) -> Vec<Departure> {
     let separation_sets = instance.separation_sets();
