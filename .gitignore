@@ -12,3 +12,6 @@ guide/
 
 # Cargo compilation output
 target/
+
+# Visualiser output
+visuals/
