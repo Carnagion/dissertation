@@ -9,3 +9,9 @@ guide/
 
 # Typst output
 *.pdf
+
+# Cargo compilation output
+target/
+
+# Visualiser output
+visuals/
