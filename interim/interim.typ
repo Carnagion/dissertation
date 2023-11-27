@@ -94,9 +94,7 @@ For this project, I have opted to use #link("https://www.rust-lang.org")[Rust]. 
 
 == Data
 
-// TODO: Start off less abruptly
-
-The datasets as well as the ICAO separations between each pair of aircraft used for this project were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of codes and instances]. These instance sets were also used in previous works @furini-improved-horizon. // TODO: Reference Furini's earlier paper
+An initial dataset of instances was needed to test the implementation on -- these, as well as the ICAO separations between each pair of aircraft in them, were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of instances]. These instance sets were also used in previous works @furini-improved-horizon. // TODO: Reference Furini's earlier paper
 
 === Data Generation
 
