@@ -133,6 +133,8 @@ Since all of the methods used in this project are exact methods, using separatio
 // TODO: Talk about the branch-and-bound implementation
 == Branch-and-bound
 
+The current lower bound is updated in each iteration and passed around as a parameter to avoid having to re-calculate it from scratch every iteration. This leads to a noticeable decrease in run time, especially for larger instances with more aircraft to sequence.
+
 // TODO: Rework to make less messy and more consistent
 #pseudocode(
     [*if* length of $D$ $=$ length of $A$ *then*], ind,
