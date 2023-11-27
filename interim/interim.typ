@@ -38,6 +38,8 @@
 
 #set par(justify: true)
 
+#set math.equation(numbering: "(1)")
+
 #outline(indent: auto)
 #pagebreak()
 
