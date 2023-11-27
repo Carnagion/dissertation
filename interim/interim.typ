@@ -45,15 +45,26 @@
 
 = Introduction
 
-// TODO: Add introduction from proposal and tweak it
+This project explores the integrated version of the aircraft runway sequencing and de-icing problem. It is an NP-hard problem @demaere-pruning-rules which involves assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set in a way that complies with safety and operational requirements @lieder-scheduling-aircraft while minimising operational costs, fuel emissions, flight delays, and crew connection times.
 
 == Background
 
-// TODO: Add background from proposal and tweak it
+Aircraft taking off from or landing on a given airport must adhere to strict separation requirements that are dictated by the type of operation (i.e., taking off or landing), the aircraft classes of the preceding and succeeding operations, and the allocated time frame for the operation @lieder-scheduling-aircraft @lieder-dynamic-programming. De-icing must also be accounted for -- aircraft may be de-iced inside gates or at de-icing pads, which pushes back the take-off time of the aircraft (and consequently, those of the rest of the sequence) depending on the number of de-icing stations or rigs available at the time.
+An airport's maximum capacity and throughput -- the number of aircraft taking off or landing per unit of time -- is thus bounded by its runway capacity @lieder-dynamic-programming. Although it is possible to construct additional runways or airports, this is not always feasible due to the high costs of infrastructure and land. Therefore, efficient use and scheduling of runway operations is crucial for maximising the capacity of existing runways and airports @lieder-scheduling-aircraft @lieder-dynamic-programming.
+
+// TODO: Talk about previous work in more detail
+// - Assumption of each size class mapping to a fixed separation time (not true because directions also must be considered)
+// - Assumption of fixed size classes
+// - Lack of integration with de-icing
 
 == Motivation
 
-// TODO: Add motivation from proposal and tweak it
+Prior approaches to runway sequencing have employed a variety of methods -- both exact and heuristic-based -- such as first-come-first-serve (FCFS) @furini-improved-horizon, branch-and-bound, linear programming (LP) based tree search @beasley-scheduling-aircraft, dynamic programming @lieder-scheduling-aircraft @lieder-dynamic-programming., and mixed-integer programming (MIP) @lieder-dynamic-programming @avella-time-indexed. Some have also incorporated a rolling horizon to lower the exponential computation time required for large problem instances @furini-improved-horizon @beasley-scheduling-aircraft.
+
+However, these approaches have focused primarily on generating optimal runway sequences or de-icing schedules in isolation or in a decomposed manner (i.e., generating solutions for the two problems independently of each other). There is a possibility that integrating the solutions of runway sequencing and de-icing yields more optimal results, and as such, the problem is ripe for investigation.
+This project is thus one of the first of its kind, and investigates four distinct approaches to determining the order of de-icing using three different algorithms.
+
+In doing so, this project will provide fundamental insights into the innate characteristics of and interactions between runway sequencing and de-icing -- which can then be used as a starting point for further research. Additionally, it will reveal the potential advantages of an integrated solution, as compared to using fully decomposed or partially integrated methods proposed in existing literature.
 
 = Objectives
 
@@ -143,7 +154,15 @@ At the same time, the efficiency of exploiting complete orders is highly depende
 
 == Objective Function
 
-// TODO: Talk about objective function
+For this problem, the objective function $f$ represents the total cost of a sequence of departures $D$ in terms of its delays. This can be expressed as the sum of each scheduled departure's deviation from the earliest possible time for that aircraft:
+
+$
+f(D) = sum_(x in D) (T_x - E_x)^2 
+$
+
+Thus, the problem is one of minimisation, i.e. finding the runway sequence with the minimum possible objective value.
+
+The difference (in minutes) between an aircraft $x$'s scheduled take-off time $T_x$ and its earliest possible take-off time $E_x$ is squared. This ensures fairness by favouring moderate delays for all aircraft rather than exceedingly high delays for some and little to no delays for the rest.
 
 #pseudocode(
     [*input*: sequence of aircraft departures $D$],
