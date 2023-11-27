@@ -44,8 +44,10 @@ fn branch(
 ) {
     if sequence.len() == instance.rows().len() {
         // Update the cost with that of the best sequence found so far
-        bounds.lowest = bounds.lowest.min(bounds.current_lower);
-        *best_sequence = sequence.clone();
+        if bounds.current_lower < bounds.lowest {
+            bounds.lowest = bounds.current_lower;
+            *best_sequence = sequence.clone();
+        }
 
         return;
     }
