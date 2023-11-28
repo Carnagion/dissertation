@@ -1,9 +1,8 @@
 #import "@preview/lovelace:0.1.0": *
 #import "@preview/timeliney:0.0.1": *
 
+// NOTE: Needs to be called at the top of the document to setup lovelace
 #show: setup-lovelace
-
-#let pseudocode = pseudocode.with(indentation-guide-stroke: 0.1pt)
 
 #let email(email) = link("mailto:" + email, raw(email))
 
@@ -47,6 +46,8 @@
 
 #set math.equation(numbering: "(1)")
 
+#let pseudocode = pseudocode.with(indentation-guide-stroke: 0.1pt)
+
 #outline(indent: auto)
 #pagebreak()
 
@@ -58,11 +59,6 @@ This project explores the integrated version of the aircraft runway sequencing a
 
 Aircraft taking off from or landing on a given airport must adhere to strict separation requirements that are dictated by the type of operation (i.e., taking off or landing), the aircraft classes of the preceding and succeeding operations, and the allocated time frame for the operation @lieder-scheduling-aircraft @lieder-dynamic-programming. De-icing must also be accounted for -- aircraft may be de-iced inside gates or at de-icing pads, which pushes back the take-off time of the aircraft (and consequently, those of the rest of the sequence) depending on the number of de-icing stations or rigs available at the time.
 An airport's maximum capacity and throughput -- the number of aircraft taking off or landing per unit of time -- is thus bounded by its runway capacity @lieder-dynamic-programming. Although it is possible to construct additional runways or airports, this is not always feasible due to the high costs of infrastructure and land. Therefore, efficient use and scheduling of runway operations is crucial for maximising the capacity of existing runways and airports @lieder-scheduling-aircraft @lieder-dynamic-programming.
-
-// TODO: Talk about previous work in more detail
-// - Assumption of each size class mapping to a fixed separation time (not true because directions also must be considered)
-// - Assumption of fixed size classes
-// - Lack of integration with de-icing
 
 == Motivation
 
@@ -81,11 +77,19 @@ The project's key objectives are as follows:
 
 1. *Investigate prior approaches to runway sequencing*. The mathematical models and formulations proposed in prior research may not be directly applicable to this project, as they focus on only runway sequencing or only de-icing. Thus, there will be a need to understand and then adapt or extend these models so they are suitable for the integrated problem.
 
-2. *Design and implement three algorithms* -- branch-and-bound, branch-and-bound with a rolling window, and mathematical programming -- *using four different de-icing ordering approaches* -- sequential, based on the Target Off-Block Time (TOBT), based on the Calculated Take-Off Time (CTOT), and based on runway sequences. The algorithms must be generic enough to work with data from different sources (i.e., different airports and datasets), by using a set of common features and characteristics in the data. Additionally, they must be fast and reliable enough to be viable in highly dynamic, real-time situations where unexpected failure is not an option @demaere-pruning-rules. If time permits, a fourth algorithm -- dynamic programming -- may also be explored, since it is known to work well for runway sequencing @lieder-dynamic-programming but its effectiveness at de-icing is yet to be evaluated.
+2. *Design and implement three algorithms* -- branch-and-bound, branch-and-bound with a rolling window, and mathematical programming -- *using four different de-icing ordering approaches* -- sequentially, based on the Target Off-Block Time (TOBT), based on the Calculated Take-Off Time (CTOT), and based on existing runway sequences. The algorithms must be generic enough to work with data from different sources (i.e., different airports and datasets), by using a set of common features and characteristics in the data. Additionally, they must be fast and reliable enough to be viable in highly dynamic, real-time situations where unexpected failure is not an option @demaere-pruning-rules. If time permits, a fourth algorithm -- dynamic programming -- may also be explored, since it is known to work well for runway sequencing @lieder-dynamic-programming but its effectiveness at de-icing is yet to be evaluated.
 
 3. *Analyse the algorithms' performance and outputs*. This will involve benchmarking them on known and available datasets and comparing them with existing solutions as well as with each other. A simulation that is more representative of real-world data and use cases will also be used to run the algorithms on multiple problem instances over a longer period of time. This will help expose any issues, such as instability in the generated sequences, that may not be visible in individual runs.
 
 4. *Develop a tool for visualising the outputs and intermediate results produced by the algorithms*. This will provide a more intuitive, human-friendly view intended to aid users' understanding, which will not only be useful for an end user, but also for the analysis of the algorithms themselves.
+
+// TODO: Figure out a better heading and whether to put it before or after objectives
+= Previous Research
+
+// TODO: Talk about previous work in more detail
+// - Assumption of each size class mapping to a fixed separation time (not true because directions also must be considered)
+// - Assumption of fixed size classes
+// - Lack of integration with de-icing
 
 = Implementation
 
@@ -94,11 +98,11 @@ For this project, I have opted to use #link("https://www.rust-lang.org")[Rust]. 
 
 == Data
 
-An initial dataset of instances was needed to test the implementation on -- these, as well as the ICAO separations between each pair of aircraft in them, were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of instances]. These instance sets were also used in previous works @furini-improved-horizon. // TODO: Reference Furini's earlier paper
+An initial dataset of instances was needed to test the implementation on. These were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of instances]. These instance sets consisted of rows of aircraft with their registration numbers, models, weight class, operation type (arrival or departure), and earliest possible take-off time, as well as the ICAO separations between each pair of aircraft. The instances were also used for testing in previous works @furini-improved-horizon. // TODO: Reference Furini's earlier paper
 
 === Data Generation
 
-The aforementioned datasets were developed solely for the runway sequencing problem and not integrated runway and de-icing sequencing. This meant that the instances did not contain data for the pushback durations, taxi durations, de-icing durations, and line-up durations of aircraft, making them largely unsuitable for use as-is in this project. Thus, there was a need to augment the datasets and create a data generator.
+The aforementioned datasets were developed solely for the runway sequencing problem and not integrated runway and de-icing sequencing. This meant that the instances did not contain data for the pushback durations, taxi durations, de-icing durations, and line-up durations of aircraft, making them largely unsuitable for use as-is in this project. Thus, there was a need to augment the data and create a dataset generator.
 
 // TODO: Talk about creating the new CSV format and generating random data
 
@@ -153,7 +157,7 @@ This allows the exploitation of _complete orders_ between separation-identical a
 // TODO: Review if this paragraph is needed and probably cite Psaraftis
 Since all of the methods used in this project are exact methods, using separation-identical sets does not compromise the optimality of the generated sequences @demaere-pruning-rules, and considerably trims the solution search space.
 
-At the same time, the efficiency of exploiting complete orders is highly dependent on the separations between aircraft and the diversity of aircraft. In practice, complete orders can be exploited well due to the typical separation matrices and aircraft diversity in runway sequencing instances -- this was the case for the test instances as well. However, in some cases -- such as when every aircraft is subject to a CTOT or when there are very few separation-identical aircraft -- the number of separation sets might be too large and the number of aircraft in each set too small. Such cases prevent the effective exploitation of complete orders @demaere-pruning-rules.
+At the same time, the efficiency of exploiting complete orders is highly dependent on the separations between aircraft and the diversity of aircraft. In practice, complete orders can be exploited well due to the typical separation matrices and aircraft diversity in runway sequencing instances -- this was the case for the test instances as well. However, in some cases -- such as when every aircraft is subject to a CTOT or when there are very few separation-identical aircraft -- the number of sets might be too large and the number of aircraft in each set too small. Such cases prevent the effective exploitation of complete orders @demaere-pruning-rules.
 
 == Objective Function
 
@@ -189,17 +193,17 @@ The objective function is implemented in the following way:
 
 // TODO: Talk about what branch-and-bound is and the branch-and-bound implementation
 
-The objective value of the current sequence is updated in each iteration and passed around as a parameter to avoid having to re-calculate it from scratch every iteration. This leads to a noticeable decrease in run time, especially for larger instances with more aircraft to sequence.
+// TODO: Talk about how the order of de-icing is determined in this
 
 #pseudocode(
     no-number,
-    [*inputs*: set of aircraft $A$, sets of separation-identical aircraft $S$, indexes $I$ of last included aircraft from each set in $S$, current runway sequence $D$, current objective value $l$, best known objective value $L$, best known runway sequence $D_b$],
+    [*inputs*: set of aircraft $A$, sets of separation-identical aircraft $S$, indexes $I$ of last included aircraft from each set in $S$, current runway sequence $D$, current objective value $C$, best known objective value $C_b$, best known runway sequence $D_b$],
     no-number,
     [*output*: best runway sequence],
 
     [*if* length of $D$ $=$ length of $A$ *then*], ind,
-        [*if* $l > L$ *then*], ind,
-            [$L <- l$],
+        [*if* $C > C_b$ *then*], ind,
+            [$C_b <- C$],
             [$D_b <- D$], ded,
         [*end*], ded,
     [*else*], ind,
@@ -212,23 +216,27 @@ The objective value of the current sequence is updated in each iteration and pas
             [$d <-$ schedule departure for $x$],
 
             [$c <-$ cost of $d$],
-            [*if* $l + c > L$ *then*], ind,
+            [*if* $C + c > C_b$ *then*], ind,
                 [*continue*], ded,
             [*end*],
 
             [add $d$ to $D$],
-            [$l <- l + c$],
+            [$C <- C + c$],
             [$i <- i + 1$],
 
             [$D_b <- $ *recurse* with updated parameters],
 
             [remove $d$ from $D$],
-            [$l <- l - c$],
+            [$C <- C - c$],
             [$i <- i - 1$], ded,
         [*end*], ded,
     [*end*],
     [*return* $D_b$],
 )
+
+The objective value of the current sequence is updated in each iteration and passed around as a parameter to avoid having to re-calculate it from scratch every iteration. This leads to a noticeable decrease in run time, especially for larger instances with more aircraft to sequence.
+
+// TODO: Insert benchmarks to provide evidence
 
 == Visualising Sequences
 
