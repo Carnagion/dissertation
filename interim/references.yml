@@ -1,4 +1,16 @@
-# TODO: Only keep references that are actually used in final version
+# TODO: Review citations and check that all info (including issue numbers journal names, and author orders) is provided and correct
+
+psaraftis-dynamic-programming:
+  type: article
+  title: "A Dynamic Programming Approach for Sequencing Groups of Identical Jobs"
+  author:
+    - "Psaraftis, Harilaos N."
+  date: 1980
+  parent:
+    title: "Operations Research"
+    publisher: "INFORMS"
+    volume: 28
+    issue: 6
 
 beasley-scheduling-aircraft:
   type: article

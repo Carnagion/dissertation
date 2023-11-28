@@ -53,16 +53,16 @@
 
 = Introduction
 
-This project explores the integrated version of the aircraft runway sequencing and de-icing problem. It is an NP-hard problem @demaere-pruning-rules which involves assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set in a way that complies with safety and operational requirements @lieder-scheduling-aircraft while minimising operational costs, fuel emissions, flight delays, and crew connection times.
+This project explores the integrated version of the aircraft runway sequencing and de-icing problem for a single runway and single de-icing station. It is a known NP-hard problem @demaere-pruning-rules which involves assigning runways, take-off or landing times, and de-icing times to each aircraft from a given set in a way that complies with safety and operational requirements @lieder-scheduling-aircraft while minimising operational costs, fuel emissions, flight delays, and crew connection times.
 
-== Background
+== Background <background>
 
 Aircraft taking off from or landing on a given airport must adhere to strict separation requirements that are dictated by the type of operation (i.e., taking off or landing), the aircraft classes of the preceding and succeeding operations, and the allocated time frame for the operation @lieder-scheduling-aircraft @lieder-dynamic-programming. De-icing must also be accounted for -- aircraft may be de-iced inside gates or at de-icing pads, which pushes back the take-off time of the aircraft (and consequently, those of the rest of the sequence) depending on the number of de-icing stations or rigs available at the time.
 An airport's maximum capacity and throughput -- the number of aircraft taking off or landing per unit of time -- is thus bounded by its runway capacity @lieder-dynamic-programming. Although it is possible to construct additional runways or airports, this is not always feasible due to the high costs of infrastructure and land. Therefore, efficient use and scheduling of runway operations is crucial for maximising the capacity of existing runways and airports @lieder-scheduling-aircraft @lieder-dynamic-programming.
 
 == Motivation
 
-Prior approaches to runway sequencing have employed a variety of methods -- both exact and heuristic-based -- such as first-come-first-serve (FCFS) @furini-improved-horizon, branch-and-bound, linear programming (LP) based tree search @beasley-scheduling-aircraft, dynamic programming @lieder-scheduling-aircraft @lieder-dynamic-programming., and mixed-integer programming (MIP) @lieder-dynamic-programming @avella-time-indexed. Some have also incorporated a rolling horizon to lower the exponential computation time required for large problem instances @furini-improved-horizon @beasley-scheduling-aircraft.
+Prior approaches to runway sequencing have employed a variety of methods -- both exact and heuristic-based -- such as first-come-first-serve (FCFS) @furini-improved-horizon, branch-and-bound, linear programming (LP) based tree search @beasley-scheduling-aircraft, dynamic programming @lieder-scheduling-aircraft @lieder-dynamic-programming, and mixed-integer programming (MIP) @lieder-dynamic-programming @avella-time-indexed. Some have also incorporated a rolling horizon to lower the exponential computation time required for large problem instances @furini-improved-horizon @beasley-scheduling-aircraft.
 
 However, these approaches have focused primarily on generating optimal runway sequences or de-icing schedules in isolation or in a decomposed manner (i.e., generating solutions for the two problems independently of each other). There is a possibility that integrating the solutions of runway sequencing and de-icing yields more optimal results, and as such, the problem is ripe for investigation.
 This project is thus one of the first of its kind, and investigates four distinct approaches to determining the order of de-icing using three different algorithms.
@@ -91,10 +91,7 @@ The project's key objectives are as follows:
 // - Assumption of fixed size classes
 // - Lack of integration with de-icing
 
-= Implementation
-
-// TODO: Review and check if the Rust website should be cited
-For this project, I have opted to use #link("https://www.rust-lang.org")[Rust]. The primary reason for this is my familiarity and experience with the language, which allows me to be more confident in my implementation and estimated timelines. Another major factor is that Rust's rich type system and unique memory ownership and borrowing mechanics eliminate many classes of bugs -- such as null reference exceptions or Undefined Behaviour -- at compile time. As a result, I can be more productive while being confident in my implementation's reliability and handling of edge cases.
+= Design
 
 == Data
 
@@ -102,14 +99,56 @@ An initial dataset of instances was needed to test the implementation on. These 
 
 === Data Generation
 
-The aforementioned datasets were developed solely for the runway sequencing problem and not integrated runway and de-icing sequencing. This meant that the instances did not contain data for the pushback durations, taxi durations, de-icing durations, and line-up durations of aircraft, making them largely unsuitable for use as-is in this project. Thus, there was a need to augment the data and create a dataset generator.
+The datasets chosen were meant to be used in the runway sequencing problem, not integrated runway and de-icing sequencing. This meant that the instances did not contain data for the pushback durations, taxi durations, de-icing durations, and line-up durations of aircraft, making them largely unsuitable for use as-is in this project. Thus, there was a need to augment the data and create a dataset generator.
 
 // TODO: Talk about creating the new CSV format and generating random data
 
-=== Data Preprocessing
+== Aircraft Separations
 
-// TODO: Probably reference the paper by Psaraftis
-Before sequencing, an instance is split into sets of _separation-identical_ aircraft as a preprocessing step. Two aircraft $x$ and $y$ are separation-identical if their mutual separations with respect to every other aircraft $z$ in the set of aircraft $A$ are the same @demaere-pruning-rules; i.e. $x$ and $y$ are separation-identical if and only if:
+// TODO: Talk about allowing individual separations for each aircraft
+
+As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typicaly based on size or weight -- and specifying the separation that must apply between each class.
+
+In practice, however, separation times are decided based on a number of other factors. For example, at London Heathrow, separation times relate not only to aircraft classes but also to the Standard Instrument Departure (SID) route that the aircraft is to follow after take-off @beasley-scheduling-aircraft. Assuming a fixed mapping of aircraft classes to separation durations would therefore fail to account for pratical situations.
+
+== Objective Function
+
+For this problem, the objective function $f$ represents the total cost of a sequence of departures $D$ in terms of its delays. This can be expressed as the sum of each scheduled departure's deviation from the earliest possible take-off time for that aircraft:
+
+$
+f(D) = sum_(x in D) (T_x - E_x)^2 
+$
+
+The longer the deviation and number of deviations in $D$, the higher the objective value will be. Thus, the problem is one of minimisation, i.e. finding the runway sequence with the minimum objective value, which translates to the minimum possible delay.
+
+Note that the difference (in minutes) between an aircraft $x$'s scheduled take-off time $T_x$ and its earliest possible take-off time $E_x$ is squared. This ensures fairness by favouring moderate delays for all aircraft rather than exceedingly high delays for some and little to no delays for the rest.
+
+// TODO: Illustrate the above with an example
+
+The objective function is implemented in the following way:
+
+#pseudocode(
+    no-number,
+    [*input*: sequence of aircraft departures $D$],
+    no-number,
+    [*output*: cost of $D$],
+    
+    [$c <- 0$],
+    [*for* $x$ *in* $D$ *do*], ind,
+        [$d <- (T_x - E_x)$ in minutes],
+        [$c <- c + d^2$], ded,
+    [*end*],
+    [*return* $c$],
+)
+
+= Implementation
+
+// TODO: Review and check if the Rust website should be cited
+For this project, I have opted to use #link("https://www.rust-lang.org")[Rust]. The primary reason for this is my familiarity and experience with the language, which allows me to be more confident in my implementation and estimated timelines. Another major factor is that Rust's rich type system and unique memory ownership and borrowing mechanics eliminate many classes of bugs -- such as null reference exceptions or Undefined Behaviour -- at compile time. As a result, I can be more productive while being confident in my implementation's reliability and handling of edge cases.
+
+== Complete Orders
+
+Before sequencing, an instance is split into sets of _separation-identical_ aircraft as a preprocessing step. Two aircraft $x$ and $y$ are separation-identical if their mutual separations with respect to every other aircraft $z$ in the set of aircraft $A$ are the same @demaere-pruning-rules @psaraftis-dynamic-programming; i.e. $x$ and $y$ are separation-identical if and only if:
 
 // TODO: Figure out how to number equations
 $
@@ -158,36 +197,6 @@ This allows the exploitation of _complete orders_ between separation-identical a
 Since all of the methods used in this project are exact methods, using separation-identical sets does not compromise the optimality of the generated sequences @demaere-pruning-rules, and considerably trims the solution search space.
 
 At the same time, the efficiency of exploiting complete orders is highly dependent on the separations between aircraft and the diversity of aircraft. In practice, complete orders can be exploited well due to the typical separation matrices and aircraft diversity in runway sequencing instances -- this was the case for the test instances as well. However, in some cases -- such as when every aircraft is subject to a CTOT or when there are very few separation-identical aircraft -- the number of sets might be too large and the number of aircraft in each set too small. Such cases prevent the effective exploitation of complete orders @demaere-pruning-rules.
-
-== Objective Function
-
-For this problem, the objective function $f$ represents the total cost of a sequence of departures $D$ in terms of its delays. This can be expressed as the sum of each scheduled departure's deviation from the earliest possible take-off time for that aircraft:
-
-$
-f(D) = sum_(x in D) (T_x - E_x)^2 
-$
-
-The longer the deviation and number of deviations in $D$, the higher the objective value will be. Thus, the problem is one of minimisation, i.e. finding the runway sequence with the minimum objective value, which translates to the minimum possible delay.
-
-Note that the difference (in minutes) between an aircraft $x$'s scheduled take-off time $T_x$ and its earliest possible take-off time $E_x$ is squared. This ensures fairness by favouring moderate delays for all aircraft rather than exceedingly high delays for some and little to no delays for the rest.
-
-// TODO: Illustrate the above with an example
-
-The objective function is implemented in the following way:
-
-#pseudocode(
-    no-number,
-    [*input*: sequence of aircraft departures $D$],
-    no-number,
-    [*output*: cost of $D$],
-    
-    [$c <- 0$],
-    [*for* $x$ *in* $D$ *do*], ind,
-        [$d <- (T_x - E_x)$ in minutes],
-        [$c <- c + d^2$], ded,
-    [*end*],
-    [*return* $c$],
-)
 
 == Branch-and-bound
 
