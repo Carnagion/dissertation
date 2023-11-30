@@ -93,6 +93,8 @@ The project's key objectives are as follows:
 
 = Design
 
+// TODO: Find something to put here
+
 == Data
 
 An initial dataset of instances was needed to test the implementation on. These were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of instances]. These instance sets consisted of rows of aircraft with their registration numbers, models, weight class, operation type (arrival or departure), and earliest possible take-off time, as well as the ICAO separations between each pair of aircraft. The instances were also used for testing in previous works @furini-improved-horizon. // TODO: Reference Furini's earlier paper
@@ -107,9 +109,9 @@ The datasets chosen were meant to be used in the runway sequencing problem, not 
 
 // TODO: Talk about allowing individual separations for each aircraft
 
-As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typicaly based on size or weight -- and specifying the separation that must apply between each class.
+As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typicaly based on size or weight -- and specifying the separation that must apply between each class @beasley-scheduling-aircraft. Many of the existing works on runway sequencing have assumed that these are the only factors influencing separation times.
 
-In practice, however, separation times are decided based on a number of other factors. For example, at London Heathrow, separation times relate not only to aircraft classes but also to the Standard Instrument Departure (SID) route that the aircraft is to follow after take-off @beasley-scheduling-aircraft. Assuming a fixed mapping of aircraft classes to separation durations would therefore fail to account for pratical situations.
+In practice, however, separation times are decided based on a number of other factors. For example, at London Heathrow, separation times relate not only to aircraft classes but also to the Standard Instrument Departure (SID) route that the aircraft is to follow after take-off @beasley-scheduling-aircraft. Assuming a fixed mapping of aircraft classes to separation durations would therefore fail to account for pratical situations. To cater to such situations, this project makes no such assumptions, and the data structures and representations used allow for unique separations between each pair of aircraft that are to be sequenced.
 
 == Objective Function
 
