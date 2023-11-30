@@ -48,6 +48,51 @@
 
 #let pseudocode = pseudocode.with(indentation-guide-stroke: 0.1pt)
 
+// TODO: Remove once the double heading bug is fixed - see https://github.com/andreasKroepelin/lovelace/pull/1
+#show figure.where(kind: "lovelace"): fig => {
+    let booktabbed = block(
+        stroke: (y: 1.3pt),
+        inset: 0pt,
+        breakable: true,
+        width: 100%,
+        {
+            set align(left)
+            block(
+            inset: (y: 5pt),
+            width: 100%,
+            stroke: (bottom: .8pt),
+            {
+                strong({
+                    fig.supplement
+                    sym.space.nobreak
+                    counter(figure.where(kind: "lovelace")).display(fig.numbering)
+                    if fig.caption != none {
+                        [: ]
+                    } else {
+                        [.]
+                    }
+                })
+                if fig.caption != none {
+                    fig.caption.body
+                }
+            }
+
+            )
+            block(
+                inset: (bottom: 5pt),
+                breakable: true,
+                fig.body
+            )
+        }
+    )
+    let centered = pad(x: 5%, booktabbed)
+    if fig.placement in (auto, top, bottom) {
+        place(fig.placement, float: true, centered)
+    } else {
+        centered
+    }
+}
+
 #outline(indent: auto)
 #pagebreak()
 
@@ -97,7 +142,7 @@ The project's key objectives are as follows:
 
 == Data
 
-An initial dataset of instances was needed to test the implementation on. These were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of instances]. These instance sets consisted of rows of aircraft with their registration numbers, models, weight class, operation type (arrival or departure), and earliest possible take-off time, as well as the ICAO separations between each pair of aircraft. The instances were also used for testing in previous works @furini-improved-horizon. // TODO: Reference Furini's earlier paper
+An initial dataset of instances was needed to test the implementation on. These were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of instances]. These instance sets consisted of rows of aircraft with their registration numbers, models, weight class, operation type (arrival or departure), and earliest possible take-off time, as well as the separations between each pair of aircraft. The instances were also used for testing in previous works @furini-improved-horizon. // TODO: Reference Furini's earlier paper
 
 === Data Generation
 
@@ -106,8 +151,6 @@ The datasets chosen were meant to be used in the runway sequencing problem, not 
 // TODO: Talk about creating the new CSV format and generating random data
 
 == Aircraft Separations
-
-// TODO: Talk about allowing individual separations for each aircraft
 
 As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typicaly based on size or weight -- and specifying the separation that must apply between each class @beasley-scheduling-aircraft. Many of the existing works on runway sequencing have assumed that these are the only factors influencing separation times.
 
@@ -119,29 +162,13 @@ For this problem, the objective function $f$ represents the total cost of a sequ
 
 $
 f(D) = sum_(x in D) (T_x - E_x)^2 
-$
+$ <objective-function-equation>
 
 The longer the deviation and number of deviations in $D$, the higher the objective value will be. Thus, the problem is one of minimisation, i.e. finding the runway sequence with the minimum objective value, which translates to the minimum possible delay.
 
 Note that the difference (in minutes) between an aircraft $x$'s scheduled take-off time $T_x$ and its earliest possible take-off time $E_x$ is squared. This ensures fairness by favouring moderate delays for all aircraft rather than exceedingly high delays for some and little to no delays for the rest.
 
 // TODO: Illustrate the above with an example
-
-The objective function is implemented in the following way:
-
-#pseudocode(
-    no-number,
-    [*input*: sequence of aircraft departures $D$],
-    no-number,
-    [*output*: cost of $D$],
-    
-    [$c <- 0$],
-    [*for* $x$ *in* $D$ *do*], ind,
-        [$d <- (T_x - E_x)$ in minutes],
-        [$c <- c + d^2$], ded,
-    [*end*],
-    [*return* $c$],
-)
 
 = Implementation
 
@@ -152,45 +179,46 @@ For this project, I have opted to use #link("https://www.rust-lang.org")[Rust]. 
 
 Before sequencing, an instance is split into sets of _separation-identical_ aircraft as a preprocessing step. Two aircraft $x$ and $y$ are separation-identical if their mutual separations with respect to every other aircraft $z$ in the set of aircraft $A$ are the same @demaere-pruning-rules @psaraftis-dynamic-programming; i.e. $x$ and $y$ are separation-identical if and only if:
 
-// TODO: Figure out how to number equations
 $
 forall_(z in A), z != x and z != y and delta_(x z) = delta_(y z) and delta_(z x) = delta_(z y)
 $
 
 Separation-identical sets are generated by comparing the separations of every pair of aircraft with every other aircraft in $A$ as follows:
 
-// TODO: Use `algorithm` when double heading issue is fixed - see https://github.com/andreasKroepelin/lovelace/pull/1
 // TODO: Maybe add some comments
-#pseudocode(
-    no-number,
-    [*input*: set of aircraft $A$],
-    no-number,
-    [*output*: separation-identical sets of aircraft in $A$],
+#algorithm(
+    caption: [Calculating sets of separation-identical aircraft],
+    pseudocode(
+        no-number,
+        [*input*: set of aircraft $A$],
+        no-number,
+        [*output*: separation-identical sets of aircraft in $A$],
 
-    [$S <-$ empty list],
-    [*for* $x$ *in* $A$ *do*], ind,
-        [*for* $s$ *in* $S$ *do*], ind,
-            [*for* $y$ *in* $s$ *do*], ind,
-                [*for* $z$ *in* $A$ except $x, y$ *do*], ind,
+        [$S <-$ empty list],
+        [*for* $x$ *in* $A$ *do*], ind,
+            [*for* $s$ *in* $S$ *do*], ind,
+                [*for* $y$ *in* $s$ *do*], ind,
+                    [*for* $z$ *in* $A$ except $x, y$ *do*], ind,
 
-                    [*if* $delta_(x z) != delta_(y z)$ *or* $delta_(z x) != delta_(z y)$ *then*], ind,
-                        [*continue* to next set in $S$], ded,
+                        [*if* $delta_(x z) != delta_(y z)$ *or* $delta_(z x) != delta_(z y)$ *then*], ind,
+                            [*continue* to next set in $S$], ded,
+                        [*end*], ded,
+
                     [*end*], ded,
+                [*end*],
+                
+                [add $x$ to $s$],
+                [*continue* to next aircraft in $A$], ded,
 
-                [*end*], ded,
             [*end*],
-            
-            [add $x$ to $s$],
-            [*continue* to next aircraft in $A$], ded,
 
-        [*end*],
+            [$s <-$ singleton with $x$],
+            [add $s$ to $S$], ded,
 
-        [$s <-$ singleton with $x$],
-        [add $s$ to $S$], ded,
+        [*end*], ded,
 
-    [*end*], ded,
-
-    [*return* $S$],
+        [*return* $S$],
+    ),
 )
 
 This allows the exploitation of _complete orders_ between separation-identical aircraft. A complete order exists between two aircraft $x$ and $y$ if any arbitrary sequence containing $x$ and $y$ cannot be improved any further by reversing the orders of $x$ and $y$ @demaere-pruning-rules. Such complete orders simplify the problem of runway sequencing to one of interleaving ordered sets of separation-identical aircraft. It also reduces the problem's worst-case computational complexity from $n!$ to $O(m^2(n + 1)^m)$, where $n$ denotes the number of sets and $m$ denotes the number of aircraft @demaere-pruning-rules.
@@ -206,48 +234,88 @@ At the same time, the efficiency of exploiting complete orders is highly depende
 
 // TODO: Talk about how the order of de-icing is determined in this
 
-#pseudocode(
-    no-number,
-    [*inputs*: set of aircraft $A$, sets of separation-identical aircraft $S$, indexes $I$ of last included aircraft from each set in $S$, current runway sequence $D$, current objective value $C$, best known objective value $C_b$, best known runway sequence $D_b$],
-    no-number,
-    [*output*: best runway sequence],
+#algorithm(
+    caption: [Branch-and-bound for runway and de-icing sequencing],
+    pseudocode(
+        no-number,
+        [*inputs*: set of aircraft $A$, sets of separation-identical aircraft $S$, indexes $I$ of last included aircraft from each set in $S$, current runway sequence $D$, current objective value $C$, best known objective value $C_b$, best known runway sequence $D_b$],
+        no-number,
+        [*output*: best runway sequence],
 
-    [*if* length of $D$ $=$ length of $A$ *then*], ind,
-        [*if* $C > C_b$ *then*], ind,
-            [$C_b <- C$],
-            [$D_b <- D$], ded,
-        [*end*], ded,
-    [*else*], ind,
-        [*for* $s, i$ *in* $S$ zipped with $I$ *do*], ind,
-            [*if* $i >=$ length of $s$ *then*], ind,
-                [*continue*], ded,
-            [*end*],
+        [*if* length of $D$ $=$ length of $A$ *then*], ind,
+            [*if* $C > C_b$ *then*], ind,
+                [$C_b <- C$],
+                [$D_b <- D$], ded,
+            [*end*], ded,
+        [*else*], ind,
+            [*for* $s, i$ *in* $S$ zipped with $I$ *do*], ind,
+                [*if* $i >=$ length of $s$ *then*], ind,
+                    [*continue*], ded,
+                [*end*],
 
-            [$x <-$ aircraft at index $i$ in $s$],
-            [$d <-$ schedule departure for $x$],
+                [$x <-$ aircraft at index $i$ in $s$],
+                [$d <-$ schedule departure for $x$],
 
-            [$c <-$ cost of $d$],
-            [*if* $C + c > C_b$ *then*], ind,
-                [*continue*], ded,
-            [*end*],
+                [$c <-$ cost of $d$],
+                [*if* $C + c > C_b$ *then*], ind,
+                    [*continue*], ded,
+                [*end*],
 
-            [add $d$ to $D$],
-            [$C <- C + c$],
-            [$i <- i + 1$],
+                [add $d$ to $D$],
+                [$C <- C + c$],
+                [$i <- i + 1$],
 
-            [$D_b <- $ *recurse* with updated parameters],
+                [$D_b <- $ *recurse* with updated parameters],
 
-            [remove $d$ from $D$],
-            [$C <- C - c$],
-            [$i <- i - 1$], ded,
-        [*end*], ded,
-    [*end*],
-    [*return* $D_b$],
+                [remove $d$ from $D$],
+                [$C <- C - c$],
+                [$i <- i - 1$], ded,
+            [*end*], ded,
+        [*end*],
+        [*return* $D_b$],
+    ),
+) <branch-and-bound-pseudocode>
+
+=== Bounding
+
+A sequence's lower bound -- i.e. the best possible value for that sequence, assuming all future aircraft are scheduled with no delays -- can simply be calculated using the objective function as described in @objective-function-equation:
+
+#algorithm(
+    caption: [Objective function for runway sequences],
+    pseudocode(
+        no-number,
+        [*input*: sequence of aircraft departures $D$],
+        no-number,
+        [*output*: cost of $D$],
+        
+        [$c <- 0$],
+        [*for* $x$ *in* $D$ *do*], ind,
+            [$d <- (T_x - E_x)$ in minutes],
+            [$c <- c + d^2$], ded,
+        [*end*],
+        [*return* $c$],
+    ),
 )
 
-The objective value of the current sequence is updated in each iteration and passed around as a parameter to avoid having to re-calculate it from scratch every iteration. This leads to a noticeable decrease in run time, especially for larger instances with more aircraft to sequence.
+However, it is more efficient to update the bounds of the current sequence in each iteration by passing them around as a parameter as seen in @branch-and-bound-pseudocode. This avoids having to re-calculate them from scratch every iteration and leads to a noticeable decrease in run time, especially for larger instances with more aircraft to sequence.
 
 // TODO: Insert benchmarks to provide evidence
+
+An estimate for the upper bound of a runway sequence is obtained by assigning take-off times to each remaining (yet to be sequenced) aircraft, assuming a fixed separation of one minute between all of them. De-icing is also scheduled in a similar way, disregarding the actual duration required to go through the process:
+
+#algorithm(
+    caption: [Estimation of the upper bound for a runway sequence],
+    pseudocode(
+        no-number,
+        [*input*: sets of separation-identical aircraft $S$, indexes $I$ of last included aircraft from each set in $S$, most recently scheduled aircraft $x$],
+        no-number,
+        [*output*: estimated cost for remaining aircraft],
+
+        // TODO: Write pseudocode for upper bound estimation
+    ),
+)
+
+Although this does not always yield an accurate cost, using a small separation and naive scheduling strategy avoids overshooting the actual upper bound, and thus prevents the branch-and-bound algorithm from incorrectly pruning a potentially better sub-sequence.
 
 == Visualising Sequences
 
