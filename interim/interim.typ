@@ -51,45 +51,43 @@
 // TODO: Remove once the double heading bug is fixed - see https://github.com/andreasKroepelin/lovelace/pull/1
 #show figure.where(kind: "lovelace"): fig => {
     let booktabbed = block(
-        stroke: (y: 1.3pt),
+        stroke: (y: 1pt),
         inset: 0pt,
         breakable: true,
         width: 100%,
         {
             set align(left)
             block(
-            inset: (y: 5pt),
-            width: 100%,
-            stroke: (bottom: .8pt),
-            {
-                strong({
-                    fig.supplement
-                    sym.space.nobreak
-                    counter(figure.where(kind: "lovelace")).display(fig.numbering)
+                inset: (y: 5pt),
+                width: 100%,
+                stroke: (bottom: 1pt),
+                {
+                    strong({
+                        fig.supplement
+                        sym.space.nobreak
+                        counter(figure.where(kind: "lovelace")).display(fig.numbering)
+                        if fig.caption != none {
+                            [: ]
+                        } else {
+                            [.]
+                        }
+                    })
                     if fig.caption != none {
-                        [: ]
-                    } else {
-                        [.]
+                        fig.caption.body
                     }
-                })
-                if fig.caption != none {
-                    fig.caption.body
-                }
-            }
-
+                },
             )
             block(
                 inset: (bottom: 5pt),
                 breakable: true,
                 fig.body
             )
-        }
+        },
     )
-    let centered = pad(x: 5%, booktabbed)
     if fig.placement in (auto, top, bottom) {
-        place(fig.placement, float: true, centered)
+        place(fig.placement, float: true, booktabbed)
     } else {
-        centered
+        booktabbed
     }
 }
 
@@ -154,7 +152,7 @@ The datasets chosen were meant to be used in the runway sequencing problem, not 
 
 As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typicaly based on size or weight -- and specifying the separation that must apply between each class @beasley-scheduling-aircraft. Many of the existing works on runway sequencing have assumed that these are the only factors influencing separation times.
 
-In practice, however, separation times are decided based on a number of other factors. For example, at London Heathrow, separation times relate not only to aircraft classes but also to the Standard Instrument Departure (SID) route that the aircraft is to follow after take-off @beasley-scheduling-aircraft. Assuming a fixed mapping of aircraft classes to separation durations would therefore fail to account for pratical situations. To cater to such situations, this project makes no such assumptions, and the data structures and representations used allow for unique separations between each pair of aircraft that are to be sequenced.
+In practice, however, separation times are decided based on a number of other factors. For example, at London Heathrow, separation times relate not only to aircraft classes but also to the Standard Instrument Departure (SID) route that the aircraft is to follow after take-off @beasley-scheduling-aircraft. Assuming a fixed mapping of aircraft classes to separation durations would therefore fail to accurately represent pratical situations. To cater to such situations, this project makes no such assumptions, and the data structures and representations used allow for unique separations between each pair of aircraft that are to be sequenced.
 
 == Objective Function
 
@@ -175,7 +173,7 @@ Note that the difference (in minutes) between an aircraft $x$'s scheduled take-o
 // TODO: Review and check if the Rust website should be cited
 For this project, I have opted to use #link("https://www.rust-lang.org")[Rust]. The primary reason for this is my familiarity and experience with the language, which allows me to be more confident in my implementation and estimated timelines. Another major factor is that Rust's rich type system and unique memory ownership and borrowing mechanics eliminate many classes of bugs -- such as null reference exceptions or Undefined Behaviour -- at compile time. As a result, I can be more productive while being confident in my implementation's reliability and handling of edge cases.
 
-== Complete Orders
+== Complete Orders <complete-orders>
 
 Before sequencing, an instance is split into sets of _separation-identical_ aircraft as a preprocessing step. Two aircraft $x$ and $y$ are separation-identical if their mutual separations with respect to every other aircraft $z$ in the set of aircraft $A$ are the same @demaere-pruning-rules @psaraftis-dynamic-programming; i.e. $x$ and $y$ are separation-identical if and only if:
 
@@ -223,16 +221,26 @@ Separation-identical sets are generated by comparing the separations of every pa
 
 This allows the exploitation of _complete orders_ between separation-identical aircraft. A complete order exists between two aircraft $x$ and $y$ if any arbitrary sequence containing $x$ and $y$ cannot be improved any further by reversing the orders of $x$ and $y$ @demaere-pruning-rules. Such complete orders simplify the problem of runway sequencing to one of interleaving ordered sets of separation-identical aircraft. It also reduces the problem's worst-case computational complexity from $n!$ to $O(m^2(n + 1)^m)$, where $n$ denotes the number of sets and $m$ denotes the number of aircraft @demaere-pruning-rules.
 
-// TODO: Review if this paragraph is needed and probably cite Psaraftis
 Since all of the methods used in this project are exact methods, using separation-identical sets does not compromise the optimality of the generated sequences @demaere-pruning-rules, and considerably trims the solution search space.
 
 At the same time, the efficiency of exploiting complete orders is highly dependent on the separations between aircraft and the diversity of aircraft. In practice, complete orders can be exploited well due to the typical separation matrices and aircraft diversity in runway sequencing instances -- this was the case for the test instances as well. However, in some cases -- such as when every aircraft is subject to a CTOT or when there are very few separation-identical aircraft -- the number of sets might be too large and the number of aircraft in each set too small. Such cases prevent the effective exploitation of complete orders @demaere-pruning-rules.
 
 == Branch-and-bound
 
-// TODO: Talk about what branch-and-bound is and the branch-and-bound implementation
+// TODO: Tweak as this is taken from Wikipedia
+Branch-and-bound is a method for solving optimisation problems by breaking them down into smaller sub-problems and using a _bounding_ function to eliminate those sub-problems that cannot possibly contain a more optimal solution than the best known optimal one found so far.
 
-// TODO: Talk about how the order of de-icing is determined in this
+// TODO: Review this entire section
+
+First, the algorithm starts off with an empty sequence and a best known objective value of infinity. It then visits the sub-sequences of the current sequence, each of which contains a unique subset of all possible feasible solutions. This is done by iterating through each set of separation-identical aircraft, picking the next unsequenced aircraft from that set, pushing it to the end of the current sequence, and recursing.
+
+Before recursing on this new branch, however, the upper and lower bounds of the new sub-sequence are calculated. If the sum of these bounds is greater than the best cost obtained so far, the branch is ignored and the newly added aircraft is removed, continuing to the next aircraft or set. This simple check allows the algorithm to prune the solution search space and perform better than a brute-force (exhaustive) search. After the recursive call returns, the aircraft that was pushed to the sequence is removed, and the algorithm continues to the next aircraft or the next set of separation-identical aircraft.
+
+And finally, if the current runway sequence includes all aircraft from $A$, then its objective value is compared to the best known objective value at that point. If it is better, the sequence is set as the best known runway sequence and its objective value to the best known objective value.
+
+To exploit the characteristics of complete orders between sets of separation-identical aircraft as previously mentioned in @complete-orders, the indices of the last-added aircraft in each separation-identical set are passed around as a paramter. By doing so, the algorithm does not ever swap around the orders of two aircraft from the same set, and is able to prune the search space further compared to simply picking the next aircraft from the set of all aircraft.
+
+A full implementation of the branch-and-bound algorithm is as follows:
 
 #algorithm(
     caption: [Branch-and-bound for runway and de-icing sequencing],
@@ -278,7 +286,7 @@ At the same time, the efficiency of exploiting complete orders is highly depende
 
 === Bounding
 
-A sequence's lower bound -- i.e. the best possible value for that sequence, assuming all future aircraft are scheduled with no delays -- can simply be calculated using the objective function as described in @objective-function-equation:
+A sequence's lower bound -- i.e. the best possible value for that sequence, assuming all future aircraft are scheduled with no delays -- can simply be calculated using the objective function as described in @objective-function-equation. The pseudocode for this is as follows:
 
 #algorithm(
     caption: [Objective function for runway sequences],
@@ -301,7 +309,7 @@ However, it is more efficient to update the bounds of the current sequence in ea
 
 // TODO: Insert benchmarks to provide evidence
 
-An estimate for the upper bound of a runway sequence is obtained by assigning take-off times to each remaining (yet to be sequenced) aircraft, assuming a fixed separation of one minute between all of them. De-icing is also scheduled in a similar way, disregarding the actual duration required to go through the process:
+To further prune the solution search space, an estimate for the upper bound of a runway sequence is obtained by assigning take-off times to each remaining (yet to be sequenced) aircraft, as outlined in @upper-bound-pseudocode. This assumes a fixed separation of one minute between all of them. De-icing times for these aircraft are also calculated in a similar manner, disregarding the actual duration required to go through the process.
 
 #algorithm(
     caption: [Estimation of the upper bound for a runway sequence],
@@ -313,9 +321,15 @@ An estimate for the upper bound of a runway sequence is obtained by assigning ta
 
         // TODO: Write pseudocode for upper bound estimation
     ),
-)
+) <upper-bound-pseudocode>
 
 Although this does not always yield an accurate cost, using a small separation and naive scheduling strategy avoids overshooting the actual upper bound, and thus prevents the branch-and-bound algorithm from incorrectly pruning a potentially better sub-sequence.
+
+== De-Icing Order
+
+// TODO: Talk about de-icing order
+
+In the current implementation, each aircraft is assigned a de-icing time based on its TOBT.
 
 == Visualising Sequences
 
