@@ -126,13 +126,16 @@ The project's key objectives are as follows:
 
 4. *Develop a tool for visualising the outputs and intermediate results produced by the algorithms*. This will provide a more intuitive, human-friendly view intended to aid users' understanding, which will not only be useful for an end user, but also for the analysis of the algorithms themselves.
 
-// TODO: Figure out a better heading and whether to put it before or after objectives
-= Previous Research
+// TODO: Maybe find a better heading
+= Existing Literature
 
 // TODO: Talk about previous work in more detail
 // - Assumption of each size class mapping to a fixed separation time (not true because directions also must be considered)
 // - Assumption of fixed size classes
 // - Lack of integration with de-icing
+// - Better results using exact methods instead of heuristic methods
+
+However, CPS may be impractical in situations involving CTOTs or other time window constraints, or mixed-mode operations (i.e. both arrivals and departures on the same runway) where delays between arrivals and departures may differ widely. These can require large positional shifts, thereby challenging the tractability of CPS-based approaches @demaere-pruning-rules.
 
 = Design
 
