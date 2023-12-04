@@ -135,6 +135,8 @@ The project's key objectives are as follows:
 // - Lack of integration with de-icing
 // - Better results using exact methods instead of heuristic methods
 
+Traditionally, runway sequencing has been approached using simpler FCFS methods.
+
 However, CPS may be impractical in situations involving CTOTs or other time window constraints, or mixed-mode operations (i.e. both arrivals and departures on the same runway) where delays between arrivals and departures may differ widely. These can require large positional shifts, thereby challenging the tractability of CPS-based approaches @demaere-pruning-rules.
 
 = Design
@@ -153,9 +155,11 @@ The datasets chosen were meant to be used in the runway sequencing problem, not 
 
 == Aircraft Separations
 
-As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typicaly based on size or weight -- and specifying the separation that must apply between each class @beasley-scheduling-aircraft. Many of the existing works on runway sequencing have assumed that these are the only factors influencing separation times.
+As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typicaly based on size or weight -- and specifying the separation that must apply between each class @beasley-scheduling-aircraft. Many of the existing works on runway sequencing assume that there are a fixed number of aircraft classes, and that these are the only factors influencing separation times @beasley-scheduling-aircraft.
 
-In practice, however, separation times are decided based on a number of other factors. For example, at London Heathrow, separation times relate not only to aircraft classes but also to the Standard Instrument Departure (SID) route that the aircraft is to follow after take-off @beasley-scheduling-aircraft. Assuming a fixed mapping of aircraft classes to separation durations would therefore fail to accurately represent pratical situations. To cater to such situations, this project makes no such assumptions, and the data structures and representations used allow for unique separations between each pair of aircraft that are to be sequenced.
+In practice, however, separation times are decided based on a number of other factors. For example, at London Heathrow, separation times relate not only to aircraft classes but also to the Standard Instrument Departure (SID) route that the aircraft is to follow after take-off @beasley-scheduling-aircraft. Assuming a fixed number and mapping of aircraft classes to separation durations would therefore fail to generalise to every single system or practical situation.
+
+To cater to such situations, this project makes no such assumptions, and the data structures and representations used allow for unique separations between each pair of aircraft that are to be sequenced.
 
 == Objective Function
 
@@ -332,7 +336,7 @@ Although this does not always yield an accurate cost, using a small separation a
 
 // TODO: Talk about de-icing order
 
-In the current implementation, each aircraft is assigned a de-icing time based on its TOBT.
+In the current implementation, each aircraft is assigned a de-icing time based on its TOBT. The TOBT of an aircraft can be calculated as its earliest possible take-off time minus the time taken to get from the gates to the runway, including de-icing and lineup.
 
 == Visualising Sequences
 
@@ -341,6 +345,123 @@ In the current implementation, each aircraft is assigned a de-icing time based o
 = Progress
 
 // TODO: Talk about progress and reflections including LSEPI
+
+An outline of the original plan is depicted in the following Gantt chart:
+
+/ A: Write the project proposal
+/ B: Research prior approaches into runway sequencing and de-icing
+/ C: Implement a branch-and-bound algorithm
+/ D: Develop the visualisation tool
+/ E: Evaluate the performance of the algorithm and run simulations
+/ F: Write the interim report
+/ G: Extend the branch-and-bound algorithm with a rolling window
+/ H: Implement a mathematical programming algorithm
+/ I: Write the final dissertation
+/ J: Christmas break
+/ K: Prepare for exams
+/ L: Implement a dynamic programming algorithm
+/ M: Easter break
+
+#import "@preview/timeliney:0.0.1": *
+
+#timeline(show-grid: true, {
+    // NOTE: Technically 28 weeks and 5 days
+    let num-weeks = 29
+    let days-in-week = 7
+
+    let day(day) = day / days-in-week
+
+    let proposal-day = day(25)
+    let interim-day = day(72)
+    let diss-day = day(201)
+
+    // NOTE: 0.0001 subtracted because timeliney gets stuck if the group length exceeds total length even by a little
+    headerline(group(([*2023*], day(92))), group(([*2024*], num-weeks - day(92) - 0.0001)))
+    headerline(
+        group(("Oct", day(31))),
+        group(("Nov", day(30))),
+        group(("Dec", day(31))),
+        group(("Jan", day(31))),
+        group(("Feb", day(29))),
+        group(("Mar", day(31))),
+        group(("Apr", day(20) - 0.0001)), // NOTE: See above
+    )
+    headerline(..range(1, num-weeks + 1).map(week => group(str(week))))
+
+    let break-line-style = (stroke: 3pt + gray)
+    let doc-line-style = (stroke: 3pt + gray.darken(25%))
+    let work-line-style = (stroke: 3pt)
+
+    taskgroup({
+        // Write the project proposal
+        task("A", (0, proposal-day), style: doc-line-style)
+
+        // Research prior approaches into runway sequencing and de-icing
+        task("B", (0, day(49)), style: work-line-style)
+
+        // Implement a branch-and-bound algorithm
+        task("C", (day(21), day(31)), style: work-line-style)
+
+        // Develop the visualisation tool
+        task("D", (day(21), day(175)), style: work-line-style)
+
+        // Evaluate the performance of the algorithm and run simulations
+        task("E", (day(21), day(182)), style: work-line-style)
+
+        // Write the interim report
+        task("F", (proposal-day, interim-day), style: doc-line-style)
+
+        // Extend the branch-and-bound algorithm with a rolling window
+        task("G", (day(31), day(49)), style: work-line-style)
+
+        // Implement a mathematical programming algorithm
+        task("H", (day(56), day(126)), style: work-line-style)
+
+        // Write the final dissertation
+        task("I", (interim-day, diss-day), style: doc-line-style)
+
+        // Christmas break
+        task("J", (day(77), day(107)), style: break-line-style)
+
+        // Prepare for exams
+        task("K", (day(84), day(119)), style: break-line-style)
+
+        // Implement a dynamic programming algorithm
+        task("L", (day(133), day(168)), style: work-line-style)
+
+        // Easter break
+        task("M", (day(181), day(203)), style: break-line-style)
+    })
+
+    let milestone-line-style = (stroke: (dash: "dashed"))
+
+    milestone(
+        at: proposal-day,
+        style: milestone-line-style,
+        align(center)[
+            *Project Proposal*\
+            25 Oct
+        ],
+    )
+
+    milestone(
+        at: interim-day,
+        style: milestone-line-style,
+        align(center)[
+            *Interim Report*\
+            11 Dec
+        ],
+    )
+
+    milestone(
+        at: diss-day,
+        style: milestone-line-style,
+        align(center)[
+            *Final Dissertation*\
+            19 Apr
+        ],
+    )
+})
 
 = References
 
