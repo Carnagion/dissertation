@@ -28,6 +28,21 @@ beasley-scheduling-aircraft:
     volume: 34
     page-range: 180-197
 
+balakrishnan-runway-operations:
+  type: article
+  title: "Algorithms for Scheduling Runway Operations Under Constrained Position Shifting"
+  author:
+    - "Balakrishnan, Hamsa"
+    - "Chandran, Bala G."
+  date: 2010
+  doi: "10.1287/opre.1100.0869"
+  parent:
+    title: "Operations Research"
+    publisher: "INFORMS"
+    volume: 58
+    issue: 6
+    page-range: 1650-1665
+
 furini-improved-horizon:
   type: article
   title: "Improved rolling horizon approaches to the aircraft sequencing problem"
