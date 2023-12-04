@@ -4,6 +4,8 @@
 // NOTE: Needs to be called at the top of the document to setup lovelace
 #show: setup-lovelace
 
+#let todo(message) = raw("// TODO: " + message, block: true, lang: "rust")
+
 #let email(email) = link("mailto:" + email, raw(email))
 
 #set text(font: "EB Garamond", size: 11pt)
@@ -142,6 +144,7 @@ However, CPS may be impractical in situations involving CTOTs or other time wind
 = Design
 
 // TODO: Find something to put here
+#todo("Have a paragraph here to introduce the rest of the section")
 
 == Data
 
@@ -174,6 +177,7 @@ The longer the deviation and number of deviations in $D$, the higher the objecti
 Note that the difference (in minutes) between an aircraft $x$'s scheduled take-off time $T_x$ and its earliest possible take-off time $E_x$ is squared. This ensures fairness by favouring moderate delays for all aircraft rather than exceedingly high delays for some and little to no delays for the rest.
 
 // TODO: Illustrate the above with an example
+#todo("Add an example to illustrate this")
 
 = Implementation
 
@@ -315,6 +319,7 @@ A sequence's lower bound -- i.e. the best possible value for that sequence, assu
 However, it is more efficient to update the bounds of the current sequence in each iteration by passing them around as a parameter as seen in @branch-and-bound-pseudocode. This avoids having to re-calculate them from scratch every iteration and leads to a noticeable decrease in run time, especially for larger instances with more aircraft to sequence.
 
 // TODO: Insert benchmarks to provide evidence
+#todo("Insert benchmarks to show the improvement")
 
 To further prune the solution search space, an estimate for the upper bound of a runway sequence is obtained by assigning take-off times to each remaining (yet to be sequenced) aircraft, as outlined in @upper-bound-pseudocode. This assumes a fixed separation of one minute between all of them. De-icing times for these aircraft are also calculated in a similar manner, disregarding the actual duration required to go through the process.
 
@@ -327,6 +332,7 @@ To further prune the solution search space, an estimate for the upper bound of a
         [*output*: estimated cost for remaining aircraft],
 
         // TODO: Write pseudocode for upper bound estimation
+        todo("Write the pseudocode for upper bound estimation")
     ),
 ) <upper-bound-pseudocode>
 
@@ -341,6 +347,7 @@ In the current implementation, each aircraft is assigned a de-icing time based o
 == Visualising Sequences
 
 // TODO: Talk about the visualiser implementation
+#todo("Write about the visualiser implementation and insert images of the output")
 
 = Progress
 
