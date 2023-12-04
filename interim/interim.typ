@@ -107,7 +107,7 @@ An airport's maximum capacity and throughput -- the number of aircraft taking of
 
 == Motivation
 
-Prior approaches to runway sequencing have employed a variety of methods -- both exact and heuristic-based -- such as first-come-first-serve (FCFS) @furini-improved-horizon, branch-and-bound, linear programming (LP) based tree search @beasley-scheduling-aircraft, dynamic programming @lieder-scheduling-aircraft @lieder-dynamic-programming, and mixed-integer programming (MIP) @lieder-dynamic-programming @avella-time-indexed. Some have also incorporated a rolling horizon to lower the exponential computation time required for large problem instances @furini-improved-horizon @beasley-scheduling-aircraft.
+Prior approaches to runway sequencing have employed a variety of methods -- both exact and heuristic-based -- such as first-come-first-serve (FCFS) @furini-improved-horizon, branch-and-bound, mixed-integer linear programming @beasley-scheduling-aircraft, dynamic programming @lieder-scheduling-aircraft @lieder-dynamic-programming, and mixed-integer programming (MIP) @lieder-dynamic-programming @avella-time-indexed. Some have also incorporated a rolling horizon to lower the exponential computation time required for large problem instances @furini-improved-horizon @beasley-scheduling-aircraft.
 
 However, these approaches have focused primarily on generating optimal runway sequences or de-icing schedules in isolation or in a decomposed manner (i.e., generating solutions for the two problems independently of each other). There is a possibility that integrating the solutions of runway sequencing and de-icing yields more optimal results, and as such, the problem is ripe for investigation.
 This project is thus one of the first of its kind, and investigates four distinct approaches to determining the order of de-icing using three different algorithms.
@@ -136,6 +136,14 @@ The project's key objectives are as follows:
 // - Assumption of fixed size classes
 // - Lack of integration with de-icing
 // - Better results using exact methods instead of heuristic methods
+
+// TODO: Mention early approaches using single optimised objectives
+
+Linearizing the objective function allows the problem to be solved to optimality using mixed-integer linear programming. One such mixed-integer 0-1 formulation is introduced by #cite(<beasley-scheduling-aircraft>, form: "prose") for scheduling aircraft landings, supporting both single or multiple runways operating in either mixed or segregated modes. Unlike many previous approaches that assumed an indefinite latest time limit for landing, this approach employs more realistic latest landing times based on fuel considerations @beasley-scheduling-aircraft. This allows exploiting the presence of increased disjoint intervals -- caused by relatively narrower hard time windows for arrivals -- to simplify the problem using landing times @demaere-pruning-rules. The approach also allows for complex and arbitrary separation matrices, and is capable of working with different complex objective functions -- both linear and non-linear as long as time can be discretized -- making it applicable to a wider variety of situations.
+
+By viewing aircraft as jobs and runways as machines, runway sequencing can be considered a variation of the machine/job scheduling problem, which is known to be NP-hard @demaere-pruning-rules.
+
+// TODO: Mention existing solutions using insights from job sequencing
 
 A number of solutions have also employed Constrained Positional Shifts (CPS) @psaraftis-dynamic-programming @balakrishnan-runway-operations. CPS restricts the shift in position of an aircraft's scheduled departure relative to its original position in the initial sequence, typically an (unoptimised) FCFS sequence. Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also encourages fairness by preventing aircraft from being advanced or delayed disproportionately relative to other aircraft @demaere-pruning-rules.
 
