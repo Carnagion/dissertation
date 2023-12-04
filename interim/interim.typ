@@ -114,7 +114,7 @@ This project is thus one of the first of its kind, and investigates four distinc
 
 In doing so, this project will provide fundamental insights into the innate characteristics of and interactions between runway sequencing and de-icing -- which can then be used as a starting point for further research. Additionally, it will reveal the potential advantages of an integrated solution, as compared to using fully decomposed or partially integrated methods proposed in existing literature.
 
-= Objectives
+= Objectives <objectives>
 
 The primary aim of this project is to investigate the integrated runway sequencing and de-icing problem by developing three algorithms that explore four different approaches to the order of aircraft de-icing. The investigation and implementation of these algorithms will provide deeper insights into the problem's fundamental characteristics and the interactions between runway sequencing and de-icing, as well as the potential benefits of integrating their solutions.
 
@@ -139,13 +139,33 @@ The project's key objectives are as follows:
 
 // TODO: Mention early approaches using single optimised objectives
 
-Linearizing the objective function allows the problem to be solved to optimality using mixed-integer linear programming. One such mixed-integer 0-1 formulation is introduced by #cite(<beasley-scheduling-aircraft>, form: "prose") for scheduling aircraft landings, supporting both single or multiple runways operating in either mixed or segregated modes. Unlike many previous approaches that assumed an indefinite latest time limit for landing, this approach employs more realistic latest landing times based on fuel considerations @beasley-scheduling-aircraft. This allows exploiting the presence of increased disjoint intervals -- caused by relatively narrower hard time windows for arrivals -- to simplify the problem using landing times @demaere-pruning-rules. The approach also allows for complex and arbitrary separation matrices, and is capable of working with different complex objective functions -- both linear and non-linear as long as time can be discretized -- making it applicable to a wider variety of situations.
-
 By viewing aircraft as jobs and runways as machines, runway sequencing can be considered a variation of the machine/job scheduling problem, which is known to be NP-hard @demaere-pruning-rules.
 
 // TODO: Mention existing solutions using insights from job sequencing
 
-A number of solutions have also employed Constrained Positional Shifts (CPS) @psaraftis-dynamic-programming @balakrishnan-runway-operations. CPS restricts the shift in position of an aircraft's scheduled departure relative to its original position in the initial sequence, typically an (unoptimised) FCFS sequence. Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also encourages fairness by preventing aircraft from being advanced or delayed disproportionately relative to other aircraft @demaere-pruning-rules.
+Bianco et al. present a dynamic programming approach for the single-machine scheduling problem with sequence-dependent setup times. This is equivalent to the runway sequencing problem for a single runway, not taking into account aircraft classes @lieder-dynamic-programming. // TODO: Cite Bianco's paper
+
+== Heuristic Approaches
+
+// TODO: Talk about heuristic approaches to runway sequencing
+
+== Linear Programming
+
+Linearizing the objective function allows the problem to be solved to optimality using mixed-integer linear programming. One such mixed-integer 0-1 formulation is introduced by #cite(<beasley-scheduling-aircraft>, form: "prose") for scheduling aircraft landings, supporting both single or multiple runways operating in either mixed or segregated modes. Unlike many previous approaches that assumed an indefinite latest time limit for landing, this approach employs more realistic latest landing times based on fuel considerations @beasley-scheduling-aircraft. This allows exploiting the presence of increased disjoint intervals -- caused by relatively narrower hard time windows for arrivals -- to simplify the problem using landing times @demaere-pruning-rules. The approach also allows for complex and arbitrary separation matrices, and is capable of working with different complex objective functions -- both linear and non-linear as long as time can be discretized -- making it applicable to a wider variety of situations.
+
+== Dynamic Programming
+
+Dynamic programming approaches have been used in many solutions in the past @demaere-pruning-rules @psaraftis-dynamic-programming @balakrishnan-runway-operations, since it is known to work well for runway sequencing as mentioned in @objectives, and yields optimal schedules significantly faster than mixed-integer programming (MIP) solvers @lieder-dynamic-programming. // TODO: Cite Bianco's paper as well
+
+#cite(<lieder-dynamic-programming>, form: "prose") provides an optimisation algorithm for runway sequencing based on that of #cite(<briskorn-aircraft-landing>, form: "prose") with more general assumptions -- multiple runways, positive target times, and limited time windows, building upon existing approaches that rely on more restricted or impractical assumptions.
+
+// TODO: Explain more about dynamic programming approaches - look at Lieder's paper for more examples
+
+#cite(<psaraftis-dynamic-programming>, form: "prose") further utilized the inherent characteristics of the problem to design an approach that grouped aircraft into multiple sets, allowing the exploitation of known precedence orders within these sets. When implemented as a preprocessing step, this reduced the problem's worst-case computational complexity to $O(m^2(n + 1)^m)$, where $n$ denotes the number of sets and $m$ denotes the number of aircraft @demaere-pruning-rules @psaraftis-dynamic-programming. This approach is also used in this project and is discussed later in @complete-orders.
+
+== Constrained Positional Shifts
+
+A number of solutions -- such as that of #cite(<psaraftis-dynamic-programming>, form: "prose") and #cite(<balakrishnan-runway-operations>, form: "prose") -- have also employed Constrained Positional Shifting (CPS). CPS restricts the shift in position of an aircraft's scheduled departure relative to its original position in the initial sequence, typically an (unoptimised) FCFS sequence. Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also encourages fairness by preventing aircraft from being advanced or delayed disproportionately relative to other aircraft @demaere-pruning-rules.
 
 However, CPS may be impractical in situations involving CTOTs or other time window constraints, or mixed-mode operations (i.e. both arrivals and departures on the same runway) where delays between arrivals and departures may differ widely. These can require large positional shifts, thereby challenging the tractability of CPS-based approaches @demaere-pruning-rules.
 
@@ -238,7 +258,7 @@ Separation-identical sets are generated by comparing the separations of every pa
     ),
 )
 
-This allows the exploitation of _complete orders_ between separation-identical aircraft. A complete order exists between two aircraft $x$ and $y$ if any arbitrary sequence containing $x$ and $y$ cannot be improved any further by reversing the orders of $x$ and $y$ @demaere-pruning-rules. Such complete orders simplify the problem of runway sequencing to one of interleaving ordered sets of separation-identical aircraft. It also reduces the problem's worst-case computational complexity from $n!$ to $O(m^2(n + 1)^m)$, where $n$ denotes the number of sets and $m$ denotes the number of aircraft @demaere-pruning-rules.
+This allows the exploitation of _complete orders_ between separation-identical aircraft. A complete order exists between two aircraft $x$ and $y$ if any arbitrary sequence containing $x$ and $y$ cannot be improved any further by reversing the orders of $x$ and $y$ @demaere-pruning-rules. Such complete orders simplify the problem of runway sequencing to one of interleaving ordered sets of separation-identical aircraft. It also reduces the problem's worst-case computational complexity from $n!$ to $O(m^2(n + 1)^m)$, where $n$ denotes the number of sets and $m$ denotes the number of aircraft @demaere-pruning-rules @psaraftis-dynamic-programming.
 
 Since all of the methods used in this project are exact methods, using separation-identical sets does not compromise the optimality of the generated sequences @demaere-pruning-rules @psaraftis-dynamic-programming, and considerably trims the solution search space.
 

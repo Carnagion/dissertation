@@ -43,6 +43,21 @@ balakrishnan-runway-operations:
     issue: 6
     page-range: 1650-1665
 
+briskorn-aircraft-landing:
+  type: article
+  title: "Aircraft landing problems with aircraft classes"
+  author:
+    - "Briskorn, Dirk"
+    - "Stolletz, Raik"
+  date: 2014
+  doi: "10.1007/s10951-013-0337-x"
+  parent:
+    title: "Journal of Scheduling"
+    publisher: "Springer"
+    volume: 17
+    issue: 1
+    page-range: 31-45
+
 furini-improved-horizon:
   type: article
   title: "Improved rolling horizon approaches to the aircraft sequencing problem"
