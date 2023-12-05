@@ -6,11 +6,27 @@ psaraftis-dynamic-programming:
   author:
     - "Psaraftis, Harilaos N."
   date: 1980
+  doi: "10.1287/opre.28.6.1347"
   parent:
     title: "Operations Research"
     publisher: "INFORMS"
     volume: 28
     issue: 6
+
+bianco-minimizing-time:
+  type: article
+  title: "Minimizing total completion time subject to release dates and sequence-dependent processing times"
+  author:
+    - "Bianco, Lucio"
+    - "Dell'Olmo, Paolo"
+    - "Giordani, Stefano"
+  date: 1999
+  doi: "10.1023/a:1018975323093"
+  parent:
+    title: "Annals of Operations Research"
+    publisher: "Springer"
+    volume: 86
+    page-range: 393-415
 
 beasley-scheduling-aircraft:
   type: article
