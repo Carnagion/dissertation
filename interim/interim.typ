@@ -625,9 +625,13 @@ Based on this, the timelines for some remaining tasks have been revised, and Gan
 
 The project was managed in a very Agile way with weekly (and sometimes bi-weekly) sprints, each having clear tasks to complete. Weekly meetings were held to discuss the project's progress, plan the tasks for the current week, and clarify any issues encountered. These were very effective at ensuring a constant flow of development without long breaks, and enabled the discovery and discussion of problems relatively early.
 
-== Contributions and Reflections
+== Reflection
 
-// TODO: Talk about reflections including LSEPI
+Reflecting upon the project this term, I believe that I have made good progress towards realising the overall goals of the project. Although there were a few delays in completing the tasks set out in the initial project plan, I have been able to complete the vast majority of them, and have set up a clear direction and foundation for the remainder. This should reduce the overall time required for some of the tasks in the next semester, which is also reflected by the Gantt chart in @revised-gantt.
+
+In its current state, the project already consists of a branch-and-bound algorithm that is capable of solving the integrated runway and de-icing sequencing problem. Next semester, I plan to extend this with a rolling horizon, apply some of the optimisations proposed in existing literature, and further analyse its performance and look for inherent characteristics of the problem that can be exploited to improve the algorithm. I will also implement the other approaches -- mathematical programming and dynamic programming, and undertake a detailed analysis and comparison of their performance.
+
+// Talk about LSEPI
 
 = References
 
