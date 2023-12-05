@@ -376,9 +376,11 @@ In the current implementation, each aircraft is assigned a de-icing time based o
 
 = Progress
 
-// TODO: Talk about progress and reflections including LSEPI
+As previously mentioned in the Project Proposal, the goals for the first half of the project were to investigate prior approaches to runway sequencing, fully implementing a branch-and-bound algorithm, and developing a visualisation tool for the generated sequences. These goals have been mostly successfully realised -- in its current state, the project has a working branch-and-bound implementation, a basic runway sequence visualisation tool, and a dataset generator.
 
-An outline of the original plan is depicted in the following Gantt chart:
+However, a rolling horizon extension to the algorithm has not yet been implemented. The time taken to produce a basic working branch-and-bound implementation without de-icing was longer than expected -- the original plan allocated approximately two weeks for this, but in reality it required closer to three weeks. This was primarily due to issues with adapting a classic branch-and-bound method to utilizing the preprocessed sets of separation-identical aircraft, and underestimation of the workload of other modules.
+
+Despite this, the project is on schedule since the original plan had accounted for such delays. As mentioned in the proposal, the Gantt chart -- seen below in @original-gantt -- includes gaps of multiple days at various points througout the timeline:
 
 / A: Write the project proposal
 / B: Research prior approaches into runway sequencing and de-icing
@@ -394,9 +396,7 @@ An outline of the original plan is depicted in the following Gantt chart:
 / L: Implement a dynamic programming algorithm
 / M: Easter break
 
-#import "@preview/timeliney:0.0.1": *
-
-#timeline(show-grid: true, {
+#let original-gantt = timeline(show-grid: true, {
     // NOTE: Technically 28 weeks and 5 days
     let num-weeks = 29
     let days-in-week = 7
@@ -494,6 +494,134 @@ An outline of the original plan is depicted in the following Gantt chart:
         ],
     )
 })
+
+#figure(original-gantt, caption: [Original Gantt chart], gap: 1em) <original-gantt>
+
+Additionally, certain tasks -- such as developing an initial visualisation tool -- took much less time than expected, further offsetting the delay incurred by the branch-and-bound-implementation. Based on this, the timelines for some remaining tasks have also been revised.
+
+This Gantt chart has now been updated to reflect the actual tasks completed during the first half of the project, as well as the remaining tasks along with their revised timelines set to be completed during the second half:
+
+/ A: Write the project proposal
+/ B: Research prior approaches into runway sequencing and de-icing
+/ C: Implement a branch-and-bound algorithm
+/ D: Write the interim report
+/ E: Evaluate the performance of the algorithm and run simulations
+/ F: Develop the visualisation tool
+/ G: Write the final dissertation
+/ H: Extend the branch-and-bound algorithm with a rolling window
+/ I: Christmas break
+/ J: Prepare for exams
+/ K: Implement a mathematical programming algorithm
+/ L: Implement a dynamic programming algorithm
+/ M: Easter break
+
+#let revised-gantt = timeline(show-grid: true, {
+    // NOTE: Technically 28 weeks and 5 days
+    let num-weeks = 29
+    let days-in-week = 7
+
+    let day(day) = day / days-in-week
+
+    let proposal-day = day(25)
+    let interim-day = day(72)
+    let diss-day = day(201)
+
+    // NOTE: 0.0001 subtracted because timeliney gets stuck if the group length exceeds total length even by a little
+    headerline(group(([*2023*], day(92))), group(([*2024*], num-weeks - day(92) - 0.0001)))
+    headerline(
+        group(("Oct", day(31))),
+        group(("Nov", day(30))),
+        group(("Dec", day(31))),
+        group(("Jan", day(31))),
+        group(("Feb", day(29))),
+        group(("Mar", day(31))),
+        group(("Apr", day(20) - 0.0001)), // NOTE: See above
+    )
+    headerline(..range(1, num-weeks + 1).map(week => group(str(week))))
+
+    let break-line-style = (stroke: 3pt + gray)
+    let doc-line-style = (stroke: 3pt + gray.darken(25%))
+    let work-line-style = (stroke: 3pt)
+
+    taskgroup({
+        // Write the project proposal
+        task("A", (0, proposal-day), style: doc-line-style)
+
+        // Research prior approaches into runway sequencing and de-icing
+        task("B", (0, day(56)), style: work-line-style)
+
+        // Implement a branch-and-bound algorithm
+        task("C", (day(25), day(49)), style: work-line-style)
+
+        // Write the interim report
+        task("D", (proposal-day, interim-day), style: doc-line-style)
+
+        // Evaluate the performance of the algorithm and run simulations
+        task("E", (day(35), day(182)), style: work-line-style)
+
+        // Develop the visualisation tool
+        task("F", (day(49), day(175)), style: work-line-style)
+
+        // Write the final dissertation
+        task("G", (interim-day, diss-day), style: doc-line-style)
+
+        // Extend the branch-and-bound algorithm with a rolling window
+        task("H", (interim-day, day(91)), style: work-line-style)
+
+        // Christmas break
+        task("I", (day(77), day(107)), style: break-line-style)
+
+        // Prepare for exams
+        task("J", (day(84), day(119)), style: break-line-style)
+
+        // Implement a mathematical programming algorithm
+        task("K", (day(98), day(126)), style: work-line-style)
+
+        // Implement a dynamic programming algorithm
+        task("L", (day(133), day(168)), style: work-line-style)
+
+        // Easter break
+        task("M", (day(181), day(203)), style: break-line-style)
+    })
+
+    let milestone-line-style = (stroke: (dash: "dashed"))
+
+    milestone(
+        at: proposal-day,
+        style: milestone-line-style,
+        align(center)[
+            *Project Proposal*\
+            25 Oct
+        ],
+    )
+
+    milestone(
+        at: interim-day,
+        style: milestone-line-style,
+        align(center)[
+            *Interim Report*\
+            11 Dec
+        ],
+    )
+
+    milestone(
+        at: diss-day,
+        style: milestone-line-style,
+        align(center)[
+            *Final Dissertation*\
+            19 Apr
+        ],
+    )
+})
+
+#figure(revised-gantt, caption: [Revised Gantt chart], gap: 1em)
+
+// TODO: Find a better place to put this
+Weekly meetings were held to discuss the project's progress, plan the tasks for the current week, and clarify any issues encountered. These were very effective at ensuring a constant flow of development without long breaks, and enabled the discovery and discussion of problems relatively early.
+
+== Contributions and Reflections
+
+// TODO: Talk about reflections including LSEPI
 
 = References
 
