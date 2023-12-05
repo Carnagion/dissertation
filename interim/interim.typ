@@ -365,22 +365,25 @@ Although this does not always yield an accurate cost, using a small separation a
 
 == De-Icing Order
 
-// TODO: Talk about de-icing order
-
 In the current implementation, each aircraft is assigned a de-icing time based on its TOBT. The TOBT of an aircraft can be calculated as its earliest possible take-off time minus the time taken to get from the gates to the runway, including de-icing and lineup.
+
+// TODO: Write more about the de-icing order
+#todo("Write more about this or integrate it earlier into the branch-and-bound section")
 
 == Visualising Sequences
 
-// TODO: Talk about the visualiser implementation
-#todo("Write about the visualiser implementation and insert images of the output")
+Alongside the branch-and-bound algorithm, a tool for visualising generated runway sequences has also been developed. The visualiser takes any sequence of departures and de-icing times and produces a Scalable Vector Graphic (SVG) file showcasing the earliest possible departure time, TOBT, pushback duration, pre-de-ice taxi duration, scheduled de-icing time, de-ice duration, post-de-ice taxi duration, runway lineup time, and scheduled take-off time for each aircraft. The SVG format was chosen primarily because it is a vector graphics format supported by a wide range of browsers and image applications, and because its XML-like syntax makes SVG files easy to create and manipulate from within code. An output from the visualiser is shown below:
+
+// TODO: Insert screenshots from visualiser
+#todo("Insert images of the visualiser output")
+
+Time increases along the horizontal axis, while the aircraft that are sequenced are laid out vertically, from the first to take-off at the top, to the last at the bottom. The different durations are coloured differently to help distinguish them. Although simple, this output already aids greatly in obtaining a better view and understanding of the generated sequences, and was also invaluable in finding and eliminating bugs in the branch-and-bound implementation.
+
+As the project progresses, there will likely be a need for different kinds of visualisations and plots -- for example, plotting a tree of intermediate solutions considered by the runway sequencing algorithm. As such, there is a need to continually work on the visualiser and enhance its capabilities.
 
 = Progress
 
-As previously mentioned in the Project Proposal, the goals for the first half of the project were to investigate prior approaches to runway sequencing, fully implementing a branch-and-bound algorithm, and developing a visualisation tool for the generated sequences. These goals have been mostly successfully realised -- in its current state, the project has a working branch-and-bound implementation, a basic runway sequence visualisation tool, and a dataset generator.
-
-However, a rolling horizon extension to the algorithm has not yet been implemented. The time taken to produce a basic working branch-and-bound implementation without de-icing was longer than expected -- the original plan allocated approximately two weeks for this, but in reality it required closer to three weeks. This was primarily due to issues with adapting a classic branch-and-bound method to utilizing the preprocessed sets of separation-identical aircraft, and underestimation of the workload of other modules.
-
-Despite this, the project is on schedule since the original plan had accounted for such delays. As mentioned in the proposal, the Gantt chart -- seen below in @original-gantt -- includes gaps of multiple days at various points througout the timeline:
+As previously mentioned in the Project Proposal, the goals for the first half of the project -- seen below in @original-gantt -- were to investigate prior approaches to runway sequencing, fully implementing a branch-and-bound algorithm, and developing a visualisation tool for the generated sequences. These goals have been mostly successfully realised -- in its current state, the project has a working branch-and-bound implementation, a basic runway sequence visualisation tool, and a dataset generator.
 
 / A: Write the project proposal
 / B: Research prior approaches into runway sequencing and de-icing
@@ -497,9 +500,11 @@ Despite this, the project is on schedule since the original plan had accounted f
 
 #figure(original-gantt, caption: [Original Gantt chart], gap: 1em) <original-gantt>
 
-Additionally, certain tasks -- such as developing an initial visualisation tool -- took much less time than expected, further offsetting the delay incurred by the branch-and-bound-implementation. Based on this, the timelines for some remaining tasks have also been revised.
+However, a rolling horizon extension to the algorithm has not yet been implemented. The time taken to produce a basic working branch-and-bound implementation without de-icing was longer than expected -- the original plan allocated approximately two weeks for this, but in reality it required closer to three weeks. This was primarily due to issues with adapting a classic branch-and-bound method to utilizing the preprocessed sets of separation-identical aircraft, and underestimation of the workload of other modules.
 
-This Gantt chart has now been updated to reflect the actual tasks completed during the first half of the project, as well as the remaining tasks along with their revised timelines set to be completed during the second half:
+Despite this, the project is on schedule since the original plan had accounted for such delays -- the original Gantt chart includes gaps of multiple days at various points througout the timeline. Certain tasks -- such as developing an initial visualisation tool -- took much less time than expected, further offsetting the delay incurred by the branch-and-bound-implementation. Additionally, the tasks that have been completed have laid down most of the groundwork for the tasks yet to come, and have improved my overall understanding of and grasp on the problem domain. 
+
+Based on this, the timelines for some remaining tasks have been revised, and Gantt chart has been updated -- see @revised-gantt -- to reflect the actual tasks completed during the first half of the project, as well as the remaining (revised) tasks. The second half of the project will focus mainly on applying more optimisations and pruning rules to the existing branch-and-bound algorithm, implementing a mathematical programming algorithm, and implementing a dymamic programming algorithm.
 
 / A: Write the project proposal
 / B: Research prior approaches into runway sequencing and de-icing
@@ -614,10 +619,11 @@ This Gantt chart has now been updated to reflect the actual tasks completed duri
     )
 })
 
-#figure(revised-gantt, caption: [Revised Gantt chart], gap: 1em)
+#figure(revised-gantt, caption: [Revised Gantt chart], gap: 1em) <revised-gantt>
 
-// TODO: Find a better place to put this
-Weekly meetings were held to discuss the project's progress, plan the tasks for the current week, and clarify any issues encountered. These were very effective at ensuring a constant flow of development without long breaks, and enabled the discovery and discussion of problems relatively early.
+== Project Management
+
+The project was managed in a very Agile way with weekly (and sometimes bi-weekly) sprints, each having clear tasks to complete. Weekly meetings were held to discuss the project's progress, plan the tasks for the current week, and clarify any issues encountered. These were very effective at ensuring a constant flow of development without long breaks, and enabled the discovery and discussion of problems relatively early.
 
 == Contributions and Reflections
 
