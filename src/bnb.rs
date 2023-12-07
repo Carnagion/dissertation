@@ -178,11 +178,20 @@ fn schedule_departure(
             // Get the constraints for the previous departure
             let prev_constraints = &instance.rows()[prev_dep.aircraft_idx].constraints;
 
+            let earliest_take_off_time = constraints
+                .earliest_time
+                .max(prev_dep.take_off_time + separation);
+
+            let earliest_de_ice_time = (prev_dep.de_ice_time + prev_constraints.de_ice_dur).max(
+                earliest_take_off_time
+                    - (constraints.lineup_dur
+                        + constraints.post_de_ice_dur
+                        + constraints.de_ice_dur),
+            );
+
             // The de-ice time is the maximum of when that the aircraft can get there
             // and when the previous aircraft finishes de-icing
-            let de_ice_time = constraints
-                .target_de_ice_time()
-                .max(prev_dep.de_ice_time + prev_constraints.de_ice_dur);
+            let de_ice_time = earliest_de_ice_time;
 
             // The take-off time is the max of its earliest time,
             // the time of the previous take-off plus separation,
