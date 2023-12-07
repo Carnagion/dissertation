@@ -2,6 +2,8 @@ use std::{str::FromStr, time::Duration};
 
 use csv::{ReaderBuilder, Trim};
 
+use rand::Rng;
+
 use serde::{Deserialize, Serialize};
 
 use serde_with::serde_as;
@@ -16,6 +18,8 @@ use constraints::DepartureConstraints;
 
 mod duration;
 use duration::DurationMinutes;
+
+use self::aircraft::SizeClass;
 
 #[serde_as] // NOTE: This must remain before the derive
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -35,8 +39,16 @@ impl Instance {
         &self.0
     }
 
+    pub fn rows_mut(&mut self) -> &mut [InstanceRow] {
+        &mut self.0
+    }
+
     pub fn separation(&self, earlier_idx: usize, later_idx: usize) -> Option<Duration> {
-        self.0.get(later_idx)?.separations.get(earlier_idx).copied()
+        self.rows()
+            .get(later_idx)?
+            .separations
+            .get(earlier_idx)
+            .copied()
     }
 
     pub fn separation_sets(&self) -> Vec<Vec<usize>> {
@@ -80,6 +92,36 @@ impl Instance {
 
         sets
     }
+
+    pub fn randomize_times<R>(&mut self, rng: &mut R)
+    where
+        R: Rng,
+    {
+        for row in self.rows_mut() {
+            // Randomize separations based on the size class
+            let size_class = row.aircraft.size_class;
+            for sep in &mut row.separations {
+                let dur_range = match size_class {
+                    SizeClass::Small => 1..3,
+                    SizeClass::Medium => 2..5,
+                    SizeClass::Large => 4..6,
+                };
+                let dur = rng.gen_range(dur_range);
+                *sep = Duration::from_secs(dur * 60);
+            }
+
+            let constraints = &mut row.constraints;
+            for dur in [
+                &mut constraints.pushback_dur,
+                &mut constraints.pre_de_ice_dur,
+                &mut constraints.de_ice_dur,
+                &mut constraints.post_de_ice_dur,
+                &mut constraints.lineup_dur,
+            ] {
+                *dur = Duration::from_secs(rng.gen_range(1..5) * 60);
+            }
+        }
+    }
 }
 
 #[derive(Debug, Error)]
@@ -104,7 +146,7 @@ impl FromStr for Instance {
 
         // Check that the number of separations in each row equals the number of rows
         instance
-            .0
+            .rows()
             .iter()
             .all(|row| row.separations.len() == instance.0.len())
             .then_some(instance)
