@@ -178,10 +178,14 @@ fn schedule_departure(
             // Get the constraints for the previous departure
             let prev_constraints = &instance.rows()[prev_dep.aircraft_idx].constraints;
 
+            // The earliest possible take-off time is the maximum of the earliest allocated take-off time
+            // and the take-off time of the previous aircraft plus the required separation
             let earliest_take_off_time = constraints
                 .earliest_time
                 .max(prev_dep.take_off_time + separation);
 
+            // The earliest possible de-ice time is the maximum of when the previous aircraft finishes de-icing
+            // and when the aircraft can actually get there considering the updated earliest take-off time
             let earliest_de_ice_time = (prev_dep.de_ice_time + prev_constraints.de_ice_dur).max(
                 earliest_take_off_time
                     - (constraints.lineup_dur
@@ -189,21 +193,17 @@ fn schedule_departure(
                         + constraints.de_ice_dur),
             );
 
-            // The de-ice time is the maximum of when that the aircraft can get there
-            // and when the previous aircraft finishes de-icing
+            // De-ice as early as possible
             let de_ice_time = earliest_de_ice_time;
 
-            // The take-off time is the max of its earliest time,
-            // the time of the previous take-off plus separation,
-            // and the de-ice time plus the duration taken to get to the runway
-            let take_off_time = (prev_dep.take_off_time + separation)
-                .max(constraints.earliest_time)
-                .max(
-                    de_ice_time
-                        + constraints.de_ice_dur
-                        + constraints.post_de_ice_dur
-                        + constraints.lineup_dur,
-                );
+            // The actual take-off time is the maximum of the earliest possible
+            // and when the aircraft can actually get there considering the actual de-ice time
+            let take_off_time = earliest_take_off_time.max(
+                de_ice_time
+                    + constraints.de_ice_dur
+                    + constraints.post_de_ice_dur
+                    + constraints.lineup_dur,
+            );
 
             (de_ice_time, take_off_time)
         }
