@@ -79,9 +79,10 @@ pub fn visualise(sequence: &[Departure], instance: &Instance) -> Option<Document
         let rect_height = 5;
 
         // Rect that represents time spent de-icing
-        let de_ice_width = (constraints.de_ice_dur.as_secs() / 60) * SCALE_X;
+        let de_ice_width = constraints.de_ice_dur.as_secs() / 60;
         let de_ice_title =
             Title::new().add(Text::new(format!("De-ice for {} minutes", de_ice_width)));
+        let de_ice_width = de_ice_width * SCALE_X;
         let de_ice_rect = Rectangle::new()
             .set("x", de_ice_x)
             .set("y", rect_y)
@@ -91,11 +92,12 @@ pub fn visualise(sequence: &[Departure], instance: &Instance) -> Option<Document
             .add(de_ice_title);
 
         // Rect that represents time spent from gates to de-icing station
-        let pre_de_ice_width = (constraints.pre_de_ice_dur.as_secs() / 60) * SCALE_X;
+        let pre_de_ice_width = constraints.pre_de_ice_dur.as_secs() / 60;
         let pre_de_ice_title = Title::new().add(Text::new(format!(
             "Taxi before de-icing for {} minutes",
             pre_de_ice_width,
         )));
+        let pre_de_ice_width = pre_de_ice_width * SCALE_X;
         let pre_de_ice_rect = Rectangle::new()
             .set("x", de_ice_x - pre_de_ice_width)
             .set("y", rect_y)
@@ -105,11 +107,12 @@ pub fn visualise(sequence: &[Departure], instance: &Instance) -> Option<Document
             .add(pre_de_ice_title);
 
         // Rect that represents time spent in pushback
-        let pushback_width = (constraints.pushback_dur.as_secs() / 60) * SCALE_X;
+        let pushback_width = constraints.pushback_dur.as_secs() / 60;
         let pushback_title = Title::new().add(Text::new(format!(
             "Pushback for {} minutes",
             pushback_width,
         )));
+        let pushback_width = pushback_width * SCALE_X;
         let pushback_rect = Rectangle::new()
             .set("x", de_ice_x - pre_de_ice_width - pushback_width)
             .set("y", rect_y)
@@ -119,11 +122,12 @@ pub fn visualise(sequence: &[Departure], instance: &Instance) -> Option<Document
             .add(pushback_title);
 
         // Rect that represents time spent from de-icing station to runway
-        let post_de_ice_width = (constraints.post_de_ice_dur.as_secs() / 60) * SCALE_X;
+        let post_de_ice_width = constraints.post_de_ice_dur.as_secs() / 60;
         let post_de_ice_title = Title::new().add(Text::new(format!(
             "Taxi after de-icing for {} minutes",
             post_de_ice_width,
         )));
+        let post_de_ice_width = post_de_ice_width * SCALE_X;
         let post_de_ice_rect = Rectangle::new()
             .set("x", de_ice_x + de_ice_width)
             .set("y", rect_y)
@@ -133,11 +137,12 @@ pub fn visualise(sequence: &[Departure], instance: &Instance) -> Option<Document
             .add(post_de_ice_title);
 
         // Rect that represents time spent lining up before take-off
-        let lineup_width = (constraints.lineup_dur.as_secs() / 60) * SCALE_X;
+        let lineup_width = constraints.lineup_dur.as_secs() / 60;
         let lineup_title = Title::new().add(Text::new(format!(
             "Lineup on runway for {} minutes",
             lineup_width,
         )));
+        let lineup_width = lineup_width * SCALE_X;
         let lineup_rect = Rectangle::new()
             .set("x", de_ice_x + de_ice_width + post_de_ice_width)
             .set("y", rect_y)
