@@ -110,6 +110,7 @@ impl Instance {
                 *sep = Duration::from_secs(dur * 60);
             }
 
+            // Randomize pushback, taxi, de-ice, and lineup durations within a fixed range
             let constraints = &mut row.constraints;
             for dur in [
                 &mut constraints.pushback_dur,
