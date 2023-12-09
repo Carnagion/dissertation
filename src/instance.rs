@@ -11,15 +11,13 @@ use serde_with::serde_as;
 use thiserror::Error;
 
 pub mod aircraft;
-use aircraft::Aircraft;
+use aircraft::{Aircraft, SizeClass};
 
 pub mod constraints;
 use constraints::DepartureConstraints;
 
 mod duration;
 use duration::DurationMinutes;
-
-use self::aircraft::SizeClass;
 
 #[serde_as] // NOTE: This must remain before the derive
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
