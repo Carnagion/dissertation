@@ -48,6 +48,9 @@
 
 #set math.equation(numbering: "(1)")
 
+// NOTE: Workaround to get non-math text to use EB Garamond in math equations until Typst ships a native function for doing so
+#let markup(name) = math.text(font: "EB Garamond", weight: "regular", name)
+
 #let pseudocode = pseudocode.with(indentation-guide-stroke: 0.1pt)
 
 // TODO: Remove once the double heading bug is fixed - see https://github.com/andreasKroepelin/lovelace/pull/1
@@ -196,22 +199,21 @@ To cater to such situations, this project makes no such assumptions, and the dat
 
 == Objective Function
 
-For this problem, the objective function $f$ represents the total cost of a sequence of departures $D$ in terms of its delays. This can be expressed as the sum of each scheduled departure's deviation from the earliest possible take-off time for that aircraft:
+For this problem, the objective function $f$ represents the total cost of a sequence of departures $D$ in terms of its delays. This can be expressed as the sum of the deviation of each scheduled departure $t_x$ from the earliest allocated departure time $e_x$ for that aircraft:
 
 $
-f(D) = sum_(x in D) (T_x - E_x)^2 
+f(D) = sum_(x in D) (t_x - e_x)^2 
 $ <objective-function-equation>
 
 The longer the deviation and number of deviations in $D$, the higher the objective value will be. Thus, the problem is one of minimisation, i.e. finding the runway sequence with the minimum objective value, which translates to the minimum possible delay.
 
-Note that the difference (in minutes) between an aircraft $x$'s scheduled take-off time $T_x$ and its earliest possible take-off time $E_x$ is squared. This ensures fairness by favouring moderate delays for all aircraft rather than exceedingly high delays for some and little to no delays for the rest.
+Note that the difference (in minutes) between an aircraft $x$'s scheduled take-off time $t_x$ and its earliest allocated take-off time $e_x$ is squared. This ensures fairness by favouring moderate delays for all aircraft rather than exceedingly high delays for some and little to no delays for the rest.
 
 // TODO: Illustrate the above with an example
 #todo("Add an example to illustrate this")
 
 = Implementation
 
-// TODO: Review and check if the Rust website should be cited
 For this project, I have opted to use #link("https://www.rust-lang.org")[Rust]. The primary reason for this is my familiarity and experience with the language, which allows me to be more confident in my implementation and estimated timelines. Another major factor is that Rust's rich type system and unique memory ownership and borrowing mechanics eliminate many classes of bugs -- such as null reference exceptions or Undefined Behaviour -- at compile time. As a result, I can be more productive while being confident in my implementation's reliability and handling of edge cases.
 
 == Complete Orders <complete-orders>
@@ -224,7 +226,6 @@ $
 
 Separation-identical sets are identified by comparing the separations of every pair of aircraft with every other aircraft in $A$ as follows:
 
-// TODO: Maybe add some comments
 #algorithm(
     caption: [Identifying sets of separation-identical aircraft],
     pseudocode(
@@ -233,16 +234,14 @@ Separation-identical sets are identified by comparing the separations of every p
         no-number,
         [*output*: separation-identical sets of aircraft in $A$],
 
-        [$S <-$ empty list],
+        [$S <- markup("empty list")$],
         [*for* $x$ *in* $A$ *do*], ind,
             [*for* $s$ *in* $S$ *do*], ind,
                 [*for* $y$ *in* $s$ *do*], ind,
-                    [*for* $z$ *in* $A$ except $x, y$ *do*], ind,
-
+                    [*for* $z$ *in* $A markup("except") x, y$ *do*], ind,
                         [*if* $delta_(x z) != delta_(y z)$ *or* $delta_(z x) != delta_(z y)$ *then*], ind,
                             [*continue* to next set in $S$], ded,
                         [*end*], ded,
-
                     [*end*], ded,
                 [*end*],
                 
@@ -251,7 +250,7 @@ Separation-identical sets are identified by comparing the separations of every p
 
             [*end*],
 
-            [$s <-$ singleton with $x$],
+            [$s <- markup("singleton with ") x$],
             [add $s$ to $S$], ded,
 
         [*end*], ded,
@@ -268,7 +267,6 @@ At the same time, the efficiency of exploiting complete orders is highly depende
 
 == Branch-and-bound
 
-// TODO: Tweak as this is taken from Wikipedia
 Branch-and-bound is a method for solving optimisation problems by breaking them down into smaller sub-problems and using a _bounding_ function to eliminate those sub-problems that cannot possibly contain a more optimal solution than the best known optimal one found so far.
 
 // TODO: Review this entire section
@@ -291,21 +289,21 @@ A full implementation of the branch-and-bound algorithm is as follows:
         no-number,
         [*output*: best runway sequence],
 
-        [*if* length of $D$ $=$ length of $A$ *then*], ind,
+        [*if* $markup("length of") D = markup("length of") A$ *then*], ind,
             [*if* $C > C_b$ *then*], ind,
                 [$C_b <- C$],
                 [$D_b <- D$], ded,
             [*end*], ded,
         [*else*], ind,
-            [*for* $s, i$ *in* $S$ zipped with $I$ *do*], ind,
-                [*if* $i >=$ length of $s$ *then*], ind,
+            [*for* $s, i$ *in* $S markup("zipped with") I$ *do*], ind,
+                [*if* $i >= markup("length of") s$ *then*], ind,
                     [*continue*], ded,
                 [*end*],
 
-                [$x <-$ aircraft at index $i$ in $s$],
-                [$d <-$ schedule departure for $x$],
+                [$x <- markup("aircraft at index") i markup("in") s$],
+                [$d <- markup("schedule departure for") x$],
 
-                [$c <-$ cost of $d$],
+                [$c <- markup("cost of") d$],
                 [*if* $C + c > C_b$ *then*], ind,
                     [*continue*], ded,
                 [*end*],
@@ -314,7 +312,7 @@ A full implementation of the branch-and-bound algorithm is as follows:
                 [$C <- C + c$],
                 [$i <- i + 1$],
 
-                [$D_b <- $ *recurse* with updated parameters],
+                [$D_b <- markup("recurse with updated parameters")$],
 
                 [remove $d$ from $D$],
                 [$C <- C - c$],
@@ -339,7 +337,7 @@ A sequence's lower bound -- i.e. the best possible value for that sequence, assu
         
         [$c <- 0$],
         [*for* $x$ *in* $D$ *do*], ind,
-            [$d <- (T_x - E_x)$ in minutes],
+            [$d <- (t_x - e_x) markup("in minutes")$],
             [$c <- c + d^2$], ded,
         [*end*],
         [*return* $c$],
@@ -368,12 +366,40 @@ To further prune the solution search space, an estimate for the upper bound of a
 
 Although this does not always yield an accurate cost, using a small separation and naive scheduling strategy avoids overshooting the actual upper bound, and thus prevents the branch-and-bound algorithm from incorrectly pruning a potentially better sub-sequence.
 
-== De-Icing Order
+== Scheduling Aircraft
 
-In the current implementation, each aircraft is assigned a de-icing time based on its TOBT. The TOBT of an aircraft can be calculated as its earliest possible take-off time minus the time taken to get from the gates to the runway, including de-icing and lineup.
+Given an aircraft $x$, the earliest possible time it can take off is the maximum of its allocated earliest time $e_x$ and the previous aircraft $w$'s actual take-off time $t_w$ plus the mandatory separation $delta_(w x)$ required between them. If there is no previous aircraft, then $x$ is the first aircraft to be scheduled and its earliest possible take-off time is simply the earliest allocated take-off time $e_x$. Once calculated, this can be used to update the aircraft's TOBT.
 
-// TODO: Write more about the de-icing order
-#todo("Write more about this or integrate it earlier into the branch-and-bound section")
+Its earliest possible de-icing time can then be calculated as the maximum of the time the previous aircraft $w$ finishes de-icing and the time that $x$ can actually arrive at the de-icing station, considering its updated TOBT. Like before, if there is no previous aircraft, then its earliest possible de-icing time is simply the time it needs to start de-icing to meet its earliest allocated take-off time $e_x$.
+
+Finally, its _actual_ take-off time $t_x$ can be calculated as the maximum of its earliest possible take-off time and the time that $x$ can arrive at the runway. The latter can be expressed as its de-icing time plus its de-icing duration, taxi duration, and runway lineup duration.
+
+The pseudocode for this scheduling process is shown below:
+
+#algorithm(
+    caption: [Scheduling an aircraft's de-icing and take-off times],
+    pseudocode(
+        no-number,
+        [*input*: aircraft $x$, sequence of aircraft departures $D$],
+        no-number,
+        [*output*: departure and de-icing times for $x$],
+        
+        [$w <- markup("last scheduled aircraft in") D$],
+        [*if* $w markup("exists")$ *then*], ind,
+            [$q <- markup("maximum of") e_x markup("and") (t_w + delta_(w x))$],
+            [$d <- markup("maximum of") (d_w + u_w) markup("and") (q - (u_x + b_x + v_x))$],
+            [$t <- markup("maximum of") q markup("and") (d + u_x + b_x + v_x)$],
+            [*return* $(d, t)$], ded,
+        [*else*], ind,
+        	[*return* $(e_x, e_x - (u_x + b_x + v_x))$], ded,
+        [*end*],
+    ),
+)
+
+== Results
+
+// TODO: Show results from benchmark
+#todo("Insert benchmarks")
 
 == Visualising Sequences
 
@@ -634,7 +660,31 @@ In its current state, the project already consists of a branch-and-bound algorit
 #bibliography("references.yml", title: none)
 
 // TODO:
+// - Talk about results - benchmark
+// - Use "operation time" or similar and not just "take-off"
+// - Keep description of BnB to a minimum
 // - Change citation style - eg. "Beasley et al."
 // - Use small letters for variables and capital letters for constants
-// - Keep description of BnB to a minimum
-// - Talk about results - benchmark
+// - Gaps in de-icing queue where aircraft can be fit (may disappear once de-icing is assumed to be at least five minutes)
+// - Make de-icing take at least five minutes
+// - Notation table
+
+// Possible notation:
+
+// A = set of aircraft
+
+// e_x = earliest allocated depature time for x
+// p_x = pushback time for x
+// a_x = pre-de-ice taxi duration for x
+// u_x  = de-ice duration for x
+// b_x = post-de-ice taxi duration for x
+// v_x = lineup duration for x
+
+// delta_(x y) = separation between x and y
+
+// t_x = scheduled departure time for x
+// d_x = scheduled de-ice time for x
+
+// s_A = separation-identical sets of aircraft in A
+
+// D = sequence of departures
