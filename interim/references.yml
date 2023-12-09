@@ -44,6 +44,23 @@ beasley-scheduling-aircraft:
     volume: 34
     page-range: 180-197
 
+atkin-hybrid-metaheuristics:
+  type: article
+  title: "Hybrid Metaheuristics to Aid Runway Scheduling at London Heathrow Airport"
+  author:
+    - "Atkin, Jason A. D."
+    - "Burke, Edmund K."
+    - "Greenwood, John S."
+    - "Reeson, Dale"
+  date: 2007
+  doi: "10.1287/trsc.1060.0163"
+  parent:
+    title: "Transportation Science"
+    publisher: "INFORMS"
+    volume: 41
+    issue: 1
+    page-range: 90-106
+
 balakrishnan-runway-operations:
   type: article
   title: "Algorithms for Scheduling Runway Operations Under Constrained Position Shifting"

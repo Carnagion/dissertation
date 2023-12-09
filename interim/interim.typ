@@ -137,8 +137,9 @@ Early approaches to runway sequencing used by many airports around the world inc
 
 == Heuristic Approaches
 
-// TODO: Talk about heuristic approaches to runway sequencing
-#todo("Mention heuristic approaches to runway sequencing")
+#cite(<atkin-hybrid-metaheuristics>, form: "prose") introduce a hybridised metaheuristic approach to aid runway scheduling at London Heathrow. This involves using a Tabu Search metaheuristic to search for good feasible departure orders.
+
+#cite(<bianco-minimizing-time>, form: "prose") introduce two heuristic algorithms -- Cheapest Addition Heuristic (CAH) and Cheapest Insertion Heuristic (CIH). They note that the latter almost always performs better than the former as it searches for the best partial sequences obtained by inserting new times anywhere within the sequence. However, it is also much more computationally expensive @bianco-minimizing-time.
 
 == Linear Programming
 
@@ -204,9 +205,6 @@ An initial dataset of instances was needed to test the implementation on. These 
 The datasets chosen were meant to be used in the runway sequencing problem, not integrated runway and de-icing sequencing. This meant that the instances did not contain data for the pushback durations, taxi durations, de-icing durations, and line-up durations of aircraft, making them largely unsuitable for use as-is in this project. Thus, there was a need to augment the data and create a dataset generator.
 
 First, a new Comma-Separated Value (CSV) data format was created for these datasets, which included all the relevant fields. This format included both the separation matrices and the rows of aircraft data together in a single CSV file, unlike the old instance sets that separated them into different files. This made the data much easier to parse and save.
-
-// TODO: Add images showing both data formats
-#todo("Add images showing both the old and new data formats side-by-side")
 
 A randomisation algorithm was then created to randomise instances after parsing them, allowing for the generation of new data from an existing dataset. This alters the separation times and the pushback, taxi, de-icing, and lineup durations of each aircraft in the instance. Separations are randomised within a specified range as defined by the aircraft's size class -- small aircraft are assigned a separation between one and three minutes, medium-sized aircraft between two and four minutes, and large aircraft either four or five minutes. The pushback, taxi, de-icing, and lineup durations are each assigned a random duration between one to four minutes. All other data -- such as the number of aircraft, their earliest allocated take-off times, their size classes, and so on -- is untouched.
 
@@ -421,12 +419,11 @@ These measurements were taken on a computer running Windows 10 (64-bit) with an 
 
 == Visualising Sequences
 
-Alongside the branch-and-bound algorithm, a tool for visualising generated runway sequences has also been developed. The visualiser takes any sequence of departures and de-icing times and produces a Scalable Vector Graphic (SVG) file showcasing the earliest possible departure time, TOBT, pushback duration, pre-de-ice taxi duration, scheduled de-icing time, de-ice duration, post-de-ice taxi duration, runway lineup time, and scheduled take-off time for each aircraft. The SVG format was chosen primarily because it is a vector graphics format supported by a wide range of browsers and image applications, and because its XML-like syntax makes SVG files easy to create and manipulate from within code. An output from the visualiser is shown below:
+Alongside the branch-and-bound algorithm, a tool for visualising generated runway sequences has also been developed. The visualiser takes any sequence of departures and de-icing times and produces a Scalable Vector Graphic (SVG) file showcasing the earliest allocated departure time, pushback duration, pre-de-ice taxi duration, scheduled de-icing time, de-ice duration, post-de-ice taxi duration, runway lineup time, and scheduled departure time for each aircraft. The SVG format was chosen because it is a vector graphics format supported by a wide range of browsers and image applications, and because its XML-like syntax makes SVG files easy to create and manipulate within code. An output from the visualiser is shown below:
 
-// TODO: Insert screenshots from visualiser
-#todo("Insert images of the visualiser output")
+#figure(image("images/visual.svg"), caption: [Visualiser output])
 
-Time increases along the horizontal axis, while the aircraft that are sequenced are laid out vertically, from the first to take-off at the top, to the last at the bottom. The different durations are coloured differently to help distinguish them. Although simple, this output already aids greatly in obtaining a better view and understanding of the generated sequences, and was also invaluable in identifying and eliminating bugs in the branch-and-bound implementation.
+Time increases along the horizontal axis, while the aircraft that are sequenced are laid out vertically, from the first to take-off at the top, to the last at the bottom. The different durations are coloured differently to help distinguish them. The black lines represent the scheduled de-icing and departure times, and the dashed lines represent the earliest allocated departure times for each aircraft. Although simple, this output already aids greatly in obtaining a better view and understanding of the generated sequences, and was also invaluable in identifying and eliminating bugs in the branch-and-bound implementation.
 
 As the project progresses, there will likely be a need for different kinds of visualisations and plots -- for example, plotting a tree of intermediate solutions considered by the runway sequencing algorithm. As such, there is a need to continually work on the visualiser and enhance its capabilities.
 
