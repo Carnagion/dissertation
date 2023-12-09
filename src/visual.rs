@@ -72,6 +72,7 @@ pub fn visualise(sequence: &[Departure], instance: &Instance) -> Option<Document
             .set("y1", line_y)
             .set("y2", line_height)
             .set("style", "stroke: rgb(0, 0, 0)")
+            .set("stroke-dasharray", "1 1")
             .add(earliest_take_off_title);
 
         // Calculate the common y and height for all rects
