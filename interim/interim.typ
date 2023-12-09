@@ -131,6 +131,7 @@ The project's key objectives are as follows:
 
 4. *Develop a tool for visualising the outputs and intermediate results produced by the algorithms*. This will provide a more intuitive, human-friendly view intended to aid users' understanding, which will not only be useful for an end user, but also for the analysis of the algorithms themselves.
 
+// TODO: Change citation style - eg. "Beasley et al."
 = Existing Literature
 
 Early approaches to runway sequencing used by many airports around the world include simple FCFS algorithms optimising for a single objective @bianco-minimizing-time. Although very simple to implement and computationally inexpensive, FCFS strategies are well-known to produce excessive delays @bianco-minimizing-time. Therefore, a number of more optimising approaches -- using both exact and heuristic-based methods -- have been proposed in the past.
@@ -169,6 +170,7 @@ A number of solutions -- such as that of #cite(<psaraftis-dynamic-programming>, 
 
 However, CPS may be impractical in situations involving CTOTs or other time window constraints, or mixed-mode operations (i.e. both arrivals and departures on the same runway) where delays between arrivals and departures may differ widely. These can require large positional shifts, thereby challenging the tractability of CPS-based approaches @demaere-pruning-rules.
 
+// TODO: Use "operation time" or similar and not just "take-off"
 = Design
 
 // TODO: Find something to put here
@@ -673,9 +675,3 @@ In its current state, the project already consists of a branch-and-bound algorit
 = References
 
 #bibliography("references.yml", title: none)
-
-// TODO:
-// - Use "operation time" or similar and not just "take-off"
-// - Change citation style - eg. "Beasley et al."
-// - Gaps in de-icing queue where aircraft can be fit (may disappear once de-icing is assumed to be at least five minutes)
-// - Make de-icing take at least five minutes
