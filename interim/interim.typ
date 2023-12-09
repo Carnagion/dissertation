@@ -132,7 +132,7 @@ The project's key objectives are as follows:
 4. *Develop a tool for visualising the outputs and intermediate results produced by the algorithms*. This will provide a more intuitive, human-friendly view intended to aid users' understanding, which will not only be useful for an end user, but also for the analysis of the algorithms themselves.
 
 // TODO: Change citation style - eg. "Beasley et al."
-= Existing Literature
+= Existing Literature <existing-literature>
 
 Early approaches to runway sequencing used by many airports around the world include simple FCFS algorithms optimising for a single objective @bianco-minimizing-time. Although very simple to implement and computationally inexpensive, FCFS strategies are well-known to produce excessive delays @bianco-minimizing-time. Therefore, a number of more optimising approaches -- using both exact and heuristic-based methods -- have been proposed in the past.
 
@@ -173,8 +173,7 @@ However, CPS may be impractical in situations involving CTOTs or other time wind
 // TODO: Use "operation time" or similar and not just "take-off"
 = Design
 
-// TODO: Find something to put here
-#todo("Have a paragraph here to introduce the rest of the section")
+The findings and insights obtained from existing literature detailed in @existing-literature were used to design and implement an initial objective function, branch-and-bound algorithm, and scheduling strategy, with the de-icing order determined by the TOBT of aircraft.
 
 == Notation
 
@@ -423,7 +422,7 @@ These measurements were taken on a computer running Windows 10 (64-bit) with an 
 
 Alongside the branch-and-bound algorithm, a tool for visualising generated runway sequences has also been developed. The visualiser takes any sequence of departures and de-icing times and produces a Scalable Vector Graphic (SVG) file showcasing the earliest allocated departure time, pushback duration, pre-de-ice taxi duration, scheduled de-icing time, de-ice duration, post-de-ice taxi duration, runway lineup time, and scheduled departure time for each aircraft. The SVG format was chosen because it is a vector graphics format supported by a wide range of browsers and image applications, and because its XML-like syntax makes SVG files easy to create and manipulate within code. An output from the visualiser is shown below:
 
-#figure(image("images/visual.svg"), caption: [Visualiser output])
+#figure(image("visual.svg"), caption: [Visualiser output])
 
 Time increases along the horizontal axis, while the aircraft that are sequenced are laid out vertically, from the first to take-off at the top, to the last at the bottom. The different durations are coloured differently to help distinguish them. The black lines represent the scheduled de-icing and departure times, and the dashed lines represent the earliest allocated departure times for each aircraft. Although simple, this output already aids greatly in obtaining a better view and understanding of the generated sequences, and was also invaluable in identifying and eliminating bugs in the branch-and-bound implementation.
 
