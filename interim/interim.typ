@@ -236,7 +236,7 @@ Given an aircraft $x$, the earliest possible time it can take off or land is the
 
 Its earliest possible de-icing time -- if taking off -- can then be calculated as the maximum of the time the previous aircraft $w$ finishes de-icing and the time that $x$ can actually arrive at the de-icing station, considering its updated TOBT. If there is no previous aircraft, then its earliest possible de-icing time is simply the time it needs to start de-icing to meet its earliest allocated departure time $e_x$.
 
-Finally, its _actual_ operation time $t_x$ can be calculated as the maximum of its earliest possible operation time and the time that $x$ can arrive at the runway. The latter can be expressed as its de-icing time plus its de-icing duration, taxi duration, and runway lineup duration for take-offs.
+Finally, its _actual_ operation time $t_x$ can be calculated as the maximum of its earliest possible operation time and the time that $x$ can arrive at the runway. For departures, the latter can be expressed as its de-icing time plus its de-icing duration, taxi duration, and runway lineup duration.
 
 The pseudocode for this scheduling process is shown below:
 
@@ -367,24 +367,7 @@ A full implementation of the branch-and-bound algorithm is as follows:
 
 === Bounding
 
-A sequence's lower bound -- i.e. the best possible value for that sequence, assuming all future aircraft are scheduled with no delays -- can simply be calculated using the objective function as described in @objective-function-equation. The pseudocode for this is as follows:
-
-#algorithm(
-    caption: [Objective function for runway sequences],
-    pseudocode(
-        no-number,
-        [*input*: runway sequence $R$],
-        no-number,
-        [*output*: cost of $R$],
-        
-        [$c <- 0$],
-        [*for* $x$ *in* $R$ *do*], ind,
-            [$d <- (t_x - e_x) markup("in minutes")$],
-            [$c <- c + d^2$], ded,
-        [*end*],
-        [*return* $c$],
-    ),
-)
+A sequence's lower bound -- i.e. the best possible value for that sequence, assuming all future aircraft are scheduled with no delays -- can simply be calculated using the objective function as described in @objective-function-equation.
 
 However, it is more efficient to update the bounds of the current sequence in each iteration by passing them around as a parameter as seen in @branch-and-bound-pseudocode. This avoids having to re-calculate them from scratch every iteration and leads to a noticeable decrease in run time, especially for larger instances with more aircraft to sequence.
 
@@ -689,10 +672,9 @@ The project was managed in an Agile way with weekly (and sometimes bi-weekly) sp
 
 Reflecting upon the project this term, I believe that I have made good progress towards realising the overall goals of the project. Although there were a few delays in completing the tasks set out in the initial project plan, I have been able to complete the vast majority of them, and have set up a clear direction and foundation for the remainder. This should reduce the overall time required for some of the tasks in the next semester, which is also reflected by the Gantt chart in @revised-gantt.
 
-In its current state, the project already consists of a branch-and-bound algorithm that is capable of solving the integrated runway and de-icing sequencing problem. Next semester, I plan to extend this with a rolling horizon, apply some of the optimisations proposed in existing literature, and further analyse its performance and look for inherent characteristics of the problem that can be exploited to improve the algorithm. I will also implement the other approaches -- mathematical programming and dynamic programming, and undertake a detailed analysis and comparison of their performance.
+In its current state, the project already consists of a branch-and-bound algorithm that is capable of solving the integrated runway and de-icing sequencing problem. The algorithm that has been developed so far is a first step towards research that will ultimately contribute to reducing aircraft delays and operating costs, and optimising fuel consumption and its impact on the environment.
 
-// TODO: Talk about LSEPI
-#todo("Talk about relation to LSEPI")
+Next semester, I plan to extend the algorithm with a rolling horizon, apply some of the optimisations proposed in existing literature, and further analyse its performance and look for inherent characteristics of the problem that can be exploited to improve the algorithm. This will include appylying some of the potential improvements suggested in @results to achieve fewer and less severe delays. I will also implement the other approaches stated in @objectives -- mathematical programming and dynamic programming, and undertake a detailed analysis and comparison of their performance.
 
 = References
 
