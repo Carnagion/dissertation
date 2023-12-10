@@ -209,7 +209,7 @@ The datasets chosen were meant to be used in the runway sequencing problem, not 
 
 First, a new Comma-Separated Value (CSV) data format was created for these datasets, which included all the relevant fields. This format included both the separation matrices and the rows of aircraft data together in a single CSV file, unlike the old instance sets that separated them into different files. This made the data much easier to parse and save.
 
-A randomisation algorithm was then created to randomise instances after parsing them, allowing for the generation of new data from an existing dataset. This alters the separation times and the pushback, taxi, de-icing, and lineup durations of each aircraft in the instance. Separations are randomised within a specified range as defined by the aircraft's size class -- small aircraft are assigned a separation between one and three minutes, medium-sized aircraft between two and four minutes, and large aircraft either four or five minutes. The pushback, taxi, de-icing, and lineup durations are each assigned a random duration between one to four minutes. All other data -- such as the number of aircraft, their earliest allocated take-off times, their size classes, and so on -- is untouched.
+A randomisation algorithm was then created to randomise instances after parsing them, allowing for the generation of new data from an existing dataset. This alters the separation times and the pushback, taxi, de-icing, and lineup durations of each aircraft in the instance. Separations are randomised within a specified range as defined by the aircraft's size class -- small aircraft are assigned a separation between one and two minutes, medium-sized aircraft between two and three minutes, and large aircraft either three or four minutes. The pushback, taxi, and lineup durations are each assigned a random duration between one to three minutes, while de-icing durations are randomised between four to six minutes. All other data -- such as the number of aircraft, their earliest allocated take-off times, their size classes, and so on -- is untouched.
 
 == Aircraft Separations
 
@@ -261,7 +261,7 @@ The pseudocode for this scheduling process is shown below:
     ),
 )
 
-One effect of this scheduling strategy is that aircraft will only de-ice at the latest possible time such that they can meet their earliest possible departure time, which conserves fuel by allowing aircraft to wait at gates rater than at the runway. However, this could lead to gaps when no aircraft is being de-iced -- although this is not noticeable in the majority of cases due to the large diference between de-icing times and separation requirements. The implications of this strategy are further discussed in @results.
+One effect of this scheduling strategy is that aircraft will only de-ice at the latest possible time such that they can meet their earliest possible departure time, which conserves fuel by allowing aircraft to wait at gates rater than at the runway. However, this could lead to gaps when no aircraft is being de-iced -- although this is not noticeable in the majority of cases due to the large diference between de-icing and separation durations. The implications of this strategy are further discussed in @results.
 
 = Implementation
 
