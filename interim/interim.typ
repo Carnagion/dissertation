@@ -231,6 +231,38 @@ The longer the deviation and number of deviations in $D$, the higher the objecti
 
 Note that the difference (in minutes) between an aircraft $x$'s scheduled take-off time $t_x$ and its earliest allocated take-off time $e_x$ is squared. This ensures fairness by favouring moderate delays for all aircraft rather than exceedingly high delays for some and little to no delays for the rest.
 
+== Scheduling Strategy <scheduling-strategy>
+
+Given an aircraft $x$, the earliest possible time it can take off is the maximum of its allocated earliest time $e_x$ and the previous aircraft $w$'s actual take-off time $t_w$ plus the mandatory separation $delta_(w x)$ required between them. If there is no previous aircraft, then $x$ is the first aircraft to be scheduled and its earliest possible take-off time is simply the earliest allocated take-off time $e_x$. Once calculated, this can be used to update the aircraft's TOBT.
+
+Its earliest possible de-icing time can then be calculated as the maximum of the time the previous aircraft $w$ finishes de-icing and the time that $x$ can actually arrive at the de-icing station, considering its updated TOBT. If there is no previous aircraft, then its earliest possible de-icing time is simply the time it needs to start de-icing to meet its earliest allocated take-off time $e_x$.
+
+Finally, its _actual_ take-off time $t_x$ can be calculated as the maximum of its earliest possible take-off time and the time that $x$ can arrive at the runway. The latter can be expressed as its de-icing time plus its de-icing duration, taxi duration, and runway lineup duration.
+
+The pseudocode for this scheduling process is shown below:
+
+#algorithm(
+    caption: [Scheduling an aircraft's de-icing and departure times],
+    pseudocode(
+        no-number,
+        [*input*: aircraft $x$, sequence of aircraft departures $D$],
+        no-number,
+        [*output*: de-icing and departure times for $x$],
+        
+        [$w <- markup("last scheduled aircraft in") D$],
+        [*if* $w markup("exists")$ *then*], ind,
+            [$e <- markup("maximum of") e_x markup("and") (t_w + delta_(w x))$],
+            [$d <- markup("maximum of") (d_w + v_w) markup("and") (e - (v_x + w_x + q_x))$],
+            [$t <- markup("maximum of") e markup("and") (d + v_x + w_x + q_x)$],
+            [*return* $d, t$], ded,
+        [*else*], ind,
+        	[*return* $e_x - (v_x + w_x + q_x), e_x$], ded,
+        [*end*],
+    ),
+)
+
+One effect of this scheduling strategy is that aircraft will only de-ice at the latest possible time such that they can meet their earliest possible departure time, which conserves fuel by allowing aircraft to wait at gates rater than at the runway. However, this could lead to gaps when no aircraft is being de-iced -- although this is not noticeable in the majority of cases due to the large diference between de-icing times and separation requirements. The implications of this strategy are further discussed in @results.
+
 = Implementation
 
 For this project, I have opted to use #link("https://www.rust-lang.org")[Rust]. The primary reason for this is my familiarity and experience with the language, which allows me to be more confident in my implementation and estimated timelines. Another major factor is that Rust's rich type system and unique memory ownership and borrowing mechanics eliminate many classes of bugs -- such as null reference exceptions or Undefined Behaviour -- at compile time. As a result, I can be more productive while being confident in my implementation's reliability and handling of edge cases.
@@ -283,36 +315,6 @@ This allows the exploitation of _complete orders_ between separation-identical a
 Since all of the methods used in this project are exact methods, using separation-identical sets does not compromise the optimality of the generated sequences @demaere-pruning-rules @psaraftis-dynamic-programming, and considerably trims the solution search space.
 
 At the same time, the efficiency of exploiting complete orders is highly dependent on the separations between aircraft and the diversity of aircraft. In some cases -- such as when every aircraft is subject to a CTOT or when there are very few separation-identical aircraft -- the number of sets might be too large and the number of aircraft in each set too small. Such cases prevent the effective exploitation of complete orders. However, in practice, complete orders can be exploited well due to the typical separation matrices and aircraft diversity in runway sequencing instances @demaere-pruning-rules -- this was the case for the test instances as well.
-
-== Scheduling Individual Aircraft
-
-Given an aircraft $x$, the earliest possible time it can take off is the maximum of its allocated earliest time $e_x$ and the previous aircraft $w$'s actual take-off time $t_w$ plus the mandatory separation $delta_(w x)$ required between them. If there is no previous aircraft, then $x$ is the first aircraft to be scheduled and its earliest possible take-off time is simply the earliest allocated take-off time $e_x$. Once calculated, this can be used to update the aircraft's TOBT.
-
-Its earliest possible de-icing time can then be calculated as the maximum of the time the previous aircraft $w$ finishes de-icing and the time that $x$ can actually arrive at the de-icing station, considering its updated TOBT. If there is no previous aircraft, then its earliest possible de-icing time is simply the time it needs to start de-icing to meet its earliest allocated take-off time $e_x$.
-
-Finally, its _actual_ take-off time $t_x$ can be calculated as the maximum of its earliest possible take-off time and the time that $x$ can arrive at the runway. The latter can be expressed as its de-icing time plus its de-icing duration, taxi duration, and runway lineup duration.
-
-The pseudocode for this scheduling process is shown below:
-
-#algorithm(
-    caption: [Scheduling an aircraft's de-icing and departure times],
-    pseudocode(
-        no-number,
-        [*input*: aircraft $x$, sequence of aircraft departures $D$],
-        no-number,
-        [*output*: de-icing and departure times for $x$],
-        
-        [$w <- markup("last scheduled aircraft in") D$],
-        [*if* $w markup("exists")$ *then*], ind,
-            [$e <- markup("maximum of") e_x markup("and") (t_w + delta_(w x))$],
-            [$d <- markup("maximum of") (d_w + v_w) markup("and") (e - (v_x + w_x + q_x))$],
-            [$t <- markup("maximum of") e markup("and") (d + v_x + w_x + q_x)$],
-            [*return* $d, t$], ded,
-        [*else*], ind,
-        	[*return* $e_x - (v_x + w_x + q_x), e_x$], ded,
-        [*end*],
-    ),
-)
 
 == Branch-and-Bound Algorithm
 
@@ -411,7 +413,7 @@ To further prune the solution search space, an estimate for the upper bound of a
 
 Although this does not always yield an accurate cost, using a small separation and naive scheduling strategy avoids overshooting the actual upper bound, and thus prevents the branch-and-bound algorithm from incorrectly pruning a potentially better sub-sequence.
 
-== Results
+== Results <results>
 
 Shown below in @benches-furini are the computational costs (in seconds) for the aforementioned branch-and-bound algorithm benchmarked on twelve instances with 10 aircraft each. These were obtained by taking 10 aircraft from, augmenting, and then randomising the instances introduced in #cite(<furini-improved-horizon>, form: "prose"), using the randomisation process described in @data-generation.
 
@@ -434,7 +436,11 @@ Shown below in @benches-furini are the computational costs (in seconds) for the 
 
 #figure(benches-furini, caption: [Results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose")]) <benches-furini>
 
-These measurements were taken on a computer running Windows 10 (64-bit) with an Intel Core i7-10750H 2.60GHz CPU and 32 GB of memory. Each instance's benchmark was sampled 100 times with 100 iterations per sample.
+These measurements were taken on a computer running Windows 10 (64-bit) with an Intel Core i7-10750H 2.60GHz CPU and 32 GB of memory. Each benchmark was sampled 100 times with 100 iterations per sample.
+
+From the times for the last scheduled aircraft for each instance, it can be observed that later aircraft start accumulating large delays -- greater than 10 minutes each. This can be explained by the dominance of de-icing durations, which are considerably higher than aircraft separations -- de-icing typically takes upwards of five minutes, whereas separations are usually three minutes or less. As a result, the de-icing queue proves to be the primary bottleneck and cause of delays.
+
+One possible solution for minimising these delays is to modify the scheduling strategy described in @scheduling-strategy to allow aircraft to wait at the runway. This will allow aircraft to de-ice earlier than they would have been able to if they had waited at the gates instead, thus freeing up the de-icing queue sooner and potentially reducing delays for future aircraft. However, it would also increase fuel consumption, and may thus require a modification to the objective function as well. Further research is required into this to understand its potential benefits and drawbacks.
 
 == Visualising Sequences
 
@@ -444,7 +450,7 @@ Alongside the branch-and-bound algorithm, a tool for visualising generated runwa
 
 Time increases along the horizontal axis, while the aircraft that are sequenced are laid out vertically, from the first to take-off at the top, to the last at the bottom. The different durations are coloured differently to help distinguish them. The black lines represent the scheduled de-icing and departure times, and the dashed lines represent the earliest allocated departure times for each aircraft. Although simple, this output already aids greatly in obtaining a better view and understanding of the generated sequences, and was also invaluable in identifying and eliminating bugs in the branch-and-bound implementation.
 
-As the project progresses, there will likely be a need for different kinds of visualisations and plots -- for example, plotting a tree of intermediate solutions considered by the runway sequencing algorithm. As such, there is a need to continually work on the visualiser and enhance its capabilities.
+As the project progresses, there will likely be a need for different kinds of visualisations and plots -- for example, plotting a tree of intermediate solutions considered by the runway sequencing algorithm(s). As such, there is a need to continually work on the visualiser and enhance its capabilities.
 
 = Progress
 
