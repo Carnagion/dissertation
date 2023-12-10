@@ -168,11 +168,10 @@ These pruning rules enable significant reductions of the problem's average compu
 
 == Constrained Positional Shifts
 
-A number of solutions -- such as that of #cite(<psaraftis-dynamic-programming>, form: "prose") and #cite(<balakrishnan-runway-operations>, form: "prose") -- have also employed Constrained Positional Shifting (CPS). CPS restricts the shift in position of an aircraft's scheduled departure relative to its original position in the initial sequence, typically an (unoptimised) FCFS sequence. Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also encourages fairness by preventing aircraft from being advanced or delayed disproportionately relative to other aircraft @demaere-pruning-rules.
+A number of solutions -- such as that of #cite(<psaraftis-dynamic-programming>, form: "prose") and #cite(<balakrishnan-runway-operations>, form: "prose") -- have also employed Constrained Positional Shifting (CPS). CPS restricts the shift in position of an aircraft's scheduled arrival or departure relative to its original position in the initial sequence, typically an (unoptimised) FCFS sequence. Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also encourages fairness by preventing aircraft from being advanced or delayed disproportionately relative to other aircraft @demaere-pruning-rules.
 
 However, CPS may be impractical in situations involving CTOTs or other time window constraints, or mixed-mode operations (i.e. both arrivals and departures on the same runway) where delays between arrivals and departures may differ widely. These can require large positional shifts, thereby challenging the tractability of CPS-based approaches @demaere-pruning-rules.
 
-// TODO: Use "operation time" or similar and not just "take-off"
 = Design
 
 The findings and insights obtained from existing literature detailed in @existing-literature were used to design and implement an initial objective function, branch-and-bound algorithm, and scheduling strategy, with the de-icing order determined by the TOBT of aircraft.
@@ -186,22 +185,22 @@ The following notation will be used in equations and pseudocode throughout this 
     set math.equation(numbering: none)
 
     $
-    &A &= &markup("Set of aircraft to schedule departures and de-icing for")\
+    &A &= &markup("Set of aircraft to schedule de-icing and operations (arrivals or departures) for")\
     &p_x &= &markup("Pushback duration of aircraft") x\
     &u_x &= &markup("Pre-de-icing taxi duration of aircraft") x\
     &v_x &= &markup("De-icing duration of aircraft") x\
     &w_x &= &markup("Post-de-icing taxi duration of aircraft") x\
     &q_x &= &markup("Lineup duration of aircraft") x\
-    &e_x &= &markup("Earliest allocated departure time for aircraft") x\
-    &t_x &= &markup("Scheduled (actual) departure time for aircraft") x\
+    &e_x &= &markup("Earliest allocated operation time for aircraft") x\
+    &t_x &= &markup("Scheduled (actual) operation time for aircraft") x\
     &delta_(x y) &= &markup("Separation between aircraft") x markup("and") y markup("where") y markup("goes after") x\
-    &D &= &markup("Sequence of aircraft with scheduled departures and de-icing times")
+    &R &= &markup("Sequence of aircraft with scheduled operations and de-icing times")
     $
 }
 
 == Data
 
-An initial dataset of instances was needed to test the implementation on. These were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of instances]. These instance sets consist of rows of aircraft with their registration numbers, models, weight class, operation type (arrival or departure), and earliest possible take-off time, as well as the separations between each pair of aircraft. The instances were also used for testing in previous works @furini-improved-horizon.
+An initial dataset of instances was needed to test the implementation on. These were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of instances]. These instance sets consist of rows of aircraft with their registration numbers, models, weight class, operation type (arrival or departure), and earliest possible operation time, as well as the separations between each pair of aircraft. The instances were also used for testing in previous works @furini-improved-horizon.
 
 === Data Generation <data-generation>
 
@@ -209,11 +208,11 @@ The datasets chosen were meant to be used in the runway sequencing problem, not 
 
 First, a new Comma-Separated Value (CSV) data format was created for these datasets, which included all the relevant fields. This format included both the separation matrices and the rows of aircraft data together in a single CSV file, unlike the old instance sets that separated them into different files. This made the data much easier to parse and save.
 
-A randomisation algorithm was then created to randomise instances after parsing them, allowing for the generation of new data from an existing dataset. This alters the separation times and the pushback, taxi, de-icing, and lineup durations of each aircraft in the instance. Separations are randomised within a specified range as defined by the aircraft's size class -- small aircraft are assigned a separation between one and two minutes, medium-sized aircraft between two and three minutes, and large aircraft either three or four minutes. The pushback, taxi, and lineup durations are each assigned a random duration between one to three minutes, while de-icing durations are randomised between four to six minutes. All other data -- such as the number of aircraft, their earliest allocated take-off times, their size classes, and so on -- is untouched.
+A randomisation algorithm was then created to randomise instances after parsing them, allowing for the generation of new data from an existing dataset. This alters the separation times and the pushback, taxi, de-icing, and lineup durations of each aircraft in the instance. Separations are randomised within a specified range as defined by the aircraft's size class -- small aircraft are assigned a separation between one and two minutes, medium-sized aircraft between two and three minutes, and large aircraft either three or four minutes. The pushback, taxi, and lineup durations are each assigned a random duration between one to three minutes, while de-icing durations are randomised between four to six minutes. All other data -- such as the number of aircraft, their earliest allocated arrival or departure times, their size classes, and so on -- is untouched.
 
 == Aircraft Separations
 
-As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typicaly based on size or weight -- and specifying the separation that must apply between each class @beasley-scheduling-aircraft. Many of the existing works on runway sequencing assume that there are a fixed number of aircraft classes, and that these are the only factors influencing separation times @beasley-scheduling-aircraft.
+As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off or landing after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typicaly based on size or weight -- and specifying the separation that must apply between each class @beasley-scheduling-aircraft. Many of the existing works on runway sequencing assume that there are a fixed number of aircraft classes, and that these are the only factors influencing separation times @beasley-scheduling-aircraft.
 
 In practice, however, separation times are decided based on a number of other factors. For example, at London Heathrow, separation times relate not only to aircraft classes but also to the Standard Instrument Departure (SID) route that the aircraft is to follow after take-off @beasley-scheduling-aircraft. Assuming a fixed number and mapping of aircraft classes to separation durations would therefore fail to generalise to every single system or practical situation.
 
@@ -221,35 +220,35 @@ To cater to such situations, this project makes no such assumptions, and the dat
 
 == Objective Function
 
-For this problem, the objective function $f$ represents the total cost of a sequence of departures $D$ in terms of its delays. This can be expressed as the sum of the deviation of each scheduled departure $t_x$ from the earliest allocated departure time $e_x$ for that aircraft:
+For this problem, the objective function $f$ represents the total cost of a runway sequence $R$ in terms of its delays. This can be expressed as the sum of the deviation of each scheduled operation $t_x$ from the earliest allocated operation time $e_x$ for that aircraft:
 
 $
-f(D) = sum_(x in D) (t_x - e_x)^2 
+f(R) = sum_(x in R) (t_x - e_x)^2 
 $ <objective-function-equation>
 
-The longer the deviation and number of deviations in $D$, the higher the objective value will be. Thus, the problem is one of minimisation, i.e. finding the runway sequence with the minimum objective value, which translates to the minimum possible delay.
+The longer the deviation and number of deviations in $R$, the higher the objective value will be. Thus, the problem is one of minimisation, i.e. finding the runway sequence with the minimum objective value, which translates to the minimum possible delay in taking off or landing.
 
-Note that the difference (in minutes) between an aircraft $x$'s scheduled take-off time $t_x$ and its earliest allocated take-off time $e_x$ is squared. This ensures fairness by favouring moderate delays for all aircraft rather than exceedingly high delays for some and little to no delays for the rest.
+Note that the difference (in minutes) between an aircraft $x$'s scheduled operation time $t_x$ and its earliest allocated operation time $e_x$ is squared. This ensures fairness by favouring moderate delays for all aircraft rather than exceedingly high delays for some and little to no delays for the rest.
 
 == Scheduling Strategy <scheduling-strategy>
 
-Given an aircraft $x$, the earliest possible time it can take off is the maximum of its allocated earliest time $e_x$ and the previous aircraft $w$'s actual take-off time $t_w$ plus the mandatory separation $delta_(w x)$ required between them. If there is no previous aircraft, then $x$ is the first aircraft to be scheduled and its earliest possible take-off time is simply the earliest allocated take-off time $e_x$. Once calculated, this can be used to update the aircraft's TOBT.
+Given an aircraft $x$, the earliest possible time it can take off or land is the maximum of its allocated earliest time $e_x$ and the previous aircraft $w$'s actual operation time $t_w$ plus the mandatory separation $delta_(w x)$ required between them. If there is no previous aircraft, then $x$ is the first aircraft to be scheduled and its earliest possible time is simply the earliest allocated operation time $e_x$. Once calculated, this can be used to update the aircraft's TOBT.
 
-Its earliest possible de-icing time can then be calculated as the maximum of the time the previous aircraft $w$ finishes de-icing and the time that $x$ can actually arrive at the de-icing station, considering its updated TOBT. If there is no previous aircraft, then its earliest possible de-icing time is simply the time it needs to start de-icing to meet its earliest allocated take-off time $e_x$.
+Its earliest possible de-icing time -- if taking off -- can then be calculated as the maximum of the time the previous aircraft $w$ finishes de-icing and the time that $x$ can actually arrive at the de-icing station, considering its updated TOBT. If there is no previous aircraft, then its earliest possible de-icing time is simply the time it needs to start de-icing to meet its earliest allocated departure time $e_x$.
 
-Finally, its _actual_ take-off time $t_x$ can be calculated as the maximum of its earliest possible take-off time and the time that $x$ can arrive at the runway. The latter can be expressed as its de-icing time plus its de-icing duration, taxi duration, and runway lineup duration.
+Finally, its _actual_ operation time $t_x$ can be calculated as the maximum of its earliest possible operation time and the time that $x$ can arrive at the runway. The latter can be expressed as its de-icing time plus its de-icing duration, taxi duration, and runway lineup duration for take-offs.
 
 The pseudocode for this scheduling process is shown below:
 
 #algorithm(
-    caption: [Scheduling an aircraft's de-icing and departure times],
+    caption: [Scheduling an aircraft's de-icing and operation times],
     pseudocode(
         no-number,
-        [*input*: aircraft $x$, sequence of aircraft departures $D$],
+        [*input*: aircraft $x$, runway sequence $R$],
         no-number,
-        [*output*: de-icing and departure times for $x$],
+        [*output*: de-icing and operation times for $x$],
         
-        [$w <- markup("last scheduled aircraft in") D$],
+        [$w <- markup("last scheduled aircraft in") R$],
         [*if* $w markup("exists")$ *then*], ind,
             [$e <- markup("maximum of") e_x markup("and") (t_w + delta_(w x))$],
             [$d <- markup("maximum of") (d_w + v_w) markup("and") (e - (v_x + w_x + q_x))$],
@@ -261,7 +260,7 @@ The pseudocode for this scheduling process is shown below:
     ),
 )
 
-One effect of this scheduling strategy is that aircraft will only de-ice at the latest possible time such that they can meet their earliest possible departure time, which conserves fuel by allowing aircraft to wait at gates rater than at the runway. However, this could lead to gaps when no aircraft is being de-iced -- although this is not noticeable in the majority of cases due to the large diference between de-icing and separation durations. The implications of this strategy are further discussed in @results.
+One effect of this scheduling strategy is that departing aircraft will only de-ice at the latest possible time such that they can meet their earliest possible departure time, which conserves fuel by allowing aircraft to wait at gates rater than at the runway. However, this could lead to gaps when no aircraft is being de-iced -- although this is not noticeable in the majority of cases due to the large diference between de-icing and separation durations. The implications of this strategy are further discussed in @results.
 
 = Implementation
 
@@ -328,14 +327,14 @@ A full implementation of the branch-and-bound algorithm is as follows:
     caption: [Branch-and-bound for runway and de-icing sequencing],
     pseudocode(
         no-number,
-        [*inputs*: set of aircraft $A$, sets of separation-identical aircraft $S$, indexes $I$ of last included aircraft from each set in $S$, current runway sequence $D$, current objective value $C$, best known objective value $C_b$, best known runway sequence $D_b$],
+        [*inputs*: set of aircraft $A$, sets of separation-identical aircraft $S$, indexes $I$ of last included aircraft from each set in $S$, current runway sequence $R$, best known runway sequence $R_b$, current objective value $C$, best known objective value $C_b$],
         no-number,
         [*output*: best runway sequence],
 
-        [*if* $markup("length of") D = markup("length of") A$ *then*], ind,
+        [*if* $markup("length of") R = markup("length of") A$ *then*], ind,
             [*if* $C > C_b$ *then*], ind,
                 [$C_b <- C$],
-                [$D_b <- D$], ded,
+                [$R_b <- R$], ded,
             [*end*], ded,
         [*else*], ind,
             [*for* $s, i$ *in* $S markup("zipped with") I$ *do*], ind,
@@ -344,25 +343,25 @@ A full implementation of the branch-and-bound algorithm is as follows:
                 [*end*],
 
                 [$x <- markup("aircraft at index") i markup("in") s$],
-                [$d <- markup("schedule departure for") x$],
+                [$r <- markup("schedule de-icing and arrival or departure for") x$],
 
-                [$c <- markup("cost of") d$],
+                [$c <- markup("cost of") r$],
                 [*if* $C + c > C_b$ *then*], ind,
                     [*continue*], ded,
                 [*end*],
 
-                [add $d$ to $D$],
+                [add $r$ to $R$],
                 [$C <- C + c$],
                 [$i <- i + 1$],
 
-                [$D_b <- markup("recurse with updated parameters")$],
+                [$R_b <- markup("recurse with updated parameters")$],
 
-                [remove $d$ from $D$],
+                [remove $r$ from $R$],
                 [$C <- C - c$],
                 [$i <- i - 1$], ded,
             [*end*], ded,
         [*end*],
-        [*return* $D_b$],
+        [*return* $R_b$],
     ),
 ) <branch-and-bound-pseudocode>
 
@@ -374,12 +373,12 @@ A sequence's lower bound -- i.e. the best possible value for that sequence, assu
     caption: [Objective function for runway sequences],
     pseudocode(
         no-number,
-        [*input*: sequence of aircraft departures $D$],
+        [*input*: runway sequence $R$],
         no-number,
-        [*output*: cost of $D$],
+        [*output*: cost of $R$],
         
         [$c <- 0$],
-        [*for* $x$ *in* $D$ *do*], ind,
+        [*for* $x$ *in* $R$ *do*], ind,
             [$d <- (t_x - e_x) markup("in minutes")$],
             [$c <- c + d^2$], ded,
         [*end*],
@@ -395,14 +394,14 @@ To further prune the solution search space, an estimate for the upper bound of a
     caption: [Estimation of the upper bound for a runway sequence],
     pseudocode(
         no-number,
-        [*input*: set of aircraft $A$, sequence of departures $D$, most recently scheduled aircraft $x$],
+        [*input*: set of aircraft $A$, runway sequence $R$, most recently scheduled aircraft $x$],
         no-number,
         [*output*: estimated cost for remaining aircraft],
 
         [$c <- 0$],
         [$t <- t_x$],
         [*for* $y$ *in* $A$ *do*], ind,
-            [*if* $y in.not D and y != x$ *then*], ind,
+            [*if* $y in.not R and y != x$ *then*], ind,
                 [$t <- markup("maximum of") t_y markup("and") (t + 1 markup("minute"))$],
                 [$c <- c + (t - e_y)^2$], ded,
             [*end*], ded,
@@ -440,15 +439,15 @@ These measurements were taken on a computer running Windows 10 (64-bit) with an 
 
 From the times for the last scheduled aircraft for each instance, it can be observed that later aircraft start accumulating large delays -- greater than 10 minutes each. This can be explained by the dominance of de-icing durations, which are considerably higher than aircraft separations -- de-icing typically takes upwards of five minutes, whereas separations are usually three minutes or less. As a result, the de-icing queue proves to be the primary bottleneck and cause of delays.
 
-One possible solution for minimising these delays is to modify the scheduling strategy described in @scheduling-strategy to allow aircraft to wait at the runway. This will allow aircraft to de-ice earlier than they would have been able to if they had waited at the gates instead, thus freeing up the de-icing queue sooner and potentially reducing delays for future aircraft. However, it would also increase fuel consumption, and may thus require a modification to the objective function as well. Further research is required into this to understand its potential benefits and drawbacks.
+One possible solution for minimising these delays is to modify the scheduling strategy described in @scheduling-strategy to allow departing aircraft to wait at the runway. This will allow aircraft to de-ice earlier than they would have been able to if they had waited at the gates instead, thus freeing up the de-icing queue sooner and potentially reducing delays for future departures. However, it would also increase fuel consumption, and may thus require a modification to the objective function as well. Further research is required into this to understand its potential benefits and drawbacks.
 
 == Visualising Sequences
 
-Alongside the branch-and-bound algorithm, a tool for visualising generated runway sequences has also been developed. The visualiser takes any sequence of departures and de-icing times and produces a Scalable Vector Graphic (SVG) file showcasing the earliest allocated departure time, pushback duration, pre-de-ice taxi duration, scheduled de-icing time, de-ice duration, post-de-ice taxi duration, runway lineup time, and scheduled departure time for each aircraft. The SVG format was chosen because it is a vector graphics format supported by a wide range of browsers and image applications, and because its XML-like syntax makes SVG files easy to create and manipulate within code. An output from the visualiser is shown below:
+Alongside the branch-and-bound algorithm, a tool for visualising generated runway sequences has also been developed. The visualiser takes any sequence of departures and de-icing times and produces a Scalable Vector Graphic (SVG) file showcasing the earliest allocated operation time, pushback duration, pre-de-ice taxi duration, scheduled de-icing time, de-ice duration, post-de-ice taxi duration, runway lineup time, and scheduled operation time for each aircraft. The SVG format was chosen because it is a vector graphics format supported by a wide range of browsers and image applications, and because its XML-like syntax makes SVG files easy to create and manipulate within code. An output from the visualiser is shown below:
 
 #figure(image("visual.svg"), caption: [Visualiser output])
 
-Time increases along the horizontal axis, while the aircraft that are sequenced are laid out vertically, from the first to take-off at the top, to the last at the bottom. The different durations are coloured differently to help distinguish them. The black lines represent the scheduled de-icing and departure times, and the dashed lines represent the earliest allocated departure times for each aircraft. Although simple, this output already aids greatly in obtaining a better view and understanding of the generated sequences, and was also invaluable in identifying and eliminating bugs in the branch-and-bound implementation.
+Time increases along the horizontal axis, while the aircraft that are sequenced are laid out vertically, from the first to take-off at the top, to the last at the bottom. The different durations are coloured differently to help distinguish them. The black lines represent the scheduled de-icing and operation times, and the dashed lines represent the earliest allocated operation times for each aircraft. Although simple, this output already aids greatly in obtaining a better view and understanding of the generated sequences, and was also invaluable in identifying and eliminating bugs in the branch-and-bound implementation.
 
 As the project progresses, there will likely be a need for different kinds of visualisations and plots -- for example, plotting a tree of intermediate solutions considered by the runway sequencing algorithm(s). As such, there is a need to continually work on the visualiser and enhance its capabilities.
 
@@ -573,7 +572,7 @@ As previously mentioned in the Project Proposal, the goals for the first half of
 
 However, a rolling horizon extension to the algorithm has not yet been implemented. The time taken to produce a basic working branch-and-bound implementation without de-icing was longer than expected -- the original plan allocated approximately two weeks for this, but in reality it required closer to three weeks. This was primarily due to issues with adapting a classic branch-and-bound method to utilizing the preprocessed sets of separation-identical aircraft, and underestimation of the workload of other modules.
 
-Despite this, the project is on schedule since the original plan had accounted for such delays -- the original Gantt chart includes gaps of multiple days at various points througout the timeline. Certain tasks -- such as developing an initial visualisation tool -- took much less time than expected, further offsetting the delay incurred by the branch-and-bound-implementation. Additionally, the tasks that have been completed have laid down most of the groundwork for the tasks yet to come, and have improved my overall understanding of and grasp on the problem domain. 
+Despite this, the project is on schedule since the original plan had accounted for such delays -- the original Gantt chart includes gaps of multiple days at various points througout the timeline. Certain tasks -- such as developing an initial visualisation tool -- took much less time than expected, further offsetting the delay incurred by the branch-and-bound-implementation. Additionally, the tasks that have been completed have laid down most of the groundwork for the tasks yet to come, and have improved my overall understanding of and grasp on the problem domain.
 
 Based on this, the timelines for some remaining tasks have been revised, and Gantt chart has been updated -- see @revised-gantt -- to reflect the actual tasks completed during the first half of the project, as well as the remaining (revised) tasks. The second half of the project will focus mainly on applying more optimisations and pruning rules to the existing branch-and-bound algorithm, implementing a mathematical programming algorithm, and implementing a dymamic programming algorithm.
 
