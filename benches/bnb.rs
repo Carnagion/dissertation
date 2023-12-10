@@ -12,8 +12,8 @@ fn main() {
 fn branch_and_bound<const INSTANCE: usize>(bencher: Bencher) {
     bencher
         .with_inputs(|| {
-            let instance =
-                fs::read_to_string(format!("instances/instance-{}.csv", INSTANCE)).unwrap();
+            let path = format!("benches/instances/{}.csv", INSTANCE);
+            let instance = fs::read_to_string(path).unwrap();
             Instance::from_str(&instance).unwrap()
         })
         .bench_refs(|instance| bnb::branch_and_bound(instance));
