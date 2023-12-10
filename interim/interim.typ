@@ -53,6 +53,8 @@
 
 #let pseudocode = pseudocode.with(indentation-guide-stroke: 0.1pt)
 
+#show figure.where(kind: table): set block(breakable: true)
+
 // TODO: Remove once the double heading bug is fixed - see https://github.com/andreasKroepelin/lovelace/pull/1
 #show figure.where(kind: "lovelace"): fig => {
     let booktabbed = block(
@@ -416,18 +418,18 @@ Shown below in @benches-furini are the computational costs (in seconds) for the 
 #let benches-furini = table(
     columns: 6,
     [*Instance*], [*Start time*], [*End time*], [*Mean runtime*], [*Fastest runtime*], [*Slowest runtime*],
-    [FPT01], [], [], [15.5 ms], [14.83 ms], [28.18 ms],
-    [FPT02], [], [], [58.75 ms], [56.14 ms], [91.7 ms],
-    [FPT03], [], [], [15.3 ms], [14.44 ms], [28.27 ms],
-    [FPT04], [], [], [16.21 ms], [15.02 ms], [30.43 ms],
-    [FPT05], [], [], [58.28 ms], [53.05 ms], [85.67 ms],
-    [FPT06], [], [], [7.179 ms], [6.794 ms], [8.412 ms],
-    [FPT07], [], [], [14.56 ms], [13.4 ms], [25.54 ms],
-    [FPT08], [], [], [24.59 ms], [21.31 ms], [45.54 ms],
-    [FPT09], [], [], [10.8 ms], [10.07 ms], [19.01 ms],
-    [FPT10], [], [], [42.94 ms], [39.45 ms], [62.48 ms],
-    [FPT11], [], [], [63.08 ms], [59.43 ms], [78.01 ms],
-    [FPT12], [], [], [12.74 ms], [12.06 ms], [20.73 ms],
+    [FPT01], [14:55], [15:50], [15.5 ms], [14.83 ms], [28.18 ms],
+    [FPT02], [15:30], [16:15], [58.75 ms], [56.14 ms], [91.7 ms],
+    [FPT03], [15:47], [16:33], [15.3 ms], [14.44 ms], [28.27 ms],
+    [FPT04], [16:14], [17:01], [16.21 ms], [15.02 ms], [30.43 ms],
+    [FPT05], [16:35], [17:31], [58.28 ms], [53.05 ms], [85.67 ms],
+    [FPT06], [14:02], [14:49], [7.179 ms], [6.794 ms], [8.412 ms],
+    [FPT07], [14:32], [15:14], [14.56 ms], [13.4 ms], [25.54 ms],
+    [FPT08], [14:55], [15:44], [24.59 ms], [21.31 ms], [45.54 ms],
+    [FPT09], [15:25], [16:16], [10.8 ms], [10.07 ms], [19.01 ms],
+    [FPT10], [15:55], [16:42], [42.94 ms], [39.45 ms], [62.48 ms],
+    [FPT11], [16:28], [17:10], [63.08 ms], [59.43 ms], [78.01 ms],
+    [FPT12], [16:45], [17:23], [12.74 ms], [12.06 ms], [20.73 ms],
 )
 
 #figure(benches-furini, caption: [Results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose")]) <benches-furini>
