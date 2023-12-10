@@ -201,7 +201,7 @@ The following notation will be used in equations and pseudocode throughout this 
 
 An initial dataset of instances was needed to test the implementation on. These were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of instances]. These instance sets consist of rows of aircraft with their registration numbers, models, weight class, operation type (arrival or departure), and earliest possible take-off time, as well as the separations between each pair of aircraft. The instances were also used for testing in previous works @furini-improved-horizon.
 
-=== Data Generation
+=== Data Generation <data-generation>
 
 The datasets chosen were meant to be used in the runway sequencing problem, not integrated runway and de-icing sequencing. This meant that the instances did not contain data for the pushback durations, taxi durations, de-icing durations, and line-up durations of aircraft, making them largely unsuitable for use as-is in this project. Thus, there was a need to augment the data and create a dataset generator.
 
@@ -411,12 +411,28 @@ Although this does not always yield an accurate cost, using a small separation a
 
 == Results
 
-Shown below are the computational costs (in seconds) for the aforementioned branch-and-bound algorithm benchmarked on twelve instances with 60 aircraft each. These were obtained by augmenting and then randomising the instances introduced in #cite(<furini-improved-horizon>, form: "prose"), using the same seed for randomising each instance.
+Shown below in @benches-furini are the computational costs (in seconds) for the aforementioned branch-and-bound algorithm benchmarked on twelve instances with 10 aircraft each. These were obtained by taking 10 aircraft from, augmenting, and then randomising the instances introduced in #cite(<furini-improved-horizon>, form: "prose"), using the randomisation process described in @data-generation.
 
-// TODO: Show results from benchmark
-#todo("Insert benchmarks")
+#let benches-furini = table(
+    columns: 6,
+    [*Instance*], [*Start time*], [*End time*], [*Mean runtime*], [*Fastest runtime*], [*Slowest runtime*],
+    [FPT01], [], [], [15.5 ms], [14.83 ms], [28.18 ms],
+    [FPT02], [], [], [58.75 ms], [56.14 ms], [91.7 ms],
+    [FPT03], [], [], [15.3 ms], [14.44 ms], [28.27 ms],
+    [FPT04], [], [], [16.21 ms], [15.02 ms], [30.43 ms],
+    [FPT05], [], [], [58.28 ms], [53.05 ms], [85.67 ms],
+    [FPT06], [], [], [7.179 ms], [6.794 ms], [8.412 ms],
+    [FPT07], [], [], [14.56 ms], [13.4 ms], [25.54 ms],
+    [FPT08], [], [], [24.59 ms], [21.31 ms], [45.54 ms],
+    [FPT09], [], [], [10.8 ms], [10.07 ms], [19.01 ms],
+    [FPT10], [], [], [42.94 ms], [39.45 ms], [62.48 ms],
+    [FPT11], [], [], [63.08 ms], [59.43 ms], [78.01 ms],
+    [FPT12], [], [], [12.74 ms], [12.06 ms], [20.73 ms],
+)
 
-These measurements were taken on a computer running Windows 10 (64-bit) with an Intel Core i7-10750H 2.60GHz CPU and 32 GB of memory.
+#figure(benches-furini, caption: [Results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose")]) <benches-furini>
+
+These measurements were taken on a computer running Windows 10 (64-bit) with an Intel Core i7-10750H 2.60GHz CPU and 32 GB of memory. Each instance's benchmark was sampled 100 times with 100 iterations per sample.
 
 == Visualising Sequences
 
