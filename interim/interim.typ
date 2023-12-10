@@ -53,7 +53,9 @@
 
 #let pseudocode = pseudocode.with(indentation-guide-stroke: 0.1pt)
 
+#set figure(gap: 1em)
 #show figure.where(kind: table): set block(breakable: true)
+#show figure.where(kind: table): set par(justify: false)
 
 // TODO: Remove once the double heading bug is fixed - see https://github.com/andreasKroepelin/lovelace/pull/1
 #show figure.where(kind: "lovelace"): fig => {
@@ -416,7 +418,12 @@ Shown below in @benches-furini are the computational costs (in seconds) for the 
     [FPT12], [16:45], [17:23], [12.74], [12.06], [20.73],
 )
 
-#figure(benches-furini, caption: [Results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose")]) <benches-furini>
+#figure(
+    benches-furini,
+    caption: [
+        Results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose")
+    ],
+)    <benches-furini>
 
 These measurements were taken on a computer running Windows 10 (64-bit) with an Intel Core i7-10750H 2.60GHz CPU and 32 GB of memory. Each benchmark was sampled 100 times with 100 iterations per sample.
 
@@ -551,7 +558,7 @@ As previously mentioned in the Project Proposal, the goals for the first half of
     )
 })
 
-#figure(original-gantt, caption: [Original Gantt chart], gap: 1em) <original-gantt>
+#figure(original-gantt, caption: [Original Gantt chart]) <original-gantt>
 
 However, a rolling horizon extension to the algorithm has not yet been implemented. The time taken to produce a basic working branch-and-bound implementation without de-icing was longer than expected -- the original plan allocated approximately two weeks for this, but in reality it required closer to three weeks. This was primarily due to issues with adapting a classic branch-and-bound method to utilizing the preprocessed sets of separation-identical aircraft, and underestimation of the workload of other modules.
 
@@ -662,7 +669,7 @@ Based on this, the timelines for some remaining tasks have been revised, and Gan
     )
 })
 
-#figure(revised-gantt, caption: [Revised Gantt chart], gap: 1em) <revised-gantt>
+#figure(revised-gantt, caption: [Revised Gantt chart]) <revised-gantt>
 
 == Project Management
 
