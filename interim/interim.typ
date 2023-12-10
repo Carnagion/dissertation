@@ -212,7 +212,7 @@ A randomisation algorithm was then created to randomise instances after parsing 
 
 == Aircraft Separations
 
-As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off or landing after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typicaly based on size or weight -- and specifying the separation that must apply between each class @beasley-scheduling-aircraft. Many of the existing works on runway sequencing assume that there are a fixed number of aircraft classes, and that these are the only factors influencing separation times @beasley-scheduling-aircraft.
+As mentioned in @background, each aircraft must adhere to strict separation requirements that enforce a minimum waiting time before taking off or landing after the previous aircraft. These separations are defined by the appropriate aviation authorities by classifying aircraft into a number of classes -- typically based on size or weight -- and specifying the separation that must apply between each class @beasley-scheduling-aircraft. Many of the existing works on runway sequencing assume that there are a fixed number of aircraft classes, and that these are the only factors influencing separation times @beasley-scheduling-aircraft.
 
 In practice, however, separation times are decided based on a number of other factors. For example, at London Heathrow, separation times relate not only to aircraft classes but also to the Standard Instrument Departure (SID) route that the aircraft is to follow after take-off @beasley-scheduling-aircraft. Assuming a fixed number and mapping of aircraft classes to separation durations would therefore fail to generalise to every single system or practical situation.
 
@@ -260,7 +260,7 @@ The pseudocode for this scheduling process is shown below:
     ),
 )
 
-One effect of this scheduling strategy is that departing aircraft will only de-ice at the latest possible time such that they can meet their earliest possible departure time, which conserves fuel by allowing aircraft to wait at gates rater than at the runway. However, this could lead to gaps when no aircraft is being de-iced -- although this is not noticeable in the majority of cases due to the large diference between de-icing and separation durations. The implications of this strategy are further discussed in @results.
+One effect of this scheduling strategy is that departing aircraft will only de-ice at the latest possible time such that they can meet their earliest possible departure time, which conserves fuel by allowing aircraft to wait at gates rater than at the runway. However, this could lead to gaps when no aircraft is being de-iced -- although this is not noticeable in the majority of cases due to the large difference between de-icing and separation durations. The implications of this strategy are further discussed in @results.
 
 = Implementation
 
@@ -319,7 +319,7 @@ At the same time, the efficiency of exploiting complete orders is highly depende
 
 Branch-and-bound is a method for solving optimisation problems by breaking them down into smaller sub-problems and using a _bounding_ function to eliminate those sub-problems that cannot possibly contain a more optimal solution than the best known optimal one found so far. The use of the bounding function allows the algorithm to prune the solution space and perform better than a brute-force (exhaustive) search.
 
-This version of branch-and-bound exploits the characteristics of complete orders between sets of separation-identical aircraft as previously mentioned in @complete-orders by passing around the indices of the last-added aircraft in each separation-identical set as a paramter. By doing so, the algorithm does not ever swap around the orders of two aircraft from the same set, and is able to prune the search space further than if it were simply picking the next aircraft from the set of all aircraft.
+This version of branch-and-bound exploits the characteristics of complete orders between sets of separation-identical aircraft as previously mentioned in @complete-orders by passing around the indices of the last-added aircraft in each separation-identical set as a parameter. By doing so, the algorithm does not ever swap around the orders of two aircraft from the same set, and is able to prune the search space further than if it were simply picking the next aircraft from the set of all aircraft.
 
 A full implementation of the branch-and-bound algorithm is as follows:
 
@@ -401,19 +401,19 @@ Shown below in @benches-furini are the computational costs (in seconds) for the 
 
 #let benches-furini = table(
     columns: 6,
-    [*Instance*], [*Start time*], [*End time*], [*Mean runtime*], [*Fastest runtime*], [*Slowest runtime*],
-    [FPT01], [14:55], [15:50], [15.5 ms], [14.83 ms], [28.18 ms],
-    [FPT02], [15:30], [16:15], [58.75 ms], [56.14 ms], [91.7 ms],
-    [FPT03], [15:47], [16:33], [15.3 ms], [14.44 ms], [28.27 ms],
-    [FPT04], [16:14], [17:01], [16.21 ms], [15.02 ms], [30.43 ms],
-    [FPT05], [16:35], [17:31], [58.28 ms], [53.05 ms], [85.67 ms],
-    [FPT06], [14:02], [14:49], [7.179 ms], [6.794 ms], [8.412 ms],
-    [FPT07], [14:32], [15:14], [14.56 ms], [13.4 ms], [25.54 ms],
-    [FPT08], [14:55], [15:44], [24.59 ms], [21.31 ms], [45.54 ms],
-    [FPT09], [15:25], [16:16], [10.8 ms], [10.07 ms], [19.01 ms],
-    [FPT10], [15:55], [16:42], [42.94 ms], [39.45 ms], [62.48 ms],
-    [FPT11], [16:28], [17:10], [63.08 ms], [59.43 ms], [78.01 ms],
-    [FPT12], [16:45], [17:23], [12.74 ms], [12.06 ms], [20.73 ms],
+    [*Instance*], [*Start time*], [*End time*], [*Mean runtime* (milliseconds)], [*Fastest runtime* (milliseconds)], [*Slowest runtime* (milliseconds)],
+    [FPT01], [14:55], [15:50], [15.5], [14.83], [28.18],
+    [FPT02], [15:30], [16:15], [58.75], [56.14], [91.7],
+    [FPT03], [15:47], [16:33], [15.3], [14.44], [28.27],
+    [FPT04], [16:14], [17:01], [16.21], [15.02], [30.43],
+    [FPT05], [16:35], [17:31], [58.28], [53.05], [85.67],
+    [FPT06], [14:02], [14:49], [7.179], [6.794], [8.412],
+    [FPT07], [14:32], [15:14], [14.56], [13.4], [25.54],
+    [FPT08], [14:55], [15:44], [24.59], [21.31], [45.54],
+    [FPT09], [15:25], [16:16], [10.8], [10.07], [19.01],
+    [FPT10], [15:55], [16:42], [42.94], [39.45], [62.48],
+    [FPT11], [16:28], [17:10], [63.08], [59.43], [78.01],
+    [FPT12], [16:45], [17:23], [12.74], [12.06], [20.73],
 )
 
 #figure(benches-furini, caption: [Results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose")]) <benches-furini>
@@ -555,9 +555,9 @@ As previously mentioned in the Project Proposal, the goals for the first half of
 
 However, a rolling horizon extension to the algorithm has not yet been implemented. The time taken to produce a basic working branch-and-bound implementation without de-icing was longer than expected -- the original plan allocated approximately two weeks for this, but in reality it required closer to three weeks. This was primarily due to issues with adapting a classic branch-and-bound method to utilizing the preprocessed sets of separation-identical aircraft, and underestimation of the workload of other modules.
 
-Despite this, the project is on schedule since the original plan had accounted for such delays -- the original Gantt chart includes gaps of multiple days at various points througout the timeline. Certain tasks -- such as developing an initial visualisation tool -- took much less time than expected, further offsetting the delay incurred by the branch-and-bound-implementation. Additionally, the tasks that have been completed have laid down most of the groundwork for the tasks yet to come, and have improved my overall understanding of and grasp on the problem domain.
+Despite this, the project is on schedule since the original plan had accounted for such delays -- the original Gantt chart includes gaps of multiple days at various points throughout the timeline. Certain tasks -- such as developing an initial visualisation tool -- took much less time than expected, further offsetting the delay incurred by the branch-and-bound-implementation. Additionally, the tasks that have been completed have laid down most of the groundwork for the tasks yet to come, and have improved my overall understanding of and grasp on the problem domain.
 
-Based on this, the timelines for some remaining tasks have been revised, and Gantt chart has been updated -- see @revised-gantt -- to reflect the actual tasks completed during the first half of the project, as well as the remaining (revised) tasks. The second half of the project will focus mainly on applying more optimisations and pruning rules to the existing branch-and-bound algorithm, implementing a mathematical programming algorithm, and implementing a dymamic programming algorithm.
+Based on this, the timelines for some remaining tasks have been revised, and Gantt chart has been updated -- see @revised-gantt -- to reflect the actual tasks completed during the first half of the project, as well as the remaining (revised) tasks. The second half of the project will focus mainly on applying more optimisations and pruning rules to the existing branch-and-bound algorithm, implementing a mathematical programming algorithm, and implementing a dynamic programming algorithm.
 
 / A: Write the project proposal
 / B: Research prior approaches into runway sequencing and de-icing
@@ -674,7 +674,7 @@ Reflecting upon the project this term, I believe that I have made good progress 
 
 In its current state, the project already consists of a branch-and-bound algorithm that is capable of solving the integrated runway and de-icing sequencing problem. The algorithm that has been developed so far is a first step towards research that will ultimately contribute to reducing aircraft delays and operating costs, and optimising fuel consumption and its impact on the environment.
 
-Next semester, I plan to extend the algorithm with a rolling horizon, apply some of the optimisations proposed in existing literature, and further analyse its performance and look for inherent characteristics of the problem that can be exploited to improve the algorithm. This will include appylying some of the potential improvements suggested in @results to achieve fewer and less severe delays. I will also implement the other approaches stated in @objectives -- mathematical programming and dynamic programming, and undertake a detailed analysis and comparison of their performance.
+Next semester, I plan to extend the algorithm with a rolling horizon, apply some of the optimisations proposed in existing literature, and further analyse its performance and look for inherent characteristics of the problem that can be exploited to improve the algorithm. This will include applying some of the potential improvements suggested in @results to achieve fewer and less severe delays. I will also implement the other approaches stated in @objectives -- mathematical programming and dynamic programming, and undertake a detailed analysis and comparison of their performance.
 
 = References
 
