@@ -1,9 +1,3 @@
-// TODO:
-// - Increase spacing in contents
-// - Put a page break for algorithm on page 8
-// - Change colours in Gantt chart to be more easily distinguisable
-// - Use the same labels for the new Gantt chart
-
 #import "@preview/lovelace:0.1.0": *
 #import "@preview/timeliney:0.0.1": *
 
@@ -460,6 +454,10 @@ As the project progresses, there will likely be a need for different kinds of vi
 #let interim-day = day(72)
 #let diss-day = day(201)
 
+#let break-line-style = (stroke: 3pt + rgb("#C70039"))
+#let doc-line-style = (stroke: 3pt + rgb("#1363DF"))
+#let work-line-style = (stroke: 3pt + rgb("#000000"))
+
 As previously mentioned in the Project Proposal, the goals for the first half of the project -- seen below in @original-gantt -- were to investigate prior approaches to runway sequencing, fully implementing a branch-and-bound algorithm, and developing a visualisation tool for the generated sequences. These goals have been mostly successfully realised -- in its current state, the project has a working branch-and-bound implementation, a basic runway sequence visualisation tool, and a dataset generator.
 
 / A: Write the project proposal
@@ -489,10 +487,6 @@ As previously mentioned in the Project Proposal, the goals for the first half of
         group(("Apr", day(20) - 0.0001)), // NOTE: See above
     )
     headerline(..range(1, num-weeks + 1).map(week => group(str(week))))
-
-    let break-line-style = (stroke: 3pt + gray)
-    let doc-line-style = (stroke: 3pt + gray.darken(25%))
-    let work-line-style = (stroke: 3pt)
 
     taskgroup({
         // Write the project proposal
@@ -601,10 +595,6 @@ Based on this, the timelines for some remaining tasks have been revised, and Gan
     )
     headerline(..range(1, num-weeks + 1).map(week => group(str(week))))
 
-    let break-line-style = (stroke: 3pt + gray)
-    let doc-line-style = (stroke: 3pt + gray.darken(25%))
-    let work-line-style = (stroke: 3pt)
-
     taskgroup({
         // Write the project proposal
         task("A", (0, proposal-day), style: doc-line-style)
@@ -682,13 +672,15 @@ Based on this, the timelines for some remaining tasks have been revised, and Gan
 
 The project was managed in an Agile way with weekly (and sometimes bi-weekly) sprints, each having clear tasks to complete. Weekly meetings were held to discuss the project's progress, plan the tasks for the current week, and clarify any issues encountered. These were very effective at ensuring a constant flow of development without long breaks, and enabled the discovery and discussion of problems relatively early.
 
+Git was used as a version control system, with the project being hosted on a private GitHub repository. Along with regular physical backups, this ensured that progress was saved regularly and that all documents and source code related to the project could be easily modified without fear of losing progress from previous versions.
+
 == Reflection
 
 Reflecting upon the project this term, I believe that I have made good progress towards realising the overall goals of the project. Although there were a few delays in completing the tasks set out in the initial project plan, I have been able to complete the vast majority of them, and have set up a clear direction and foundation for the remainder. This should reduce the overall time required for some of the tasks in the next semester, which is also reflected by the Gantt chart in @revised-gantt.
 
-In its current state, the project already consists of a branch-and-bound algorithm that is capable of solving the integrated runway and de-icing sequencing problem. The algorithm that has been developed so far is a first step towards research that will ultimately contribute to reducing aircraft delays and operating costs, and optimising fuel consumption and its impact on the environment.
+In its current state, the project already consists of a branch-and-bound algorithm that is capable of solving the integrated runway and de-icing sequencing problem. Next semester, I plan to extend this algorithm with a rolling horizon, apply some of the optimisations proposed in existing literature, and further analyse its performance and look for inherent characteristics of the problem that can be exploited to improve the algorithm. This will include applying some of the potential improvements suggested in @results to achieve fewer and less severe delays. I will also implement the other approaches stated in @objectives -- mathematical programming and dynamic programming, and undertake a detailed analysis and comparison of their performance.
 
-Next semester, I plan to extend the algorithm with a rolling horizon, apply some of the optimisations proposed in existing literature, and further analyse its performance and look for inherent characteristics of the problem that can be exploited to improve the algorithm. This will include applying some of the potential improvements suggested in @results to achieve fewer and less severe delays. I will also implement the other approaches stated in @objectives -- mathematical programming and dynamic programming, and undertake a detailed analysis and comparison of their performance.
+I have also considered and reflected on the broader ethical context of this project. The algorithm that has been developed so far -- and those that will be implemented next semester -- is a crucial first step towards research that will ultimately contribute to reducing aircraft delays and operating costs, and optimising fuel consumption and its impact on the environment. I plan to make this project's code open-source at the end so that it may be of use to future research into the integrated runway and de-icing scheduling problem or any of its variants.
 
 = References
 
