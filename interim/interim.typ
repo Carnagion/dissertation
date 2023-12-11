@@ -1,3 +1,9 @@
+// TODO:
+// - Increase spacing in contents
+// - Put a page break for algorithm on page 8
+// - Change colours in Gantt chart to be more easily distinguisable
+// - Use the same labels for the new Gantt chart
+
 #import "@preview/lovelace:0.1.0": *
 #import "@preview/timeliney:0.0.1": *
 
@@ -114,7 +120,7 @@ An airport's maximum capacity and throughput -- the number of aircraft taking of
 
 == Motivation
 
-Prior approaches to runway sequencing have employed a variety of methods -- both exact and heuristic-based -- such as first-come-first-serve (FCFS) @furini-improved-horizon, branch-and-bound, mixed-integer linear programming @beasley-scheduling-aircraft, dynamic programming @lieder-scheduling-aircraft @lieder-dynamic-programming, and mixed-integer programming (MIP) @lieder-dynamic-programming @avella-time-indexed. Some have also incorporated a rolling horizon to lower the exponential computation time required for large problem instances @furini-improved-horizon @beasley-scheduling-aircraft.
+Prior approaches to runway sequencing have employed a variety of methods -- both exact and heuristic-based -- such as first-come-first-serve (FCFS) @furini-improved-horizon, branch-and-bound, linear programming @beasley-scheduling-aircraft, dynamic programming @lieder-scheduling-aircraft @lieder-dynamic-programming, and mixed-integer programming (MIP) @lieder-dynamic-programming @avella-time-indexed. Some have also incorporated a rolling horizon to lower the exponential computation time required for large problem instances @furini-improved-horizon @beasley-scheduling-aircraft.
 
 However, these approaches have focused primarily on generating optimal runway sequences or de-icing schedules in isolation or in a decomposed manner (i.e., generating solutions for the two problems independently of each other). There is a possibility that integrating the solutions of runway sequencing and de-icing yields more optimal results, and as such, the problem is ripe for investigation.
 This project is thus one of the first of its kind, and investigates four distinct approaches to determining the order of de-icing using three different algorithms.
@@ -135,16 +141,15 @@ The project's key objectives are as follows:
 
 4. *Develop a tool for visualising the outputs and intermediate results produced by the algorithms*. This will provide a more intuitive, human-friendly view intended to aid users' understanding, which will not only be useful for an end user, but also for the analysis of the algorithms themselves.
 
-// TODO: Change citation style - eg. "Beasley et al."
 = Existing Literature <existing-literature>
 
 Early approaches to runway sequencing used by many airports around the world include simple FCFS algorithms optimising for a single objective @bianco-minimizing-time. Although very simple to implement and computationally inexpensive, FCFS strategies are well-known to produce excessive delays @bianco-minimizing-time. Therefore, a number of more optimising approaches -- using both exact and heuristic-based methods -- have been proposed in the past.
 
 == Heuristic Approaches
 
-#cite(<atkin-hybrid-metaheuristics>, form: "prose") introduce a hybridised metaheuristic approach to aid runway scheduling at London Heathrow. This involves using a Tabu Search metaheuristic to search for good feasible departure orders.
+#cite(<atkin-hybrid-metaheuristics>, form: "prose") introduced a hybridised metaheuristic approach to aid runway scheduling at London Heathrow. This involves a Tabu Search metaheuristic to search for good feasible departure orders.
 
-#cite(<bianco-minimizing-time>, form: "prose") introduce two heuristic algorithms -- Cheapest Addition Heuristic (CAH) and Cheapest Insertion Heuristic (CIH). They note that the latter almost always performs better than the former as it searches for the best partial sequences obtained by inserting new times anywhere within the sequence. However, it is also much more computationally expensive @bianco-minimizing-time.
+#cite(<bianco-minimizing-time>, form: "prose") introduced two heuristic algorithms -- Cheapest Addition Heuristic (CAH) and Cheapest Insertion Heuristic (CIH). They noted that the latter almost always performed better than the former as it searches for the best partial sequences obtained by inserting new times anywhere within the sequence. However, it is also much more computationally expensive @bianco-minimizing-time.
 
 == Linear Programming
 
@@ -158,13 +163,13 @@ The approach also allows for complex and arbitrary separation matrices, and is c
 
 Dynamic programming has been used in many solutions in the past @demaere-pruning-rules @psaraftis-dynamic-programming @bianco-minimizing-time @balakrishnan-runway-operations, since it is known to work well for runway sequencing as mentioned in @objectives, and can yield optimal schedules significantly faster than MIP solvers @lieder-dynamic-programming.
 
-#cite(<lieder-dynamic-programming>, form: "prose") provide an optimisation algorithm for runway sequencing based on that of #cite(<briskorn-aircraft-landing>, form: "prose") with more general assumptions -- multiple runways, positive target times, and limited time windows, building upon existing approaches that rely on more restricted or impractical assumptions.
+#cite(<lieder-dynamic-programming>, form: "prose") provided an optimisation algorithm for runway sequencing based on that of #cite(<briskorn-aircraft-landing>, form: "prose") with more general assumptions -- multiple runways, positive target times, and limited time windows, building upon existing approaches that rely on more restricted or impractical assumptions.
 
-#cite(<bianco-minimizing-time>, form: "prose") present a dynamic programming approach for the single-machine scheduling problem with sequence-dependent setup times. This is equivalent to the runway sequencing problem for a single runway, not taking into account aircraft classes @lieder-dynamic-programming @bianco-minimizing-time. By viewing aircraft as jobs and runways as machines, runway sequencing can be considered a variation of the machine/job scheduling problem, and insights from the latter can be applied to solve the former.
+#cite(<bianco-minimizing-time>, form: "prose") presented a dynamic programming approach for the single-machine scheduling problem with sequence-dependent setup times. This is equivalent to the runway sequencing problem for a single runway, not taking into account aircraft classes @lieder-dynamic-programming @bianco-minimizing-time. By viewing aircraft as jobs and runways as machines, runway sequencing can be considered a variation of the machine/job scheduling problem, and insights from the latter can be applied to solve the former.
 
-#cite(<psaraftis-dynamic-programming>, form: "prose") utilizes an approach that grouped aircraft into multiple sets, allowing the exploitation of known precedence orders within these sets. When implemented as a preprocessing step, this reduced the problem's worst-case computational complexity to $O(m^2(n + 1)^m)$, where $n$ denotes the number of sets and $m$ denotes the number of aircraft @demaere-pruning-rules @psaraftis-dynamic-programming. This approach is also used in this project and is discussed later in @complete-orders.
+#cite(<psaraftis-dynamic-programming>, form: "prose") utilized an approach that grouped aircraft into multiple sets, allowing the exploitation of known precedence orders within these sets. When implemented as a preprocessing step, this reduced the problem's worst-case computational complexity to $O(m^2(n + 1)^m)$, where $n$ denotes the number of sets and $m$ denotes the number of aircraft @demaere-pruning-rules @psaraftis-dynamic-programming. This approach is also used in this project and is discussed later in @complete-orders.
 
-#cite(<demaere-pruning-rules>, form: "prose") further introduce a set of pruning principles that exploit the inherent characteristics of the runway sequencing problem including conditional and complete orders (introduced earlier by #cite(<psaraftis-dynamic-programming>, form: "prose")), insertion dominance, dominance with lower bounding, and considering subsets and non-identical sets.
+#cite(<demaere-pruning-rules>, form: "prose") further introduced a set of pruning principles that exploit the inherent characteristics of the runway sequencing problem including conditional and complete orders (introduced earlier by #cite(<psaraftis-dynamic-programming>, form: "prose")), insertion dominance, dominance with lower bounding, and considering subsets and non-identical sets.
 
 These pruning rules enable significant reductions of the problem's average computational complexity without compromising the optimality of the generated sequences. When integrated into a dynamic program, they have been shown to be able to generate optimal sequences for large instances at a low computational cost. Furthermore, the dynamic program has the ability to consider complex non-linear and non-convex objective functions that model real-world constraints and situations @demaere-pruning-rules.
 
@@ -238,7 +243,7 @@ Given an aircraft $x$, the earliest possible time it can take off or land is the
 
 Its earliest possible de-icing time -- if taking off -- can then be calculated as the maximum of the time the previous aircraft $w$ finishes de-icing and the time that $x$ can actually arrive at the de-icing station, considering its updated TOBT. If there is no previous aircraft, then its earliest possible de-icing time is simply the time it needs to start de-icing to meet its earliest allocated departure time $e_x$.
 
-Finally, its _actual_ operation time $t_x$ can be calculated as the maximum of its earliest possible operation time and the time that $x$ can arrive at the runway. For departures, the latter can be expressed as its de-icing time plus its de-icing duration, taxi duration, and runway lineup duration.
+Finally, its actual operation time $t_x$ can be calculated as the maximum of its earliest possible operation time and the time that $x$ can arrive at the runway. For departures, the latter can be expressed as its de-icing time plus its de-icing duration, taxi duration, and runway lineup duration.
 
 The pseudocode for this scheduling process is shown below:
 
@@ -371,7 +376,7 @@ A full implementation of the branch-and-bound algorithm is as follows:
 
 A sequence's lower bound -- i.e. the best possible value for that sequence, assuming all future aircraft are scheduled with no delays -- can simply be calculated using the objective function as described in @objective-function-equation.
 
-However, it is more efficient to update the bounds of the current sequence in each iteration by passing them around as a parameter as seen in @branch-and-bound-pseudocode. This avoids having to re-calculate them from scratch every iteration and leads to a noticeable decrease in run time, especially for larger instances with more aircraft to sequence.
+However, it is more efficient to update the bounds of the current sequence in each iteration by passing them around as a parameter as seen in @branch-and-bound-pseudocode. This avoids having to re-calculate them from scratch in every iteration and leads to a noticeable decrease in run time, especially for larger instances with more aircraft to sequence.
 
 To further prune the solution search space, an estimate for the upper bound of a runway sequence is obtained by assigning take-off times to each remaining (yet to be sequenced) aircraft, as outlined in @upper-bound-pseudocode. This assumes a fixed separation of one minute between all of them. De-icing times for these aircraft are also calculated in a similar manner, disregarding the actual duration required to go through the process.
 
@@ -562,7 +567,7 @@ As previously mentioned in the Project Proposal, the goals for the first half of
 
 However, a rolling horizon extension to the algorithm has not yet been implemented. The time taken to produce a basic working branch-and-bound implementation without de-icing was longer than expected -- the original plan allocated approximately two weeks for this, but in reality it required closer to three weeks. This was primarily due to issues with adapting a classic branch-and-bound method to utilizing the preprocessed sets of separation-identical aircraft, and underestimation of the workload of other modules.
 
-Despite this, the project is on schedule since the original plan had accounted for such delays -- the original Gantt chart includes gaps of multiple days at various points throughout the timeline. Certain tasks -- such as developing an initial visualisation tool -- took much less time than expected, further offsetting the delay incurred by the branch-and-bound-implementation. Additionally, the tasks that have been completed have laid down most of the groundwork for the tasks yet to come, and have improved my overall understanding of and grasp on the problem domain.
+Despite this, the project is on schedule since the original plan had accounted for such delays -- the original Gantt chart includes gaps of multiple days at various points throughout the timeline. Certain tasks -- such as developing an initial visualisation tool -- took much less time than expected, further offsetting the delay incurred by the branch-and-bound-implementation. Additionally, the tasks that have been completed have laid down most of the groundwork for the tasks yet to come, and have improved my overall understanding and grasp of the problem domain.
 
 Based on this, the timelines for some remaining tasks have been revised, and Gantt chart has been updated -- see @revised-gantt -- to reflect the actual tasks completed during the first half of the project, as well as the remaining (revised) tasks. The second half of the project will focus mainly on applying more optimisations and pruning rules to the existing branch-and-bound algorithm, implementing a mathematical programming algorithm, and implementing a dynamic programming algorithm.
 
@@ -685,4 +690,5 @@ Next semester, I plan to extend the algorithm with a rolling horizon, apply some
 
 = References
 
-#bibliography("references.yml", title: none)
+// NOTE: Custom IEEE CSL file to set a max limit of 3 authors before "et al." is used
+#bibliography("references.yml", title: none, style: "ieee-et-al-min.csl")
