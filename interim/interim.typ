@@ -147,13 +147,13 @@ Early approaches to runway sequencing used by many airports around the world inc
 
 == Heuristic Approaches
 
-#cite(<atkin-hybrid-metaheuristics>, form: "prose") introduced a hybridised metaheuristic approach to aid runway scheduling at London Heathrow. This involves a Tabu Search metaheuristic to search for good feasible departure orders.
+#cite(<atkin-hybrid-metaheuristics>, form: "prose", style: "ieee-et-al-min.csl") introduced a hybridised metaheuristic approach to aid runway scheduling at London Heathrow. This involves a Tabu Search metaheuristic to search for good feasible departure orders.
 
-#cite(<bianco-minimizing-time>, form: "prose") introduced two heuristic algorithms -- Cheapest Addition Heuristic (CAH) and Cheapest Insertion Heuristic (CIH). They noted that the latter almost always performed better than the former as it searches for the best partial sequences obtained by inserting new times anywhere within the sequence. However, it is also much more computationally expensive @bianco-minimizing-time.
+#cite(<bianco-minimizing-time>, form: "prose", style: "ieee-et-al-min.csl") introduced two heuristic algorithms -- Cheapest Addition Heuristic (CAH) and Cheapest Insertion Heuristic (CIH). They noted that the latter almost always performed better than the former as it searches for the best partial sequences obtained by inserting new times anywhere within the sequence. However, it is also much more computationally expensive @bianco-minimizing-time.
 
 == Linear Programming
 
-Linearizing the objective function allows the problem to be solved to optimality using mixed-integer linear programming. One such mixed-integer 0-1 formulation is introduced by #cite(<beasley-scheduling-aircraft>, form: "prose") for scheduling aircraft landings, supporting both single or multiple runways operating in either mixed or segregated modes.
+Linearizing the objective function allows the problem to be solved to optimality using mixed-integer linear programming. One such mixed-integer 0-1 formulation is introduced by #cite(<beasley-scheduling-aircraft>, form: "prose", style: "ieee-et-al-min.csl") for scheduling aircraft landings, supporting both single or multiple runways operating in either mixed or segregated modes.
 
 Unlike many previous approaches that assumed an indefinite latest time limit for landing, this approach employs more realistic latest landing times based on fuel considerations @beasley-scheduling-aircraft. This allows exploiting the presence of increased disjoint intervals -- caused by relatively narrower hard time windows for arrivals -- to simplify the problem using landing times @demaere-pruning-rules @beasley-scheduling-aircraft.
 
@@ -163,19 +163,19 @@ The approach also allows for complex and arbitrary separation matrices, and is c
 
 Dynamic programming has been used in many solutions in the past @demaere-pruning-rules @psaraftis-dynamic-programming @bianco-minimizing-time @balakrishnan-runway-operations, since it is known to work well for runway sequencing as mentioned in @objectives, and can yield optimal schedules significantly faster than MIP solvers @lieder-dynamic-programming.
 
-#cite(<lieder-dynamic-programming>, form: "prose") provided an optimisation algorithm for runway sequencing based on that of #cite(<briskorn-aircraft-landing>, form: "prose") with more general assumptions -- multiple runways, positive target times, and limited time windows, building upon existing approaches that rely on more restricted or impractical assumptions.
+#cite(<lieder-dynamic-programming>, form: "prose", style: "ieee-et-al-min.csl") provided an optimisation algorithm for runway sequencing based on that of #cite(<briskorn-aircraft-landing>, form: "prose") with more general assumptions -- multiple runways, positive target times, and limited time windows, building upon existing approaches that rely on more restricted or impractical assumptions.
 
-#cite(<bianco-minimizing-time>, form: "prose") presented a dynamic programming approach for the single-machine scheduling problem with sequence-dependent setup times. This is equivalent to the runway sequencing problem for a single runway, not taking into account aircraft classes @lieder-dynamic-programming @bianco-minimizing-time. By viewing aircraft as jobs and runways as machines, runway sequencing can be considered a variation of the machine/job scheduling problem, and insights from the latter can be applied to solve the former.
+#cite(<bianco-minimizing-time>, form: "prose", style: "ieee-et-al-min.csl") presented a dynamic programming approach for the single-machine scheduling problem with sequence-dependent setup times. This is equivalent to the runway sequencing problem for a single runway, not taking into account aircraft classes @lieder-dynamic-programming @bianco-minimizing-time. By viewing aircraft as jobs and runways as machines, runway sequencing can be considered a variation of the machine/job scheduling problem, and insights from the latter can be applied to solve the former.
 
-#cite(<psaraftis-dynamic-programming>, form: "prose") utilized an approach that grouped aircraft into multiple sets, allowing the exploitation of known precedence orders within these sets. When implemented as a preprocessing step, this reduced the problem's worst-case computational complexity to $O(m^2(n + 1)^m)$, where $n$ denotes the number of sets and $m$ denotes the number of aircraft @demaere-pruning-rules @psaraftis-dynamic-programming. This approach is also used in this project and is discussed later in @complete-orders.
+#cite(<psaraftis-dynamic-programming>, form: "prose", style: "ieee-et-al-min.csl") utilized an approach that grouped aircraft into multiple sets, allowing the exploitation of known precedence orders within these sets. When implemented as a preprocessing step, this reduced the problem's worst-case computational complexity to $O(m^2(n + 1)^m)$, where $n$ denotes the number of sets and $m$ denotes the number of aircraft @demaere-pruning-rules @psaraftis-dynamic-programming. This approach is also used in this project and is discussed later in @complete-orders.
 
-#cite(<demaere-pruning-rules>, form: "prose") further introduced a set of pruning principles that exploit the inherent characteristics of the runway sequencing problem including conditional and complete orders (introduced earlier by #cite(<psaraftis-dynamic-programming>, form: "prose")), insertion dominance, dominance with lower bounding, and considering subsets and non-identical sets.
+#cite(<demaere-pruning-rules>, form: "prose", style: "ieee-et-al-min.csl") further introduced a set of pruning principles that exploit the inherent characteristics of the runway sequencing problem including conditional and complete orders (introduced earlier by #cite(<psaraftis-dynamic-programming>, form: "prose", style: "ieee-et-al-min.csl")), insertion dominance, dominance with lower bounding, and considering subsets and non-identical sets.
 
 These pruning rules enable significant reductions of the problem's average computational complexity without compromising the optimality of the generated sequences. When integrated into a dynamic program, they have been shown to be able to generate optimal sequences for large instances at a low computational cost. Furthermore, the dynamic program has the ability to consider complex non-linear and non-convex objective functions that model real-world constraints and situations @demaere-pruning-rules.
 
 == Constrained Positional Shifts
 
-A number of solutions -- such as that of #cite(<psaraftis-dynamic-programming>, form: "prose") and #cite(<balakrishnan-runway-operations>, form: "prose") -- have also employed Constrained Positional Shifting (CPS). CPS restricts the shift in position of an aircraft's scheduled arrival or departure relative to its original position in the initial sequence, typically an (unoptimised) FCFS sequence. Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also encourages fairness by preventing aircraft from being advanced or delayed disproportionately relative to other aircraft @demaere-pruning-rules.
+A number of solutions -- such as that of #cite(<psaraftis-dynamic-programming>, form: "prose", style: "ieee-et-al-min.csl") and #cite(<balakrishnan-runway-operations>, form: "prose", style: "ieee-et-al-min.csl") -- have also employed Constrained Positional Shifting (CPS). CPS restricts the shift in position of an aircraft's scheduled arrival or departure relative to its original position in the initial sequence, typically an (unoptimised) FCFS sequence. Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also encourages fairness by preventing aircraft from being advanced or delayed disproportionately relative to other aircraft @demaere-pruning-rules.
 
 However, CPS may be impractical in situations involving CTOTs or other time window constraints, or mixed-mode operations (i.e. both arrivals and departures on the same runway) where delays between arrivals and departures may differ widely. These can require large positional shifts, thereby challenging the tractability of CPS-based approaches @demaere-pruning-rules.
 
@@ -690,5 +690,4 @@ Next semester, I plan to extend the algorithm with a rolling horizon, apply some
 
 = References
 
-// NOTE: Custom IEEE CSL file to set a max limit of 3 authors before "et al." is used
-#bibliography("references.yml", title: none, style: "ieee-et-al-min.csl")
+#bibliography("references.yml", title: none, style: "ieee")
