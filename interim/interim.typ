@@ -215,7 +215,9 @@ The datasets chosen were meant to be used in the runway sequencing problem, not 
 
 First, a new Comma-Separated Value (CSV) data format was created for these datasets, which included all the relevant fields. This format included both the separation matrices and the rows of aircraft data together in a single CSV file, unlike the old instance sets that separated them into different files. This made the data much easier to parse and save.
 
-A randomisation algorithm was then created to randomise instances after parsing them, allowing for the generation of new data from an existing dataset. This alters the separation times and the pushback, taxi, de-icing, and lineup durations of each aircraft in the instance. Separations are randomised within a specified range as defined by the aircraft's size class -- small aircraft are assigned a separation between one and two minutes, medium-sized aircraft between two and three minutes, and large aircraft either three or four minutes. The pushback, taxi, and lineup durations are each assigned a random duration between one to three minutes, while de-icing durations are randomised between four to six minutes. All other data -- such as the number of aircraft, their earliest allocated arrival or departure times, their size classes, and so on -- is untouched.
+A randomisation algorithm was then created to randomise instances after parsing them, allowing for the generation of new data from an existing dataset. This alters the separation times and the pushback, taxi, de-icing, and lineup durations of each aircraft in the instance.
+
+Separations are randomised within a specified range as defined by the aircraft's size class -- small aircraft are assigned a separation between one and two minutes, medium-sized aircraft between two and three minutes, and large aircraft either three or four minutes. The pushback, taxi, and lineup durations are each assigned a random duration between one to three minutes, while de-icing durations are randomised between four to six minutes. All other data -- such as the number of aircraft, their earliest allocated arrival or departure times, their size classes, and so on -- is untouched.
 
 == Aircraft Separations
 
@@ -326,8 +328,6 @@ At the same time, the efficiency of exploiting complete orders is highly depende
 
 Branch-and-bound is a method for solving optimisation problems by breaking them down into smaller sub-problems and using a _bounding_ function to eliminate those sub-problems that cannot possibly contain a more optimal solution than the best known optimal one found so far. The use of the bounding function allows the algorithm to prune the solution space and perform better than a brute-force (exhaustive) search.
 
-This version of branch-and-bound exploits the characteristics of complete orders between sets of separation-identical aircraft as previously mentioned in @complete-orders by passing around the indices of the last-added aircraft in each separation-identical set as a parameter. By doing so, the algorithm does not ever swap around the orders of two aircraft from the same set, and is able to prune the search space further than if it were simply picking the next aircraft from the set of all aircraft.
-
 A full implementation of the branch-and-bound algorithm is as follows:
 
 #algorithm(
@@ -372,13 +372,15 @@ A full implementation of the branch-and-bound algorithm is as follows:
     ),
 ) <branch-and-bound-pseudocode>
 
+This version of branch-and-bound exploits the characteristics of complete orders between sets of separation-identical aircraft as previously mentioned in @complete-orders by passing around the indices of the last-added aircraft in each separation-identical set as a parameter. By doing so, the algorithm does not ever swap around the orders of two aircraft from the same set, and is able to prune the search space further than if it were simply picking the next aircraft from the set of all aircraft.
+
 === Bounding
 
 A sequence's lower bound -- i.e. the best possible value for that sequence, assuming all future aircraft are scheduled with no delays -- can simply be calculated using the objective function as described in @objective-function-equation.
 
 However, it is more efficient to update the bounds of the current sequence in each iteration by passing them around as a parameter as seen in @branch-and-bound-pseudocode. This avoids having to re-calculate them from scratch in every iteration and leads to a noticeable decrease in run time, especially for larger instances with more aircraft to sequence.
 
-To further prune the solution search space, an estimate for the upper bound of a runway sequence is obtained by assigning take-off times to each remaining (yet to be sequenced) aircraft, as outlined in @upper-bound-pseudocode. This assumes a fixed separation of one minute between all of them. De-icing times for these aircraft are also calculated in a similar manner, disregarding the actual duration required to go through the process.
+To further prune the solution search space, an estimate for the upper bound of a runway sequence is obtained by assigning take-off times to each remaining (yet to be sequenced) aircraft, as outlined in @upper-bound-pseudocode. This assumes a fixed separation of one minute between all of them. De-icing times for these aircraft are also calculated in a similar manner, disregarding the actual duration required to go through the process. The pseudocode for upper bound estimation is shown below in @upper-bound-pseudocode:
 
 #algorithm(
     caption: [Estimation of the upper bound for a runway sequence],
@@ -440,7 +442,7 @@ One possible solution for minimising these delays is to modify the scheduling st
 
 Alongside the branch-and-bound algorithm, a tool for visualising generated runway sequences has also been developed. The visualiser takes any sequence of departures and de-icing times and produces a Scalable Vector Graphic (SVG) file showcasing the earliest allocated operation time, pushback duration, pre-de-ice taxi duration, scheduled de-icing time, de-ice duration, post-de-ice taxi duration, runway lineup time, and scheduled operation time for each aircraft. The SVG format was chosen because it is a vector graphics format supported by a wide range of browsers and image applications, and because its XML-like syntax makes SVG files easy to create and manipulate within code. An output from the visualiser is shown below:
 
-#figure(image("visual.svg"), caption: [Visualiser output])
+#figure(image("visual.svg"), caption: [Visualiser output for a randomised test instance])
 
 Time increases along the horizontal axis, while the aircraft that are sequenced are laid out vertically, from the first to take-off at the top, to the last at the bottom. The different durations are coloured differently to help distinguish them. The black lines represent the scheduled de-icing and operation times, and the dashed lines represent the earliest allocated operation times for each aircraft. Although simple, this output already aids greatly in obtaining a better view and understanding of the generated sequences, and was also invaluable in identifying and eliminating bugs in the branch-and-bound implementation.
 
@@ -574,14 +576,14 @@ Based on this, the timelines for some remaining tasks have been revised, and Gan
 / A: Write the project proposal
 / B: Research prior approaches into runway sequencing and de-icing
 / C: Implement a branch-and-bound algorithm
-/ D: Write the interim report
+/ D: Develop the visualisation tool
 / E: Evaluate the performance of the algorithm and run simulations
-/ F: Develop the visualisation tool
-/ G: Write the final dissertation
-/ H: Extend the branch-and-bound algorithm with a rolling window
-/ I: Christmas break
-/ J: Prepare for exams
-/ K: Implement a mathematical programming algorithm
+/ F: Write the interim report
+/ G: Extend the branch-and-bound algorithm with a rolling window
+/ H: Implement a mathematical programming algorithm
+/ I: Write the final dissertation
+/ J: Christmas break
+/ K: Prepare for exams
 / L: Implement a dynamic programming algorithm
 / M: Easter break
 
@@ -613,29 +615,29 @@ Based on this, the timelines for some remaining tasks have been revised, and Gan
         // Implement a branch-and-bound algorithm
         task("C", (day(25), day(49)), style: work-line-style)
 
-        // Write the interim report
-        task("D", (proposal-day, interim-day), style: doc-line-style)
+        // Develop the visualisation tool
+        task("D", (day(49), day(175)), style: work-line-style)
 
         // Evaluate the performance of the algorithm and run simulations
         task("E", (day(35), day(182)), style: work-line-style)
 
-        // Develop the visualisation tool
-        task("F", (day(49), day(175)), style: work-line-style)
-
-        // Write the final dissertation
-        task("G", (interim-day, diss-day), style: doc-line-style)
+        // Write the interim report
+        task("F", (proposal-day, interim-day), style: doc-line-style)
 
         // Extend the branch-and-bound algorithm with a rolling window
-        task("H", (interim-day, day(91)), style: work-line-style)
-
-        // Christmas break
-        task("I", (day(77), day(107)), style: break-line-style)
-
-        // Prepare for exams
-        task("J", (day(84), day(119)), style: break-line-style)
+        task("G", (interim-day, day(91)), style: work-line-style)
 
         // Implement a mathematical programming algorithm
-        task("K", (day(98), day(126)), style: work-line-style)
+        task("H", (day(98), day(126)), style: work-line-style)
+
+        // Write the final dissertation
+        task("I", (interim-day, diss-day), style: doc-line-style)
+
+        // Christmas break
+        task("J", (day(77), day(107)), style: break-line-style)
+
+        // Prepare for exams
+        task("K", (day(84), day(119)), style: break-line-style)
 
         // Implement a dynamic programming algorithm
         task("L", (day(133), day(168)), style: work-line-style)
