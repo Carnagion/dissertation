@@ -147,7 +147,7 @@ Early approaches to runway sequencing used by many airports around the world inc
 
 == Linear Programming
 
-Linearizing the objective function allows the problem to be solved to optimality using mixed-integer linear programming. One such mixed-integer 0-1 formulation is introduced by #cite(<beasley-scheduling-aircraft>, form: "prose", style: "ieee-et-al-min.csl") for scheduling aircraft landings, supporting both single or multiple runways operating in either mixed or segregated modes.
+Linearizing the objective function allows the problem to be solved to optimality using mixed-integer linear programming. One such mixed-integer 0-1 formulation was introduced by #cite(<beasley-scheduling-aircraft>, form: "prose", style: "ieee-et-al-min.csl") for scheduling aircraft landings, supporting both single or multiple runways operating in either mixed or segregated modes.
 
 Unlike many previous approaches that assumed an indefinite latest time limit for landing, this approach employs more realistic latest landing times based on fuel considerations @beasley-scheduling-aircraft. This allows exploiting the presence of increased disjoint intervals -- caused by relatively narrower hard time windows for arrivals -- to simplify the problem using landing times @demaere-pruning-rules @beasley-scheduling-aircraft.
 
@@ -422,7 +422,7 @@ Shown below in @benches-furini are the computational costs (in seconds) for the 
 #figure(
     benches-furini,
     caption: [
-        Results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose")
+        Results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose", style: "ieee-et-al-min.csl")
     ],
 )    <benches-furini>
 
