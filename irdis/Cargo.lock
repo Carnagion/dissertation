@@ -299,6 +299,7 @@ dependencies = [
 name = "irdis"
 version = "0.1.0"
 dependencies = [
+ "divan",
  "irdis-branch-bound",
  "irdis-core",
  "irdis-vis",
@@ -308,7 +309,6 @@ dependencies = [
 name = "irdis-branch-bound"
 version = "0.1.0"
 dependencies = [
- "divan",
  "irdis-core",
 ]
 

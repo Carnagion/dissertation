@@ -17,5 +17,16 @@ default = ["branch-bound"]
 branch-bound = ["dep:irdis-branch-bound"]
 vis = ["dep:irdis-vis"]
 
+[dev-dependencies]
+divan = "0.1.5"
+
+[[bench]]
+name = "parse"
+harness = false
+
+[[bench]]
+name = "solve"
+harness = false
+
 [workspace]
 members = ["irdis-branch-bound", "irdis-core", "irdis-vis"]
