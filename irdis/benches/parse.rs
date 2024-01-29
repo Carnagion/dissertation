@@ -12,7 +12,7 @@ fn main() {
 fn from_csv<const INSTANCE: usize>(bencher: Bencher) {
     bencher
         .with_inputs(|| {
-            let path = format!("instances/furini/{}.csv", INSTANCE);
+            let path = format!("instances/furini/converted/{}.csv", INSTANCE);
             fs::read_to_string(path).unwrap()
         })
         .bench_refs(|csv| csv.parse::<Instance>());
