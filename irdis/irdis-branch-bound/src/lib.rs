@@ -11,6 +11,12 @@ use irdis_core::{
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct BranchBound {}
 
+impl Default for BranchBound {
+    fn default() -> Self {
+        Self {}
+    }
+}
+
 impl Solve for BranchBound {
     fn solve(&self, instance: &Instance) -> RunwaySchedule {
         let separation_sets = instance.separation_sets();
