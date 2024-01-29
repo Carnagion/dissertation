@@ -299,6 +299,8 @@ dependencies = [
 name = "irdis"
 version = "0.1.0"
 dependencies = [
+ "chrono",
+ "csv",
  "divan",
  "irdis-branch-bound",
  "irdis-core",
