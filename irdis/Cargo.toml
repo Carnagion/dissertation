@@ -1,0 +1,21 @@
+[package]
+name = "irdis"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
+
+[dependencies]
+irdis-branch-bound = { version = "0.1.0", path = "irdis-branch-bound", optional = true }
+irdis-core = { version = "0.1.0", path = "irdis-core" }
+irdis-vis = { version = "0.1.0", path = "irdis-vis", optional = true }
+
+[features]
+default = ["branch-bound"]
+branch-bound = ["dep:irdis-branch-bound"]
+vis = ["dep:irdis-vis"]
+
+[workspace]
+members = ["irdis-branch-bound", "irdis-core", "irdis-vis"]

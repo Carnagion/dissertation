@@ -1,0 +1,11 @@
+[package]
+name = "irdis-vis"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
+
+[dependencies]
+irdis-core = { version = "0.1.0", path = "../irdis-core" }

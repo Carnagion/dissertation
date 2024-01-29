@@ -4,15 +4,19 @@ use serde::{Deserializer, Serializer};
 
 use serde_with::{
     formats::{Flexible, Format, Strict, Strictness},
-    DeserializeAs, DurationSeconds, SerializeAs,
+    DeserializeAs,
+    DurationSeconds,
+    SerializeAs,
 };
 
-// NOTE: This is so that we can store durations as minutes rather than seconds in instance CSV files,
-// since realistically most aircraft will have separations in the minutes and not seconds
-pub struct DurationMinutes<FORMAT = u64, STRICTNESS = Strict>(PhantomData<(FORMAT, STRICTNESS)>)
+// NOTE: This is so that we can store durations as minutes rather than seconds
+//       in instance CSV files, since realistically most aircraft will have
+//       separations in the minutes and not seconds
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct DurationMinutes<Fmt = u64, Strt = Strict>(PhantomData<(Fmt, Strt)>)
 where
-    FORMAT: Format,
-    STRICTNESS: Strictness;
+    Fmt: Format,
+    Strt: Strictness;
 
 impl<'de> DeserializeAs<'de, Duration> for DurationMinutes<u64, Strict> {
     fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
@@ -42,51 +46,50 @@ impl<'de> DeserializeAs<'de, Duration> for DurationMinutes<String, Strict> {
     }
 }
 
-impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationMinutes<FORMAT, Flexible>
+impl<'de, Fmt> DeserializeAs<'de, Duration> for DurationMinutes<Fmt, Flexible>
 where
-    FORMAT: Format,
+    Fmt: Format,
 {
     fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
     where
         D: Deserializer<'de>,
     {
-        DurationSeconds::<FORMAT, Flexible>::deserialize_as(deserializer)
-            .map(|dur: Duration| dur * 60)
+        DurationSeconds::<Fmt, Flexible>::deserialize_as(deserializer).map(|dur: Duration| dur * 60)
     }
 }
 
-impl<STRICTNESS> SerializeAs<Duration> for DurationMinutes<u64, STRICTNESS>
+impl<Strt> SerializeAs<Duration> for DurationMinutes<u64, Strt>
 where
-    STRICTNESS: Strictness,
+    Strt: Strictness,
 {
     fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        DurationSeconds::<u64, STRICTNESS>::serialize_as(&(*source / 60), serializer)
+        DurationSeconds::<u64, Strt>::serialize_as(&(*source / 60), serializer)
     }
 }
 
-impl<STRICTNESS> SerializeAs<Duration> for DurationMinutes<f64, STRICTNESS>
+impl<Strt> SerializeAs<Duration> for DurationMinutes<f64, Strt>
 where
-    STRICTNESS: Strictness,
+    Strt: Strictness,
 {
     fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        DurationSeconds::<f64, STRICTNESS>::serialize_as(&(*source / 60), serializer)
+        DurationSeconds::<f64, Strt>::serialize_as(&(*source / 60), serializer)
     }
 }
 
-impl<STRICTNESS> SerializeAs<Duration> for DurationMinutes<String, STRICTNESS>
+impl<Strt> SerializeAs<Duration> for DurationMinutes<String, Strt>
 where
-    STRICTNESS: Strictness,
+    Strt: Strictness,
 {
     fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        DurationSeconds::<String, STRICTNESS>::serialize_as(&(*source / 60), serializer)
+        DurationSeconds::<String, Strt>::serialize_as(&(*source / 60), serializer)
     }
 }

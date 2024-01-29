@@ -1,16 +1,17 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct Aircraft {
-    pub reg: Registration,
+    pub registration: Registration,
     pub model: Model,
     pub size_class: SizeClass,
 }
 
 impl Aircraft {
-    pub fn new(reg: Registration, model: Model, size_class: SizeClass) -> Self {
+    pub fn new(registration: Registration, model: Model, size_class: SizeClass) -> Self {
         Self {
-            reg,
+            registration,
             model,
             size_class,
         }
@@ -19,20 +20,26 @@ impl Aircraft {
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(transparent)]
-pub struct Registration(String);
+pub struct Registration(pub String);
 
 impl Registration {
-    pub fn new(reg: impl Into<String>) -> Self {
+    pub fn new<R>(reg: R) -> Self
+    where
+        R: Into<String>,
+    {
         Self(reg.into())
     }
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(transparent)]
-pub struct Model(String);
+pub struct Model(pub String);
 
 impl Model {
-    pub fn new(model: impl Into<String>) -> Self {
+    pub fn new<M>(model: M) -> Self
+    where
+        M: Into<String>,
+    {
         Self(model.into())
     }
 }
