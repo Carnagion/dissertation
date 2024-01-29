@@ -1,4 +1,9 @@
-use std::{fs, path::Path, time::Duration};
+use std::{
+    fs::{self, File},
+    io::Write,
+    path::Path,
+    time::Duration,
+};
 
 use chrono::NaiveTime;
 
@@ -44,14 +49,24 @@ fn main() {
 }
 
 fn save_instance(instance: Instance, path: impl AsRef<Path>) {
-    let mut writer = WriterBuilder::new()
-        .has_headers(false)
-        .from_path(&path)
-        .unwrap();
-    for row in instance.into_rows() {
-        writer.serialize(row).unwrap();
+    {
+        let mut file = File::options()
+            .create(true)
+            .write(true)
+            .truncate(true)
+            .open(&path)
+            .unwrap();
+
+        file.write_all(b"# registration, model, size class, operation, earliest time, pushback duration (departures only), pre-de-ice taxi duration (departures only), de-ice duration (departures only), post-de-ice taxi duration (departures only), lineup duration (departures only), separations\n").unwrap();
+
+        let mut writer = WriterBuilder::new()
+            .has_headers(false)
+            .comment(Some(b'#'))
+            .from_writer(file);
+        for row in instance.into_rows() {
+            writer.serialize(row).unwrap();
+        }
     }
-    writer.flush().unwrap();
 
     let csv = fs::read_to_string(path).unwrap();
     assert!(csv.parse::<Instance>().is_ok());
