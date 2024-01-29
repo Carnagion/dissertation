@@ -9,3 +9,10 @@ rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
 
 [dependencies]
 irdis-core = { version = "0.1.0", path = "../irdis-core" }
+
+[dev-dependencies]
+divan = "0.1.5"
+
+[[bench]]
+name = "modified_furini"
+harness = false
