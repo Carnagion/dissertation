@@ -2,7 +2,7 @@ use std::fs;
 
 use divan::Bencher;
 
-use irdis_core::instance::Instance;
+use irdis::instance::Instance;
 
 fn main() {
     divan::main();

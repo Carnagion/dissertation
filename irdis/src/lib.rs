@@ -4,8 +4,7 @@ pub mod solve {
     pub use irdis_core::solve::Solve;
 
     #[cfg(feature = "branch-bound")]
-    #[doc(inline)]
-    pub use irdis_branch_bound as branch_bound;
+    pub use irdis_branch_bound::BranchBound;
 }
 
 #[cfg(feature = "vis")]

@@ -2,9 +2,7 @@ use std::{fs, num::NonZeroUsize};
 
 use divan::Bencher;
 
-use irdis_branch_bound::BranchBound;
-
-use irdis_core::instance::Instance;
+use irdis::{instance::Instance, solve::BranchBound};
 
 fn main() {
     divan::main();
