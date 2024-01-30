@@ -8,4 +8,6 @@ all-features = true
 rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
 
 [dependencies]
+chrono = { version = "0.4.31", default-features = false }
 irdis-core = { version = "0.1.0", path = "../irdis-core" }
+svg = "0.15.0"

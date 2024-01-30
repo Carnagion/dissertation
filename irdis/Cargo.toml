@@ -13,7 +13,7 @@ irdis-core = { version = "0.1.0", path = "irdis-core" }
 irdis-vis = { version = "0.1.0", path = "irdis-vis", optional = true }
 
 [features]
-default = ["branch-bound"]
+default = ["branch-bound", "vis"]
 branch-bound = ["dep:irdis-branch-bound"]
 vis = ["dep:irdis-vis"]
 
