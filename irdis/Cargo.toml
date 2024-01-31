@@ -29,6 +29,12 @@ harness = false
 [[bench]]
 name = "solve"
 harness = false
+required-featurees = ["branch-bound"]
+
+[[bench]]
+name = "visualise"
+harness = false
+required-features = ["branch-bound", "vis"]
 
 [workspace]
 members = ["irdis-branch-bound", "irdis-core", "irdis-vis"]
