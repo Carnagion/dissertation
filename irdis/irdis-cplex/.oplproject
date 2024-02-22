@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ASCII"?><project>
+    	
+    <version>1.0</version>
+    	
+    <configs>
+        		
+        <config default="true" name="irdis" category="opl">
+            			
+            <ref name="irdis.mod" type="model">
+			</ref>
+            			
+            <ref name="irdis.ops" type="setting">
+			</ref>
+            			
+            <ref name="irdis.dat" type="data">
+			</ref>
+            		
+        </config>
+        	
+    </configs>
+    	
+
+</project>
