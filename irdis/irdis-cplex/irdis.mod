@@ -36,8 +36,10 @@ int nbOfFlights = ...;
 assert ValidFlightCount:
 	nbOfFlights >= 0;
 
+// Indexes of flights
 range Flights = 1..nbOfFlights;
 
+// Set of flights to be scheduled - both departures and arrivals
 Flight flights[i in Flights] = ...;
 assert ValidFlightData:
 	forall (i in Flights)
@@ -65,8 +67,10 @@ tuple Dep {
   	int lineUpDur;
 };
 
+// Indexes of departures
 setof(int) Departures = { i | i in Flights: flights[i].kind == departure };
 
+// Set of departures to be scheduled
 Dep deps[i in Departures] = <
 	flights[i].window,
 	flights[i].pushBackDur,
@@ -81,8 +85,10 @@ tuple Arr {
   	int taxiInDur;
 };
 
+// Indexes of arrivals
 setof(int) Arrivals = { i | i in Flights: flights[i].kind == arrival };
 
+// Set of arrivals to be scheduled
 Arr arrs[i in Arrivals] = <
 	flights[i].window,
 	flights[i].taxiInDur>;
@@ -93,6 +99,7 @@ int sep[i in Flights, j in Flights] = ...;
 assert ValidSeparations:
 	forall (i, j in Flights: i != j) sep[i, j] > 0;
 
+// Set of times a flight `i` could possibly be scheduled at
 setof(int) PossibleFlightTimes[i in Flights] = { t | t in flights[i].window.earliest..flights[i].window.latest };
 
 tuple FlightSched {
@@ -100,10 +107,13 @@ tuple FlightSched {
   	int time;
 };
 
+// Set of flights and their possible scheduled take-off or landing times
 setof(FlightSched) PossibleFlightScheds = { <i, t> | i in Flights, t in PossibleFlightTimes[i] };
 
+// Set of times a departure `i` could possibly be scheduled at
 setof(int) PossibleDepartureTimes[i in Departures] = PossibleFlightTimes[i];
 
+// Set of times a departure `i` could possibly de-ice at
 setof(int) PossibleDeIceTimes[i in Departures] = { t | t in
 	(deps[i].ctot.earliest
 		- (deps[i].lineUpDur
@@ -121,12 +131,15 @@ tuple DepSched {
   	int takeOffTime;
 };
 
+// Set of departures and their possible de-icing times
 setof(FlightSched) PossibleDeIceScheds = { <i, t> | i in Departures, t in PossibleDeIceTimes[i] };
 
+// Set of departures, their possible de-icing times, and their possible take-off times
 setof(DepSched) PossibleDepScheds = { <i, t, u> | i in Departures,
 	t in PossibleDeIceTimes[i],
 	u in PossibleDepartureTimes[i] };
 
+// Set of times an arrival `i` could possibly be scheduled at
 setof(int) PossibleArrivalTimes[i in Arrivals] = PossibleFlightTimes[i];
 
 tuple ArrSched {
@@ -134,6 +147,7 @@ tuple ArrSched {
   	int landingTime;
 };
 
+// Set of arrivals and their possible landing times
 setof(ArrSched) PossibleArrScheds = { <i, t> | i in Arrivals, t in PossibleArrivalTimes[i] };
 
 tuple FlightPair {
@@ -180,10 +194,13 @@ setof(FlightPair) SeparationIdenticalFlightPairs = { <i, j> |
 	&& sep[i, k] == sep[j, k]
 	&& sep[k, i] == sep[k, j] };
 
+// Whether a flight `i` is scheduled at time `t`
 dvar boolean isSchedAt[<i, t> in PossibleFlightScheds];
 
+// Whether a departure `i` is cancelled
 dvar boolean isDropped[i in Departures];
 
+// Whether a departure `i` starts de-icing at time `t`
 dvar boolean isDeIceAt[<i, t> in PossibleDeIceScheds];
 
 dexpr int delay[<i, t> in PossibleFlightScheds] = isSchedAt[<i, t>] * (
@@ -249,18 +266,14 @@ subject to {
 			(u - (t + deps[i].deIceDur)) <= maxHoldoverDur
 			|| !(isSchedAt[<i, u>] == true && isDeIceAt[<i, t>] == true);
 
-	CompleteOrderInDisjointSeparatedWindowFlights:
-		forall (<i, j> in DisjointSeparatedWindowFlightPairs union DisjointWindowFlightPairs,
-			t in PossibleFlightTimes[i],
-			u in PossibleFlightTimes[j])
-			  	u >= t
-			  	|| !(isSchedAt[<i, t>] == true && isSchedAt[<j, u>] == true);
-
+	// Any two flights `i` and `j` with non-overlapping time windows but without automatically satisfying the separation
+	// requirements must maintain separation between them
 	CompleteOrderInDisjointWindowFlights:
 		forall (<i, j> in DisjointWindowFlightPairs, t in PossibleFlightTimes[i], u in PossibleFlightTimes[j])
 		  	u >= t + sep[i, j]
 		  	|| !(isSchedAt[<i, t>] == true && isSchedAt[<j, u>] == true);
 
+	// Any two flights `i` and `j` with overlapping time windows must maintain separation between them
 	MaintainSeparationInOverlappingWindowFlights:
 		forall (<i, j> in OverlappingWindowFlightPairs, t in PossibleFlightTimes[i], u in PossibleFlightTimes[j])
 		  	u >= t
@@ -268,6 +281,7 @@ subject to {
 		  		- (flights[i].window.latest - flights[j].window.earliest) * (t >= u + 1)
 		  	|| !(isSchedAt[<i, t>] == true && isSchedAt[<j, u>] == true);
 
+	// Any two separation-identical flights `i` and `j` form a complete order that does not need to be reversed
 	CompleteOrderInSeparationIdenticalFlights:
 		forall (<i, j> in SeparationIdenticalFlightPairs, t in PossibleFlightTimes[i], u in PossibleFlightTimes[j])
 		  	u >= t + 1
