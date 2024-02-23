@@ -1,10 +1,8 @@
 SheetConnection data("irdis.xlsx");
 
-maxHoldoverDur = 15;
+maxHoldoverDur from SheetRead(data, "maxHoldoverDur");
 
-maxSlackDur = 5;
-
-//maxTime from SheetRead(data, "maxTime");
+maxSlackDur from SheetRead(data, "maxSlackDur");
 
 nbOfFlights from SheetRead(data, "nbOfFlights");
 

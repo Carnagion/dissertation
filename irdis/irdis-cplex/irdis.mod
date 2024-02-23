@@ -87,6 +87,8 @@ Arr arrs[i in Arrivals] = <
 	flights[i].window,
 	flights[i].taxiInDur>;
 
+// Separation matrix of flights for which `sep[i, j]` represents the separation
+// requirement between flight `i` and flight `j` where `j` goes after `i`
 int sep[i in Flights, j in Flights] = ...;
 assert ValidSeparations:
 	forall (i, j in Flights: i != j) sep[i, j] > 0;
@@ -188,64 +190,83 @@ dexpr int delay[<i, t> in PossibleFlightScheds] = isSchedAt[<i, t>] * (
 	(t in flights[i].window.earliest..flights[i].window.target - 1)
 		* ftoi(pow(flights[i].window.target - t, 2))
 	+ (t in flights[i].window.target + 1..flights[i].window.latest)
-		* ftoi(pow(t - flights[i].window.target, 2))
+		* ftoi(pow((t - flights[i].window.target), 2))
 );
 
-dexpr int drop[i in Departures] = isDropped[i] * 1000;
+dexpr int drop[i in Departures] = isDropped[i] * 10000;
 
 dexpr int holdover[<i, t, u> in PossibleDepScheds] = (isSchedAt[<i, u>] + isDeIceAt[<i, t>])
-	* (u - (t + deps[i].deIceDur));
+	* ftoi(pow((u - (t + deps[i].deIceDur)), 2));
+
+dexpr int slack[<i, t, u> in PossibleDepScheds] = (isSchedAt[<i, u>] + isDeIceAt[<i, t>])
+	* ftoi(pow((u - (deps[i].lineUpDur + deps[i].taxiOutDur + deps[i].deIceDur)) - t, 2));
+
+dexpr int tightness[<i, t, u> in PossibleDepScheds] = (isSchedAt[<i, u>] + isDeIceAt[<i, t>])
+	* (maxSlackDur - ((u - (deps[i].lineUpDur + deps[i].taxiOutDur + deps[i].deIceDur)) - t));
 
 minimize (sum (<i, t> in PossibleFlightScheds) delay[<i, t>])
 	+ (sum (i in Departures) drop[i])
-	+ (sum (<i, t, u> in PossibleDepScheds) holdover[<i, t, u>]);
+	+ (sum (<i, t, u> in PossibleDepScheds) holdover[<i, t, u>])
+	+ (sum (<i, t, u> in PossibleDepScheds) slack[<i, t, u>])
+	+ (sum (<i, t, u> in PossibleDepScheds) tightness[<i, t, u>]);
 
 subject to {
-  	ScheduleDepOrDrop:
+  	// Each departure `i` must be scheduled exactly once or must be dropped
+  	ScheduleDeparturesOrDrop:
 	  	forall (i in Departures)
 	  	  	(sum (t in PossibleDepartureTimes[i]) isSchedAt[<i, t>]) + isDropped[i] == 1;
 
-  	ScheduleArr:
+	// Each arrival `i` must be scheduled exactly once
+  	ScheduleAllArrivals:
 	  	forall (i in Arrivals)
 	  	  	(sum (t in PossibleArrivalTimes[i]) isSchedAt[<i, t>]) == 1;
 
+	// Each departure `i` must have de-icing scheduled exactly once or must be dropped
   	ScheduleDeIceOrDrop:
 		forall (i in Departures)
 	  	  	(sum (t in PossibleDeIceTimes[i]) isDeIceAt[<i, t>]) + isDropped[i] == 1;
 
-  	DeIceBeforeDep:
+	// De-icing for a departure `i` must happen before its scheduled departure time, with
+	// enough time for the plane to get from the de-icing station to the runway
+  	DeIceBeforeDeparture:
 	  	forall (<i, t, u> in PossibleDepScheds)
 	  		(u >= t
 				+ deps[i].lineUpDur
 				+ deps[i].taxiOutDur
-	  			+ deps[i].deIceDur
-				+ maxSlackDur)
+	  			+ deps[i].deIceDur) // NOTE: Slack not counted here - it only influences possible de-icing times
 			|| !(isSchedAt[<i, u>] == true && isDeIceAt[<i, t>] == true);
 
+	// Each departure `j` cannot start de-icing until the previous departure `i` finishes de-icing
 	NoDeIceOverlap:
 		forall (<i, t> in PossibleDeIceScheds, <j, u> in PossibleDeIceScheds: i != j)
 			(u >= t + deps[i].deIceDur
 			|| t >= u + deps[j].deIceDur)
 			|| !(isDeIceAt[<i, t>] == true && isDeIceAt[<j, u>] == true);
 
+	// Each departure `i` must have a holdover time below the allowed maximum
 	AcceptableHoldover:
 		forall (<i, t, u> in PossibleDepScheds)
 			(u - (t + deps[i].deIceDur)) <= maxHoldoverDur
 			|| !(isSchedAt[<i, u>] == true && isDeIceAt[<i, t>] == true);
 
-	forall (<i, j> in DisjointSeparatedWindowFlightPairs union DisjointWindowFlightPairs, t in PossibleFlightTimes[i], u in PossibleFlightTimes[j])
-	  	u >= t
-	  	|| !(isSchedAt[<i, t>] == true && isSchedAt[<j, u>] == true);
+	CompleteOrderInDisjointSeparatedWindowFlights:
+		forall (<i, j> in DisjointSeparatedWindowFlightPairs union DisjointWindowFlightPairs,
+			t in PossibleFlightTimes[i],
+			u in PossibleFlightTimes[j])
+			  	u >= t
+			  	|| !(isSchedAt[<i, t>] == true && isSchedAt[<j, u>] == true);
 
-	forall (<i, j> in DisjointWindowFlightPairs, t in PossibleFlightTimes[i], u in PossibleFlightTimes[j])
-	  	u >= t + sep[i, j]
-	  	|| !(isSchedAt[<i, t>] == true && isSchedAt[<j, u>] == true);
+	CompleteOrderInDisjointWindowFlights:
+		forall (<i, j> in DisjointWindowFlightPairs, t in PossibleFlightTimes[i], u in PossibleFlightTimes[j])
+		  	u >= t + sep[i, j]
+		  	|| !(isSchedAt[<i, t>] == true && isSchedAt[<j, u>] == true);
 
-	forall (<i, j> in OverlappingWindowFlightPairs, t in PossibleFlightTimes[i], u in PossibleFlightTimes[j])
-	  	u >= t
-	  		+ sep[i, j] * (u >= t + 1)
-	  		- (flights[i].window.latest - flights[j].window.earliest) * (t >= u + 1)
-	  	|| !(isSchedAt[<i, t>] == true && isSchedAt[<j, u>] == true);
+	MaintainSeparationInOverlappingWindowFlights:
+		forall (<i, j> in OverlappingWindowFlightPairs, t in PossibleFlightTimes[i], u in PossibleFlightTimes[j])
+		  	u >= t
+		  		+ sep[i, j] * (u >= t + 1)
+		  		- (flights[i].window.latest - flights[j].window.earliest) * (t >= u + 1)
+		  	|| !(isSchedAt[<i, t>] == true && isSchedAt[<j, u>] == true);
 
 	CompleteOrderInSeparationIdenticalFlights:
 		forall (<i, j> in SeparationIdenticalFlightPairs, t in PossibleFlightTimes[i], u in PossibleFlightTimes[j])
