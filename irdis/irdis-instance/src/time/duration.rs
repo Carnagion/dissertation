@@ -10,8 +10,8 @@ use serde_with::{
 };
 
 // NOTE: This is so that we can store durations as minutes rather than seconds
-//       in instance CSV files, since realistically most aircraft will have
-//       separations in the minutes and not seconds
+//       in instance CSV files, since all flights will have separations and other
+//       duration data in the minutes, not seconds.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct DurationMinutes<Fmt = u64, Strt = Strict>(PhantomData<(Fmt, Strt)>)
 where

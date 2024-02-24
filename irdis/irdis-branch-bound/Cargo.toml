@@ -8,4 +8,5 @@ all-features = true
 rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
 
 [dependencies]
-irdis-core = { version = "0.1.0", path = "../irdis-core" }
+chrono = { version = "0.4.31", default-features = false, features = ["std", "serde"] }
+irdis-instance = { version = "0.1.0", path = "../irdis-instance" }
