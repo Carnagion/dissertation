@@ -8,13 +8,13 @@ pub mod flight;
 use flight::Flight;
 
 pub mod sep;
-use sep::{Separations, SeparationsAsMinutes, SeparationsMut};
+use sep::{Separations, SeparationsMut};
 
 pub mod schedule;
 use schedule::Schedule;
 
 pub mod time;
-use time::DurationMinutes;
+use time::{DurationMinutes, SeparationsAsMinutes};
 
 #[serde_as] // NOTE: This must remain before the derive
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]

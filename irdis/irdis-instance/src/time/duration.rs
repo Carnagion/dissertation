@@ -3,93 +3,81 @@ use std::{marker::PhantomData, time::Duration};
 use serde::{Deserializer, Serializer};
 
 use serde_with::{
-    formats::{Flexible, Format, Strict, Strictness},
+    formats::{Format, Strict, Strictness},
     DeserializeAs,
     DurationSeconds,
     SerializeAs,
 };
 
+use crate::sep::Separations;
+
 // NOTE: This is so that we can store durations as minutes rather than seconds
-//       in instance CSV files, since all flights will have separations and other
-//       duration data in the minutes, not seconds.
+//       in instance files, since all flights will have duration data in the
+//       minutes, not seconds.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub struct DurationMinutes<Fmt = u64, Strt = Strict>(PhantomData<(Fmt, Strt)>)
+pub struct DurationMinutes<Fmt = u64, Strt = Strict>(PhantomData<(Fmt, Strt)>);
+
+impl<'de, Fmt, Strt> DeserializeAs<'de, Duration> for DurationMinutes<Fmt, Strt>
 where
     Fmt: Format,
-    Strt: Strictness;
-
-impl<'de> DeserializeAs<'de, Duration> for DurationMinutes<u64, Strict> {
+    Strt: Strictness,
+    DurationSeconds<Fmt, Strt>: DeserializeAs<'de, Duration>,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
     where
         D: Deserializer<'de>,
     {
-        DurationSeconds::<u64, Strict>::deserialize_as(deserializer).map(|dur: Duration| dur * 60)
+        DurationSeconds::<Fmt, Strt>::deserialize_as(deserializer).map(|dur| dur * 60)
     }
 }
 
-impl<'de> DeserializeAs<'de, Duration> for DurationMinutes<f64, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        DurationSeconds::<f64, Strict>::deserialize_as(deserializer).map(|dur: Duration| dur * 60)
-    }
-}
-
-impl<'de> DeserializeAs<'de, Duration> for DurationMinutes<String, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        DurationSeconds::<String, Strict>::deserialize_as(deserializer)
-            .map(|dur: Duration| dur * 60)
-    }
-}
-
-impl<'de, Fmt> DeserializeAs<'de, Duration> for DurationMinutes<Fmt, Flexible>
+impl<Fmt, Strt> SerializeAs<Duration> for DurationMinutes<Fmt, Strt>
 where
     Fmt: Format,
+    Strt: Strictness,
+    DurationSeconds<Fmt, Strt>: SerializeAs<Duration>,
 {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    fn serialize_as<S>(dur: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        DurationSeconds::<Fmt, Strt>::serialize_as(&(*dur / 60), serializer)
+    }
+}
+
+// NOTE: This is so that we can store separations in minutes rather than seconds
+//       in instance files, since all flights will have separation data in the
+//       minutes, not seconds.
+pub struct SeparationsAsMinutes<Fmt = u64, Strt = Strict>(PhantomData<(Fmt, Strt)>);
+
+impl<'de, Fmt, Strt> DeserializeAs<'de, Separations> for SeparationsAsMinutes<Fmt, Strt>
+where
+    Fmt: Format,
+    Strt: Strictness,
+    DurationMinutes<Fmt, Strt>: DeserializeAs<'de, Duration>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Separations, D::Error>
     where
         D: Deserializer<'de>,
     {
-        DurationSeconds::<Fmt, Flexible>::deserialize_as(deserializer).map(|dur: Duration| dur * 60)
+        Vec::<Vec<DurationMinutes<Fmt, Strt>>>::deserialize_as(deserializer).and_then(|grid| {
+            let separations = Separations::try_from(grid).map_err(serde::de::Error::custom)?;
+            Ok(separations)
+        })
     }
 }
 
-impl<Strt> SerializeAs<Duration> for DurationMinutes<u64, Strt>
+impl<Fmt, Strt> SerializeAs<Separations> for SeparationsAsMinutes<Fmt, Strt>
 where
+    Fmt: Format,
     Strt: Strictness,
+    DurationMinutes<Fmt, Strt>: SerializeAs<Duration>,
 {
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize_as<S>(separations: &Separations, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        DurationSeconds::<u64, Strt>::serialize_as(&(*source / 60), serializer)
-    }
-}
-
-impl<Strt> SerializeAs<Duration> for DurationMinutes<f64, Strt>
-where
-    Strt: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        DurationSeconds::<f64, Strt>::serialize_as(&(*source / 60), serializer)
-    }
-}
-
-impl<Strt> SerializeAs<Duration> for DurationMinutes<String, Strt>
-where
-    Strt: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        DurationSeconds::<String, Strt>::serialize_as(&(*source / 60), serializer)
+        let grid = separations.to_grid();
+        Vec::<Vec<DurationMinutes<Fmt, Strt>>>::serialize_as(&grid, serializer)
     }
 }

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 
 mod duration;
-pub(crate) use duration::DurationMinutes;
+pub(crate) use duration::{DurationMinutes, SeparationsAsMinutes};
 
 #[serde_as] // NOTE: This must remain before the derive
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]

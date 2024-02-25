@@ -16,24 +16,6 @@ pub struct Separations {
     len: usize,
 }
 
-// NOTE: This wrapper is necessary since the `try_from`/`into` container attributes
-//       supported by `serde` do not take into account the `DurationMinutes` wrapper
-//       intended for use with `serde_with`.
-serde_with::serde_conv! {
-    pub(super) SeparationsAsMinutes,
-    Separations,
-    |separations: &Separations| -> Vec<Vec<Duration>> {
-        let mut grid = separations.to_grid();
-        grid.iter_mut().flatten().for_each(|dur| *dur /= 60);
-        grid
-    },
-    |grid: Vec<Vec<Duration>>| -> Result<Separations, SeparationsLenError> {
-        let mut separations = Separations::try_from(grid)?;
-        separations.data.iter_mut().for_each(|dur| *dur *= 60);
-        Ok(separations)
-    }
-}
-
 impl Separations {
     pub fn new<S>(data: S, len: usize) -> Option<Self>
     where
