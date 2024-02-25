@@ -44,7 +44,7 @@ impl Solve for BranchBound {
             Some(horizon) => 0..usize::from(horizon),
         };
 
-        let state = BranchBoundState {
+        let state = State {
             last_set_idxs: vec![0; sep_identical_sets.len()],
             current_schedule: Vec::new(),
             best_schedule: Vec::new(),
@@ -54,46 +54,6 @@ impl Solve for BranchBound {
         };
 
         state.explore(instance, &mut sep_identical_sets)
-
-        /*
-        for each separation-identical set:
-            if last taken index for the set is greater than the set's length:
-                continue to next set
-
-            f = get flight at last taken index for the set
-
-            if f is a departure:
-                for t in ctot window of f:
-                    d = schedule departure for f at t
-
-                    b = calculate objective value of schedule so far
-                    if b is greater than lowest objective value:
-                        continue
-
-                    push b to schedule
-                    increment last taken index for the set
-
-                    branch
-
-                    pop b from schedule
-                    decrement last taken index for the set
-
-            else if f is an arrival:
-                for t in time window of f:
-                    a = schedule arrival for f at t
-
-                    b = calculate objective value of schedule so far
-                    if b is greater than lowest objective value:
-                        continue
-
-                    push b to schedule
-                    increment last taken index for the set
-
-                    branch
-
-                    pop b from schedule
-                    decrement last taken index for the set
-        */
     }
 }
 
@@ -113,25 +73,22 @@ macro_rules! iter_minutes {
     };
 }
 
-struct BranchBoundState {
+struct State {
     last_set_idxs: Vec<usize>,
-
     current_schedule: Vec<Schedule>,
     best_schedule: Vec<Schedule>,
-
     current_bound: u64,
     lowest_bound: u64,
-
     horizon: Range<usize>,
 }
 
-impl BranchBoundState {
+impl State {
     fn explore(
         mut self,
         instance: &Instance,
         sep_identical_sets: &mut [Vec<usize>],
     ) -> Vec<Schedule> {
-        self.explore_once(instance, sep_identical_sets);
+        self.explore_current(instance, sep_identical_sets);
 
         while self.horizon.end < instance.flights().len() {
             self.last_set_idxs.fill(0);
@@ -148,14 +105,14 @@ impl BranchBoundState {
             self.horizon.start += 1;
             self.horizon.end += 1;
 
-            self.explore_once(instance, sep_identical_sets);
+            self.explore_current(instance, sep_identical_sets);
         }
 
         self.current_schedule.extend(self.best_schedule);
         self.current_schedule
     }
 
-    fn explore_once(&mut self, instance: &Instance, sep_identical_sets: &[Vec<usize>]) {
+    fn explore_current(&mut self, instance: &Instance, sep_identical_sets: &[Vec<usize>]) {
         if self.current_schedule.len() == self.horizon.end {
             self.update_best();
         } else {
@@ -167,8 +124,20 @@ impl BranchBoundState {
 
                 let flight = &instance.flights()[flight_idx];
                 match flight {
-                    Flight::Arr(arrival) => self.explore_arr(arrival, flight_idx, instance),
-                    Flight::Dep(departure) => self.explore_dep(departure, flight_idx, instance),
+                    Flight::Arr(arrival) => self.explore_arrival(
+                        arrival,
+                        flight_idx,
+                        instance,
+                        sep_identical_sets,
+                        set_idx,
+                    ),
+                    Flight::Dep(departure) => self.explore_departure(
+                        departure,
+                        flight_idx,
+                        instance,
+                        sep_identical_sets,
+                        set_idx,
+                    ),
                 }
             }
         }
@@ -185,56 +154,99 @@ impl BranchBoundState {
         &mut self,
         sched: Schedule,
         sched_cost: u64,
-        set_idx: usize,
-        sep_identical_sets: &[Vec<usize>],
         instance: &Instance,
+        sep_identical_sets: &[Vec<usize>],
+        set_idx: usize,
     ) {
         self.current_schedule.push(sched);
         self.current_bound += sched_cost;
         self.last_set_idxs[set_idx] += 1;
 
-        self.explore_once(instance, sep_identical_sets);
+        self.explore_current(instance, sep_identical_sets);
 
         self.current_schedule.pop();
         self.current_bound -= sched_cost;
         self.last_set_idxs[set_idx] -= 1;
     }
 
-    fn explore_arr(&mut self, arrival: &Arrival, arrival_idx: usize, instance: &Instance) {
+    fn explore_arrival(
+        &mut self,
+        arrival: &Arrival,
+        arrival_idx: usize,
+        instance: &Instance,
+        sep_identical_sets: &[Vec<usize>],
+        set_idx: usize,
+    ) {
         let prev_sched = self.current_schedule.last();
         let landing_times = possible_landing_times(arrival, arrival_idx, prev_sched, instance);
 
         iter_minutes!(landing_times, |landing| {
-            let sched = Schedule::Arr(ArrivalSchedule {
+            let sched = ArrivalSchedule {
                 flight_idx: arrival_idx,
                 landing,
-            });
+            };
 
-            // TODO: Branch
+            let landing_cost = landing_cost(landing, arrival);
+            if self.current_bound + landing_cost > self.lowest_bound {
+                continue;
+            }
+
+            self.explore_next(
+                sched.into(),
+                landing_cost,
+                instance,
+                sep_identical_sets,
+                set_idx,
+            );
         });
     }
 
-    fn explore_dep(&mut self, departure: &Departure, departure_idx: usize, instance: &Instance) {
+    fn explore_departure(
+        &mut self,
+        departure: &Departure,
+        departure_idx: usize,
+        instance: &Instance,
+        sep_identical_sets: &[Vec<usize>],
+        set_idx: usize,
+    ) {
         let prev_sched = self.current_schedule.last();
         let prev_dep_sched = self
             .current_schedule
             .iter()
             .rev()
-            .find_map(Schedule::as_departure);
+            .find_map(Schedule::as_departure)
+            .cloned();
 
         let takeoff_times = possible_takeoff_times(departure, departure_idx, prev_sched, instance);
 
         iter_minutes!(takeoff_times, |takeoff| {
-            let deice_times = possible_deice_times(departure, takeoff, prev_dep_sched, instance);
+            let takeoff_cost = takeoff_cost(takeoff, departure);
+            if self.current_bound + takeoff_cost > self.lowest_bound {
+                continue;
+            }
+
+            let deice_times =
+                possible_deice_times(departure, takeoff, prev_dep_sched.as_ref(), instance);
 
             iter_minutes!(deice_times, |deice| {
-                let sched = Schedule::Dep(DepartureSchedule {
+                let sched = DepartureSchedule {
                     flight_idx: departure_idx,
                     deice,
                     takeoff,
-                });
+                };
 
-                // TODO: Branch
+                let slack_cost = slack_cost(deice, takeoff, departure);
+                if self.current_bound + takeoff_cost + slack_cost > self.lowest_bound {
+                    continue;
+                }
+
+                self.explore_next(
+                    sched.into(),
+                    takeoff_cost + slack_cost,
+                    instance,
+                    sep_identical_sets,
+                    set_idx,
+                );
             });
         });
     }
@@ -341,4 +353,21 @@ fn possible_deice_times(
             earliest_deice..latest_deice
         },
     }
+}
+
+fn landing_cost(landing: NaiveTime, arrival: &Arrival) -> u64 {
+    let delay = landing - arrival.window.target;
+    delay.num_minutes().unsigned_abs().pow(2)
+}
+
+fn takeoff_cost(takeoff: NaiveTime, departure: &Departure) -> u64 {
+    let delay = takeoff - departure.ctot.target;
+    delay.num_minutes().unsigned_abs().pow(2)
+}
+
+fn slack_cost(deice: NaiveTime, takeoff: NaiveTime, departure: &Departure) -> u64 {
+    let tightest_deice =
+        takeoff - departure.lineup_dur - departure.taxi_out_dur - departure.deice_dur;
+    let slack = tightest_deice - deice;
+    slack.num_minutes().unsigned_abs().pow(2)
 }
