@@ -14,6 +14,13 @@ pub enum Flight {
 }
 
 impl Flight {
+    pub fn time_window(&self) -> &TimeWindow {
+        match self {
+            Self::Arr(arr) => &arr.window,
+            Self::Dep(dep) => &dep.ctot,
+        }
+    }
+
     pub fn as_arrival(&self) -> Option<&Arrival> {
         match self {
             Self::Arr(arr) => Some(arr),
