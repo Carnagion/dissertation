@@ -2,7 +2,9 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
-use crate::time::TimeWindow;
+use serde_with::serde_as;
+
+use crate::{time::TimeWindow, DurationMinutes};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(tag = "kind")]
@@ -50,10 +52,12 @@ impl Flight {
     }
 }
 
+#[serde_as] // NOTE: This must remain before the derive
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Arrival {
     pub window: TimeWindow,
+    #[serde_as(as = "DurationMinutes")]
     pub taxi_in_dur: Duration,
 }
 
@@ -63,14 +67,20 @@ impl From<Arrival> for Flight {
     }
 }
 
+#[serde_as] // NOTE: This must remain before the derive
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Departure {
     pub ctot: TimeWindow,
+    #[serde_as(as = "DurationMinutes")]
     pub pushback_dur: Duration,
+    #[serde_as(as = "DurationMinutes")]
     pub taxi_deice_dur: Duration,
+    #[serde_as(as = "DurationMinutes")]
     pub deice_dur: Duration,
+    #[serde_as(as = "DurationMinutes")]
     pub taxi_out_dur: Duration,
+    #[serde_as(as = "DurationMinutes")]
     pub lineup_dur: Duration,
 }
 
