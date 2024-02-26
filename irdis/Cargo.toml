@@ -7,5 +7,21 @@ edition = "2021"
 all-features = true
 rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
 
+[dependencies]
+irdis-branch-bound = { version = "0.1.0", path = "irdis-branch-bound", optional = true }
+irdis-instance = { version = "0.1.0", path = "irdis-instance" }
+irdis-vis = { version = "0.1.0", path = "irdis-vis", optional = true }
+
+[features]
+default = ["branch-bound", "vis"]
+branch-bound = ["dep:irdis-branch-bound"]
+vis = ["dep:irdis-vis"]
+
+[dev-dependencies]
+chrono = { version = "0.4.31", default-features = false }
+csv = "1.3.0"
+toml = "0.8.10"
+svg = "0.15.0"
+
 [workspace]
-members = ["irdis-branch-bound", "irdis-instance"]
+members = ["irdis-branch-bound", "irdis-instance", "irdis-vis"]
