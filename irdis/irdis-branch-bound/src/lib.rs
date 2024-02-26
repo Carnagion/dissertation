@@ -251,8 +251,7 @@ fn possible_deps<'a>(
     let prev_dep_sched = current_solution
         .iter()
         .rev()
-        .find_map(Schedule::as_departure)
-        .cloned();
+        .find_map(Schedule::as_departure);
 
     let earliest_takeoff = match prev_sched {
         None => dep.ctot.earliest(),
