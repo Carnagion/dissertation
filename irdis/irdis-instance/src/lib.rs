@@ -30,7 +30,7 @@ pub struct Instance {
 }
 
 impl Instance {
-    pub fn new<F, S>(
+    pub fn new<F>(
         flights: F,
         separations: Separations,
         max_holdover_dur: Duration,
