@@ -78,7 +78,7 @@ impl Instance {
         (self.flights, self.separations)
     }
 
-    pub fn solve<S>(&self) -> Vec<Schedule>
+    pub fn solve<S>(&self) -> Option<Vec<Schedule>>
     where
         S: Solve + Default,
     {
@@ -88,5 +88,5 @@ impl Instance {
 }
 
 pub trait Solve {
-    fn solve(&self, instance: &Instance) -> Vec<Schedule>;
+    fn solve(&self, instance: &Instance) -> Option<Vec<Schedule>>;
 }
