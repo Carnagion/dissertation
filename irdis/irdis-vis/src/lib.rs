@@ -359,24 +359,37 @@ impl Visualiser {
 }
 
 fn starting_time(schedule: &[Schedule], instance: &Instance) -> Option<NaiveTime> {
-    let first_sched = schedule.first()?;
-    let flight = &instance.flights()[first_sched.flight_index()];
-
-    let starting_time = match first_sched {
-        Schedule::Arr(first_sched) => first_sched.landing,
-        Schedule::Dep(first_sched) => {
-            let dep = flight.as_departure().unwrap();
-            first_sched.deice - dep.taxi_deice_dur - dep.pushback_dur
-        },
-    };
-
-    Some(starting_time)
+    schedule
+        .iter()
+        .map(|sched| match sched {
+            Schedule::Arr(sched) => {
+                let arr = instance.flights()[sched.flight_idx].as_arrival().unwrap();
+                arr.window.earliest().min(sched.landing)
+            },
+            Schedule::Dep(sched) => {
+                let dep = instance.flights()[sched.flight_idx].as_departure().unwrap();
+                dep.ctot
+                    .earliest()
+                    .min(sched.deice - dep.taxi_deice_dur - dep.pushback_dur)
+            },
+        })
+        .min()
 }
 
 fn ending_time(schedule: &[Schedule], instance: &Instance) -> Option<NaiveTime> {
-    let last_sched = schedule.last()?;
-    let flight = &instance.flights()[last_sched.flight_index()];
-    Some(flight.time_window().latest())
+    schedule
+        .iter()
+        .map(|sched| match sched {
+            Schedule::Arr(sched) => {
+                let arr = instance.flights()[sched.flight_idx].as_arrival().unwrap();
+                arr.window.latest().max(sched.landing)
+            },
+            Schedule::Dep(sched) => {
+                let dep = instance.flights()[sched.flight_idx].as_departure().unwrap();
+                dep.ctot.latest().max(sched.takeoff)
+            },
+        })
+        .max()
 }
 
 fn width(to: NaiveTime, from: NaiveTime) -> u64 {
