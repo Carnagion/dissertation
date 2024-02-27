@@ -34,172 +34,166 @@ impl Default for BranchBound {
 }
 
 impl Solve for BranchBound {
-    fn solve(&self, instance: &Instance) -> Vec<Schedule> {
+    fn solve(&self, instance: &Instance) -> Option<Vec<Schedule>> {
         let mut sep_sets = separation_identical_sets(instance);
+        let mut next_in_sep_sets = vec![0; sep_sets.len()];
 
-        let horizon = match self.horizon {
+        let mut current_solution = Vec::with_capacity(instance.flights().len());
+        let mut best_solution = current_solution.clone();
+
+        let mut horizon = match self.horizon {
             None => 0..instance.flights().len(),
-            Some(horizon) => 0..usize::from(horizon),
+            Some(horizon) => 0..usize::from(horizon).min(instance.flights().len()),
         };
 
-        let mut state = State {
-            next_in_sep_sets: vec![0; sep_sets.len()],
-            current_solution: Vec::with_capacity(instance.flights().len()),
-            best_solution: Vec::new(),
-            bounds: Bounds::default(),
-            horizon,
-        };
+        branch(
+            instance,
+            &sep_sets,
+            &mut next_in_sep_sets,
+            &mut current_solution,
+            &mut best_solution,
+            &mut Bounds::default(),
+            horizon.clone(),
+        );
 
-        state.branch_sep_sets(instance, &sep_sets);
+        while horizon.end < instance.flights().len() {
+            next_in_sep_sets.fill(0);
 
-        while state.horizon.end < instance.flights().len() {
-            state.next_in_sep_sets.fill(0);
+            let sched = best_solution.drain(..).next()?;
 
-            state.best_solution.drain(1..);
-            let sched = state.best_solution.pop().unwrap();
-
-            sep_sets
-                .iter_mut()
-                .for_each(|set| set.retain(|&flight_idx| flight_idx != sched.flight_index()));
-
-            state.current_solution.push(sched);
-
-            state.bounds = Bounds::default();
-
-            state.horizon.start += 1;
-            state.horizon.end += 1;
-
-            state.branch_sep_sets(instance, &sep_sets);
-        }
-
-        state.current_solution.extend(state.best_solution);
-        state.current_solution
-    }
-}
-
-struct Bounds {
-    current: u64,
-    lowest: u64,
-}
-
-impl Default for Bounds {
-    fn default() -> Self {
-        Self {
-            current: 0,
-            lowest: u64::MAX,
-        }
-    }
-}
-
-struct State {
-    next_in_sep_sets: Vec<usize>,
-    current_solution: Vec<Schedule>,
-    best_solution: Vec<Schedule>,
-    bounds: Bounds,
-    horizon: Range<usize>,
-}
-
-impl State {
-    fn branch_sep_sets(&mut self, instance: &Instance, sep_sets: &[Vec<usize>]) {
-        if self.current_solution.len() == self.horizon.end {
-            self.update_best_solution();
-        } else {
-            for (set_idx, sep_set) in sep_sets.iter().enumerate() {
-                let next_idx = self.next_in_sep_sets[set_idx];
-                let Some(&flight_idx) = sep_set.get(next_idx) else {
-                    continue;
-                };
-                self.branch_flight(flight_idx, set_idx, instance, sep_sets);
+            for sep_set in &mut sep_sets {
+                sep_set.retain(|&flight_idx| flight_idx != sched.flight_index());
             }
+
+            current_solution.push(sched);
+
+            horizon.start += 1;
+            horizon.end += 1;
+
+            branch(
+                instance,
+                &sep_sets,
+                &mut next_in_sep_sets,
+                &mut current_solution,
+                &mut best_solution,
+                &mut Bounds::default(),
+                horizon.clone(),
+            );
         }
+
+        current_solution.extend(best_solution);
+        Some(current_solution)
+    }
+}
+
+fn branch(
+    instance: &Instance,
+    sep_sets: &[Vec<usize>],
+    next_in_sep_sets: &mut [usize],
+    current_solution: &mut Vec<Schedule>,
+    best_solution: &mut Vec<Schedule>,
+    bounds: &mut Bounds,
+    horizon: Range<usize>,
+) {
+    if current_solution.len() == horizon.end {
+        if bounds.current < bounds.lowest {
+            bounds.lowest = bounds.current;
+            *best_solution = current_solution[horizon.clone()].to_vec();
+        }
+
+        return;
     }
 
-    fn branch_flight(
-        &mut self,
-        flight_idx: usize,
-        set_idx: usize,
-        instance: &Instance,
-        sep_sets: &[Vec<usize>],
-    ) {
+    for (set_idx, sep_set) in sep_sets.iter().enumerate() {
+        let next_idx = next_in_sep_sets[set_idx];
+        let Some(&flight_idx) = sep_set.get(next_idx) else {
+            continue;
+        };
+
         let flight = &instance.flights()[flight_idx];
         match flight {
             Flight::Arr(arr) => {
-                for sched in possible_arrs(arr, flight_idx, &self.current_solution, instance) {
+                for sched in possible_arrs(arr, flight_idx, current_solution, instance) {
                     let landing_cost = landing_cost(&sched, arr);
-                    if self.bounds.current + landing_cost > self.bounds.lowest {
+                    if bounds.current + landing_cost >= bounds.lowest {
                         continue;
                     }
-                    self.branch_next(sched, landing_cost, set_idx, instance, sep_sets);
+
+                    current_solution.push(sched.into());
+                    bounds.current += landing_cost;
+                    next_in_sep_sets[set_idx] += 1;
+
+                    branch(
+                        instance,
+                        sep_sets,
+                        next_in_sep_sets,
+                        current_solution,
+                        best_solution,
+                        bounds,
+                        horizon.clone(),
+                    );
+
+                    current_solution.pop();
+                    bounds.current -= landing_cost;
+                    next_in_sep_sets[set_idx] -= 1;
                 }
             },
             Flight::Dep(dep) => {
-                for sched in possible_deps(dep, flight_idx, &self.current_solution, instance) {
+                for sched in possible_deps(dep, flight_idx, current_solution, instance) {
+                    let takeoff_cost = takeoff_cost(&sched, dep);
                     let holdover_cost = holdover_cost(&sched, dep);
-                    if self.bounds.current + holdover_cost > self.bounds.lowest {
+                    if bounds.current + takeoff_cost + holdover_cost >= bounds.lowest {
                         continue;
                     }
-                    self.branch_next(sched, holdover_cost, set_idx, instance, sep_sets);
+
+                    current_solution.push(sched.into());
+                    bounds.current += takeoff_cost + holdover_cost;
+                    next_in_sep_sets[set_idx] += 1;
+
+                    branch(
+                        instance,
+                        sep_sets,
+                        next_in_sep_sets,
+                        current_solution,
+                        best_solution,
+                        bounds,
+                        horizon.clone(),
+                    );
+
+                    current_solution.pop();
+                    bounds.current -= takeoff_cost + holdover_cost;
+                    next_in_sep_sets[set_idx] -= 1;
                 }
             },
         }
     }
-
-    fn branch_next<S>(
-        &mut self,
-        sched: S,
-        cost: u64,
-        set_idx: usize,
-        instance: &Instance,
-        sep_sets: &[Vec<usize>],
-    ) where
-        S: Into<Schedule>,
-    {
-        let sched = sched.into();
-
-        self.current_solution.push(sched);
-        self.bounds.current += cost;
-        self.next_in_sep_sets[set_idx] += 1;
-
-        self.branch_sep_sets(instance, sep_sets);
-
-        self.current_solution.pop();
-        self.bounds.current -= cost;
-        self.next_in_sep_sets[set_idx] -= 1;
-    }
-
-    fn update_best_solution(&mut self) {
-        if self.bounds.current < self.bounds.lowest {
-            self.bounds.lowest = self.bounds.current;
-            self.best_solution = self.current_solution.clone();
-        }
-    }
 }
 
-// NOTE: This is a workaround the fact that `Range<T>` currently only impls `Iterator` if
-//       `T` impls `Step`. Of course, `Step` is still an unstable trait, so `chrono::NaiveTime`
-//       does not impl it, and thus it isn't possible to iterate over a `Range<NaiveTime>`.
 macro_rules! iter_minutes {
     ($from:expr, $to:expr) => {{
         let (from, to) = ($from, $to);
-        let diff = (from - to).num_minutes().unsigned_abs();
-        (0..=diff).map(move |minute| from + ::std::time::Duration::from_secs(minute * 60))
+        let diff = (to - from).num_minutes().unsigned_abs();
+        (0..diff + 1).map(move |minute| from + ::std::time::Duration::from_secs(minute * 60))
     }};
 }
 
-fn possible_arrs(
-    arr: &Arrival,
+fn possible_arrs<'a>(
+    arr: &'a Arrival,
     arr_idx: usize,
     current_solution: &[Schedule],
     instance: &Instance,
-) -> impl Iterator<Item = ArrivalSchedule> {
+) -> impl Iterator<Item = ArrivalSchedule> + 'a {
     let prev_sched = current_solution.last();
 
     let (earliest_landing, latest_landing) = match prev_sched {
-        None => (arr.window.earliest(), arr.window.latest()),
+        None => (arr.window.earliest(), arr.window.earliest()),
         Some(prev_sched) => {
             let sep = instance.separations()[(prev_sched.flight_index(), arr_idx)];
+
             let earliest_landing = arr.window.earliest().max(prev_sched.flight_time() + sep);
-            (earliest_landing, arr.window.latest())
+            // let latest_landing = arr.window.latest().max(earliest_landing);
+            let latest_landing = earliest_landing;
+            (earliest_landing, latest_landing)
         },
     };
 
@@ -209,38 +203,6 @@ fn possible_arrs(
     })
 }
 
-// NOTE: Since there is no penalty for taking off anywhere inside a departure's assigned
-//       CTOT slot, we try to take off as early as we possibly can.
-//
-//       First, the earliest possible take-off time is calculated based on the earliest
-//       allowed time in the departure's CTOT slot and the take-off or landing time of the
-//       previous flight plus separation, if any.
-//
-//       The departure's earliest and latest de-icing times can be calculated based on this.
-//
-//       If this is the first departure in the sequence, its earliest de-icing time is its
-//       earliest take-off time minus the maximum holdover duration minus its de-icing duration.
-//       Its latest de-icing time is its earliest take-off time minus its taxi and lineup durations
-//       minus its de-icing duration.
-//
-//       If there is a departure before it, its earliest and latest de-icing times are calculated
-//       in a similar manner as above, except are also compared with the time that the previous
-//       departure finishes de-icing, and the maximum of the values is taken.
-//
-//       On one hand, we want to de-ice as soon as possible to avoid any gaps in the de-icing queue,
-//       as these have a significantly large knock-on effect on the following departures. On the other
-//       hand, this means that delays are absorbed at the runway rather than at the gates, wasting fuel.
-//       The ideal de-icing time lies somewhere in this range, and depends on the delay and slack costs.
-//
-//       Finally, for each de-ice time within the range, we can calculate the corresponding take-off
-//       time as the maximum of the earliest takeoff time (calculated previously) and the time it
-//       takes to finish de-icing and get to the runway.
-//
-//       Since the earliest possible take-off time will always be greater than or equal to the CTOT
-//       window's earliest allowed time, and the actual take-off time will always be greater than
-//       or equal to the earliest take-off time, we know for sure that the take-off time will be
-//       after the CTOT window's earliest allowed time. However, it may still be after its latest
-//       allowed time, in which case the current branch becomes infeasible and can be ignored.
 fn possible_deps<'a>(
     dep: &'a Departure,
     dep_idx: usize,
@@ -272,39 +234,67 @@ fn possible_deps<'a>(
                 .as_departure()
                 .unwrap();
 
-            let earliest_deice = (earliest_takeoff - instance.max_holdover_dur - dep.deice_dur)
-                .max(prev_dep_sched.deice + prev_dep.deice_dur);
+            let prev_deice_finish = prev_dep_sched.deice + prev_dep.deice_dur;
+
+            let earliest_deice = (earliest_takeoff
+                - dep.lineup_dur
+                - dep.taxi_out_dur
+                - instance.max_slack_dur
+                - dep.deice_dur)
+                .max(earliest_takeoff - instance.max_holdover_dur - dep.deice_dur)
+                .max(prev_deice_finish);
             let latest_deice =
                 (earliest_takeoff - dep.lineup_dur - dep.taxi_out_dur - dep.deice_dur)
-                    .max(prev_dep_sched.deice + prev_dep.deice_dur);
+                    .max(prev_deice_finish);
 
             (earliest_deice, latest_deice)
         },
     };
 
-    iter_minutes!(earliest_deice, latest_deice).filter_map(move |deice| {
+    iter_minutes!(earliest_deice, latest_deice).map(move |deice| {
         let takeoff =
             earliest_takeoff.max(deice + dep.deice_dur + dep.taxi_out_dur + dep.lineup_dur);
 
-        (dep.ctot.earliest()..=dep.ctot.latest())
-            .contains(&takeoff)
-            .then_some(DepartureSchedule {
-                flight_idx: dep_idx,
-                deice,
-                takeoff,
-            })
+        DepartureSchedule {
+            flight_idx: dep_idx,
+            deice,
+            takeoff,
+        }
     })
 }
 
+struct Bounds {
+    current: u64,
+    lowest: u64,
+}
+
+impl Default for Bounds {
+    fn default() -> Self {
+        Self {
+            current: 0,
+            lowest: u64::MAX,
+        }
+    }
+}
+
 fn landing_cost(sched: &ArrivalSchedule, arr: &Arrival) -> u64 {
-    let delay = sched.landing - arr.window.target;
-    delay.num_minutes().unsigned_abs().pow(2)
+    (sched.landing - arr.window.target)
+        .num_minutes()
+        .unsigned_abs()
+        .pow(2)
+}
+
+fn takeoff_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
+    (sched.takeoff - dep.ctot.target)
+        .num_minutes()
+        .unsigned_abs()
+        .pow(2)
 }
 
 fn holdover_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
     let tightest_deice = sched.takeoff - dep.lineup_dur - dep.taxi_out_dur - dep.deice_dur;
-    let slack = tightest_deice - sched.deice;
-    slack.num_minutes().unsigned_abs().pow(2)
+    let slack = (tightest_deice - sched.deice).num_minutes().unsigned_abs();
+    slack
 }
 
 fn separation_identical_sets(instance: &Instance) -> Vec<Vec<usize>> {
