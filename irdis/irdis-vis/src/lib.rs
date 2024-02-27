@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{array, time::Duration};
 
 use chrono::NaiveTime;
 
@@ -98,21 +98,6 @@ impl Visualiser {
             Group::new().add(bar).add(square).add(title)
         };
 
-        // let earliest = {
-        //     let x = width(arr.window.earliest(), starting_time) * SCALE_X;
-        //     let y = row * SCALE_Y;
-
-        //     let title = title!(
-        //         "Earliest possible arrival at {}",
-        //         arr.window.earliest().format(HM),
-        //     );
-
-        //     let bar = dashed_line(x, y, SCALE_Y);
-        //     let square = rect(x - 2, y + 8, 4, 4).set("style", HOLLOW_BLACK);
-
-        //     Group::new().add(bar).add(square).add(title)
-        // };
-
         let target = {
             let x = width(arr.window.target, starting_time) * SCALE_X;
             let y = row * SCALE_Y;
@@ -156,20 +141,6 @@ impl Visualiser {
                 .add(title)
         };
 
-        // let delay = {
-        //     let x = width(arr.window.earliest(), starting_time) * SCALE_X;
-        //     let y = (row * SCALE_Y) + 5;
-
-        //     let width = width(sched.landing, arr.window.earliest()) * SCALE_X;
-
-        //     let title = title!("{}-minute delay", width / SCALE_X);
-
-        //     rect(x, y, width, 10)
-        //         .set("style", FILL_RED)
-        //         .set("class", "hide")
-        //         .add(title)
-        // };
-
         let background = {
             let x = width(arr.window.earliest(), starting_time) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
@@ -181,11 +152,9 @@ impl Visualiser {
 
         Group::new()
             .add(background)
-            // .add(delay)
             .add(deviation)
             .add(window)
             .add(target)
-            // .add(earliest)
             .add(landing)
     }
 
@@ -217,21 +186,6 @@ impl Visualiser {
             let square = rect(x - 2, y + 8, 4, 4).set("style", FILL_BLACK);
             Group::new().add(bar).add(square).add(title)
         };
-
-        // let earliest = {
-        //     let x = width(dep.ctot.earliest(), starting_time) * SCALE_X;
-        //     let y = row * SCALE_Y;
-
-        //     let title = title!(
-        //         "Earliest possible departure at {}",
-        //         dep.ctot.earliest().format(HM),
-        //     );
-
-        //     let bar = dashed_line(x, y, SCALE_Y);
-        //     let square = rect(x - 2, y + 8, 4, 4).set("style", HOLLOW_BLACK);
-
-        //     Group::new().add(bar).add(square).add(title)
-        // };
 
         let target = {
             let x = width(dep.ctot.target, starting_time) * SCALE_X;
@@ -276,37 +230,34 @@ impl Visualiser {
                 .add(title)
         };
 
-        // let delay = {
-        //     let x = width(dep.ctot.earliest(), starting_time) * SCALE_X;
-        //     let y = (row * SCALE_Y) + 5;
-
-        //     let width = width(sched.takeoff, dep.ctot.earliest()) * SCALE_X;
-
-        //     let title = title!("{}-minute delay", width / SCALE_X);
-
-        //     rect(x, y, width, 10)
-        //         .set("style", FILL_RED)
-        //         .set("class", "hide")
-        //         .add(title)
-        // };
-
-        let durs = [
-            dep.pushback_dur,
-            dep.taxi_deice_dur,
-            dep.deice_dur,
-            dep.taxi_out_dur,
-            dep.lineup_dur,
-        ];
-        let titles = [
-            "pushback from gates",
-            "taxi to de-icing station",
-            "de-ice",
-            "taxi to runway",
-            "lineup on runway",
-        ];
-        let [pushback, taxi_deice, deice_dur, taxi_out, lineup] = std::array::from_fn(|idx| {
+        let durs = [dep.pushback_dur, dep.taxi_deice_dur];
+        let titles = ["pushback from gates", "taxi to de-icing station"];
+        let [pushback, taxi_deice] = array::from_fn(|idx| {
             let x = width(
-                sched.takeoff - durs[idx..].iter().sum::<Duration>(),
+                sched.deice - durs[idx..].iter().sum::<Duration>(),
+                starting_time,
+            ) * SCALE_X;
+            let y = (row * SCALE_Y) + 5;
+
+            let width = minutes(durs[idx]);
+
+            let title = title!("{} minutes to {}", width, titles[idx]);
+
+            let bar = rect(x, y, width * SCALE_X, 10).set("style", FILL_YELLOW);
+            let underline = rect(x, y + 10, width * SCALE_Y, 2).set("style", FILL_BLACK);
+
+            Group::new()
+                .add(bar)
+                .add(underline)
+                .add(title)
+                .set("class", "hide")
+        });
+
+        let durs = [dep.deice_dur, dep.taxi_out_dur, dep.lineup_dur];
+        let titles = ["de-ice", "taxi to runway", "lineup on runway"];
+        let [deice_dur, taxi_out, lineup] = array::from_fn(|idx| {
+            let x = width(
+                sched.deice + durs[..idx].iter().sum::<Duration>(),
                 starting_time,
             ) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
@@ -326,12 +277,7 @@ impl Visualiser {
         });
 
         let background = {
-            let start = sched.takeoff
-                - dep.lineup_dur
-                - dep.taxi_out_dur
-                - dep.deice_dur
-                - dep.taxi_deice_dur
-                - dep.pushback_dur;
+            let start = sched.deice - dep.taxi_deice_dur - dep.pushback_dur;
 
             let x = width(start, starting_time) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
@@ -348,11 +294,9 @@ impl Visualiser {
             .add(deice_dur)
             .add(taxi_out)
             .add(lineup)
-            // .add(delay)
             .add(deviation)
             .add(window)
             .add(target)
-            // .add(earliest)
             .add(deice)
             .add(takeoff)
     }
