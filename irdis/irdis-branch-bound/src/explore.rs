@@ -88,7 +88,7 @@ pub fn explore_sep_sets(
 }
 
 fn update_best_solution(
-    current_solution: &Vec<Schedule>,
+    current_solution: &[Schedule],
     best_solution: &mut Vec<Schedule>,
     cost: &mut Cost,
     horizon: Range<usize>,
@@ -116,7 +116,7 @@ fn possible_arrs(
             //       the operation to one time only - the earliest. This prunes the search space
             //       a lot but requires the objective function to consider `earliest()` and not
             //       the `target`.
-            // let latest_landing = arr.window.target.max(earliest_landing);
+            // let latest_landing = arr.window.latest().max(earliest_landing);
             let latest_landing = earliest_landing;
             (earliest_landing, latest_landing)
         },
@@ -128,12 +128,12 @@ fn possible_arrs(
     })
 }
 
-fn possible_deps<'a>(
-    dep: &'a Departure,
+fn possible_deps(
+    dep: &Departure,
     dep_idx: usize,
     current_solution: &[Schedule],
-    instance: &'a Instance,
-) -> impl Iterator<Item = DepartureSchedule> + 'a {
+    instance: &Instance,
+) -> impl Iterator<Item = DepartureSchedule> {
     let prev_sched = current_solution.last();
     let prev_dep_sched = current_solution
         .iter()
@@ -141,66 +141,68 @@ fn possible_deps<'a>(
         .find_map(Schedule::as_departure)
         .cloned();
 
-    let (earliest_takeoff, latest_takeoff) = match prev_sched {
-        None => (dep.ctot.earliest(), dep.ctot.latest()),
-        Some(prev_sched) => {
-            let sep = instance.separations()[(prev_sched.flight_index(), dep_idx)];
-            let earliest_takeoff = dep.ctot.earliest().max(prev_sched.flight_time() + sep);
-            // NOTE: Using the earliest takeoff as the latest takeoff effectively limits
-            //       the operation to one time only - the earliest. This prunes the search space
-            //       a lot but requires the objective function to consider `earliest()` and not
-            //       the `target`.
-            // let latest_takeoff = dep.ctot.target.max(earliest_takeoff);
-            let latest_takeoff = earliest_takeoff;
-            (earliest_takeoff, latest_takeoff)
+    let (earliest_deice, latest_deice, takeoff) = match (prev_sched, prev_dep_sched) {
+        (None, None) => {
+            let takeoff = dep.ctot.earliest();
+
+            let earliest_deice = (takeoff
+                - instance.max_slack_dur
+                - dep.lineup_dur
+                - dep.taxi_out_dur
+                - dep.deice_dur)
+                .max(takeoff - instance.max_holdover_dur - dep.deice_dur);
+            let latest_deice =
+                (takeoff - dep.lineup_dur - dep.taxi_out_dur - dep.deice_dur).max(earliest_deice);
+
+            (earliest_deice, latest_deice, takeoff)
         },
+        (Some(prev_sched), None) => {
+            let sep = instance.separations()[(prev_sched.flight_index(), dep_idx)];
+
+            let takeoff = dep.ctot.earliest().max(prev_sched.flight_time() + sep);
+
+            let earliest_deice = (takeoff
+                - instance.max_slack_dur
+                - dep.lineup_dur
+                - dep.taxi_out_dur
+                - dep.deice_dur)
+                .max(takeoff - instance.max_holdover_dur - dep.deice_dur);
+            let latest_deice =
+                (takeoff - dep.lineup_dur - dep.taxi_out_dur - dep.deice_dur).max(earliest_deice);
+
+            (earliest_deice, latest_deice, takeoff)
+        },
+        (Some(prev_sched), Some(prev_dep_sched)) => {
+            let prev_dep = instance.flights()[prev_dep_sched.flight_idx]
+                .as_departure()
+                .unwrap();
+            let prev_deice_end = prev_dep_sched.deice + prev_dep.deice_dur;
+
+            let sep = instance.separations()[(prev_sched.flight_index(), dep_idx)];
+
+            let takeoff = (prev_deice_end + dep.deice_dur + dep.taxi_out_dur + dep.lineup_dur)
+                .max(dep.ctot.earliest())
+                .max(prev_sched.flight_time() + sep);
+
+            let earliest_deice = (takeoff
+                - instance.max_slack_dur
+                - dep.lineup_dur
+                - dep.taxi_out_dur
+                - dep.deice_dur)
+                .max(takeoff - instance.max_holdover_dur - dep.deice_dur)
+                .max(prev_deice_end);
+            let latest_deice =
+                (takeoff - dep.lineup_dur - dep.taxi_out_dur - dep.deice_dur).max(earliest_deice);
+
+            (earliest_deice, latest_deice, takeoff)
+        },
+        (None, Some(_)) => unreachable!(),
     };
 
-    iter_minutes(earliest_takeoff, latest_takeoff).flat_map(move |takeoff| {
-        let (earliest_deice, latest_deice) = match &prev_dep_sched {
-            None => {
-                let earliest_deice = (takeoff
-                    - instance.max_slack_dur
-                    - dep.lineup_dur
-                    - dep.taxi_out_dur
-                    - dep.deice_dur)
-                    .max(takeoff - instance.max_holdover_dur - dep.deice_dur);
-                let latest_deice = (takeoff - dep.lineup_dur - dep.taxi_out_dur - dep.deice_dur)
-                    .max(earliest_deice);
-
-                (earliest_deice, latest_deice)
-            },
-            Some(prev_dep_sched) => {
-                let prev_dep = instance.flights()[prev_dep_sched.flight_idx]
-                    .as_departure()
-                    .unwrap();
-                let prev_deice_end = prev_dep_sched.deice + prev_dep.deice_dur;
-
-                let earliest_deice = (takeoff
-                    - instance.max_slack_dur
-                    - dep.lineup_dur
-                    - dep.taxi_out_dur
-                    - dep.deice_dur)
-                    .max(takeoff - instance.max_holdover_dur - dep.deice_dur)
-                    .max(prev_deice_end);
-                let latest_deice = (takeoff - dep.lineup_dur - dep.taxi_out_dur - dep.deice_dur)
-                    .max(earliest_deice);
-
-                (earliest_deice, latest_deice)
-            },
-        };
-
-        iter_minutes(earliest_deice, latest_deice)
-            // NOTE: Filters out physically impossible solutions. Removing this allows more flights
-            //       to be scheduled, but obviously some of them would be impossible.
-            .filter(move |&deice| {
-                takeoff >= deice + dep.deice_dur + dep.taxi_out_dur + dep.lineup_dur
-            })
-            .map(move |deice| DepartureSchedule {
-                flight_idx: dep_idx,
-                deice,
-                takeoff,
-            })
+    iter_minutes(earliest_deice, latest_deice).map(move |deice| DepartureSchedule {
+        flight_idx: dep_idx,
+        deice,
+        takeoff,
     })
 }
 
