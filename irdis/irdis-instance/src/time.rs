@@ -27,4 +27,8 @@ impl TimeWindow {
     pub fn latest(&self) -> NaiveTime {
         self.target + self.after
     }
+
+    pub fn contains(&self, time: &NaiveTime) -> bool {
+        (self.earliest()..=self.latest()).contains(time)
+    }
 }
