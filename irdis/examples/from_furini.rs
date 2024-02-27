@@ -23,7 +23,7 @@ fn main() {
             .join(format!("info_matrix_FPT{:0>2}.txt.txt", id));
         let separations = fs::read_to_string(separations_path).unwrap();
 
-        let instance = instance_from_furini(&flights, &separations);
+        let instance = instance_from_furini(&flights, &separations, 60);
 
         let toml = toml::to_string(&instance).unwrap();
         let instance_path = flights_path
@@ -44,7 +44,7 @@ fn main() {
     }
 }
 
-fn instance_from_furini(flights: &str, separations: &str) -> Instance {
+fn instance_from_furini(flights: &str, separations: &str, limit: usize) -> Instance {
     let mut lines = flights.lines();
     let _flight_count = lines.next();
 
@@ -52,6 +52,7 @@ fn instance_from_furini(flights: &str, separations: &str) -> Instance {
 
     let flights = lines
         .filter(|line| !line.is_empty())
+        .take(limit)
         .map(|line| {
             let mut parts = line.split_ascii_whitespace();
 
@@ -93,9 +94,11 @@ fn instance_from_furini(flights: &str, separations: &str) -> Instance {
     let separations = separations
         .lines()
         .filter(|line| !line.is_empty())
+        .take(limit)
         .map(|line| {
             line.split_ascii_whitespace()
                 .skip(1)
+                .take(limit)
                 .map(|num| Duration::from_secs(num.parse::<u64>().unwrap() * 60))
                 .collect::<Vec<_>>()
         })
