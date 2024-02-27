@@ -29,6 +29,10 @@ impl Separations {
         self.len
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+
     pub fn get(&self, from: usize, to: usize) -> Option<&Duration> {
         let idx = self.index_of(from, to);
         self.data.get(idx)
@@ -123,6 +127,10 @@ pub struct SeparationsMut<'a> {
 impl SeparationsMut<'_> {
     pub fn len(&self) -> usize {
         self.inner.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
     }
 
     pub fn get(&self, from: usize, to: usize) -> Option<&Duration> {

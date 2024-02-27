@@ -36,7 +36,7 @@ macro_rules! title {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub struct Visualiser {}
 
 impl Visualiser {
@@ -366,5 +366,5 @@ fn dashed_rect(x: u64, y: u64, width: u64, height: u64) -> Rectangle {
 }
 
 fn minutes(dur: Duration) -> u64 {
-    dur.as_secs() as u64 / 60
+    dur.as_secs() / 60
 }

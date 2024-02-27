@@ -26,28 +26,28 @@ impl Flight {
     pub fn as_arrival(&self) -> Option<&Arrival> {
         match self {
             Self::Arr(arr) => Some(arr),
-            _ => None,
+            Self::Dep(_) => None,
         }
     }
 
     pub fn into_arrival(self) -> Option<Arrival> {
         match self {
             Self::Arr(arr) => Some(arr),
-            _ => None,
+            Self::Dep(_) => None,
         }
     }
 
     pub fn as_departure(&self) -> Option<&Departure> {
         match self {
             Self::Dep(dep) => Some(dep),
-            _ => None,
+            Self::Arr(_) => None,
         }
     }
 
     pub fn into_departure(self) -> Option<Departure> {
         match self {
             Self::Dep(dep) => Some(dep),
-            _ => None,
+            Self::Arr(_) => None,
         }
     }
 }
