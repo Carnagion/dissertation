@@ -3,6 +3,9 @@ use irdis_instance::{
     schedule::{ArrivalSchedule, DepartureSchedule},
 };
 
+// NOTE: Increasing the cost for violations has seemingly has no effect when
+//       the objective function is set to using `earliest()` instead of `target`
+//       (see below).
 const VIOLATION_COST: u64 = 60;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -21,13 +24,17 @@ impl Default for Cost {
 }
 
 pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> u64 {
+    // NOTE: Using the flight index fixes the worsening of solutions from using `earliest()`
+    //       instead of `target` (see below). Maybe breaks symmetries?
     let violation = if arr.window.contains(&sched.landing) {
-        0
+        sched.flight_idx as u64
     } else {
         VIOLATION_COST.pow(2)
     };
 
-    let deviation = (sched.landing - arr.window.target)
+    // NOTE: Using `earliest()` instead of `target` makes solutions worse, except when using
+    //       the flight index (see above).
+    let deviation = (sched.landing - arr.window.earliest())
         .num_minutes()
         .unsigned_abs()
         .pow(2);
@@ -36,13 +43,17 @@ pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> u64 {
 }
 
 pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
+    // NOTE: Using the flight index fixes the worsening of solutions from using `earliest()`
+    //       instead of `target` (see above). Maybe breaks symmetries?
     let violation = if dep.ctot.contains(&sched.takeoff) {
-        0
+        sched.flight_idx as u64
     } else {
         VIOLATION_COST.pow(2)
     };
 
-    let deviation = (sched.takeoff - dep.ctot.target)
+    // NOTE: Unlike above, using `earliest()` instead of `target` here does NOT make solutions
+    //       worse.
+    let deviation = (sched.takeoff - dep.ctot.earliest())
         .num_minutes()
         .unsigned_abs()
         .pow(2);
