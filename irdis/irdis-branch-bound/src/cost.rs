@@ -28,7 +28,7 @@ pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> u64 {
     //       using `earliest()` instead of `target` (see below), but does make them
     //       slightly better. Maybe breaks symmetries?
     let violation = if arr.window.contains(&sched.landing) {
-        sched.flight_idx as u64
+        0
     } else {
         VIOLATION_COST.pow(2)
     };
@@ -47,7 +47,7 @@ pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
     //       using `earliest()` instead of `target` (see above), but does make them
     //       slightly better. Maybe breaks symmetries?
     let violation = if dep.ctot.contains(&sched.takeoff) {
-        sched.flight_idx as u64
+        0
     } else {
         VIOLATION_COST.pow(2)
     };
