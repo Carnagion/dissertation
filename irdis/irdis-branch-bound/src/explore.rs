@@ -33,7 +33,7 @@ pub fn explore_sep_sets(
                 Flight::Arr(arr) => {
                     for sched in possible_arrs(arr, flight_idx, current_solution, instance) {
                         let arr_cost = arrival_cost(&sched, arr);
-                        if cost.current + arr_cost >= cost.best {
+                        if cost.current + arr_cost >= cost.lowest {
                             continue;
                         }
 
@@ -59,7 +59,7 @@ pub fn explore_sep_sets(
                 Flight::Dep(dep) => {
                     for sched in possible_deps(dep, flight_idx, current_solution, instance) {
                         let dep_cost = departure_cost(&sched, dep);
-                        if cost.current + dep_cost >= cost.best {
+                        if cost.current + dep_cost >= cost.lowest {
                             continue;
                         }
 
@@ -93,8 +93,8 @@ fn update_best_solution(
     cost: &mut Cost,
     horizon: Range<usize>,
 ) {
-    if cost.current < cost.best {
-        cost.best = cost.current;
+    if cost.current < cost.lowest {
+        cost.lowest = cost.current;
         *best_solution = current_solution[horizon].to_vec();
     }
 }
