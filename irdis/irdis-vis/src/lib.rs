@@ -25,6 +25,8 @@ const FILL_GREY: &str = "fill: #cccccc;";
 
 const FILL_RED: &str = "fill: #c70039;";
 
+const FILL_BLUE: &str = "fill: #1363df";
+
 const FILL_YELLOW: &str = "fill: #ffd23f;";
 
 const HM: &str = "%H:%M";
@@ -141,17 +143,7 @@ impl Visualiser {
                 .add(title)
         };
 
-        let background = {
-            let x = width(arr.window.earliest(), starting_time) * SCALE_X;
-            let y = (row * SCALE_Y) + 5;
-            let width = width(sched.landing, arr.window.earliest()) * SCALE_X;
-            rect(x, y, width, 10)
-                .set("style", FILL_GREY)
-                .set("pointer-events", "none")
-        };
-
         Group::new()
-            .add(background)
             .add(deviation)
             .add(window)
             .add(target)
@@ -244,7 +236,7 @@ impl Visualiser {
             let title = title!("{} minutes to {}", width, titles[idx]);
 
             let bar = rect(x, y, width * SCALE_X, 10).set("style", FILL_YELLOW);
-            let underline = rect(x, y + 10, width * SCALE_Y, 2).set("style", FILL_BLACK);
+            let underline = rect(x, y + 10, width * SCALE_X, 2).set("style", FILL_BLACK);
 
             Group::new()
                 .add(bar)
@@ -267,7 +259,7 @@ impl Visualiser {
             let title = title!("{} minutes to {}", width, titles[idx]);
 
             let bar = rect(x, y, width * SCALE_X, 10).set("style", FILL_YELLOW);
-            let underline = rect(x, y + 10, width * SCALE_Y, 2).set("style", FILL_BLACK);
+            let underline = rect(x, y + 10, width * SCALE_X, 2).set("style", FILL_BLACK);
 
             Group::new()
                 .add(bar)
@@ -275,6 +267,26 @@ impl Visualiser {
                 .add(title)
                 .set("class", "hide")
         });
+
+        let slack = {
+            let from = sched.deice + dep.deice_dur + dep.taxi_out_dur + dep.lineup_dur;
+
+            let x = width(from, starting_time) * SCALE_X;
+            let y = (row * SCALE_Y) + 5;
+
+            let width = width(sched.takeoff, from) * SCALE_X;
+
+            let title = title!("{}-minute wait", width / SCALE_X);
+
+            let bar = rect(x, y, width, 10).set("style", FILL_BLUE);
+            let underline = rect(x, y + 10, width, 2).set("style", FILL_BLACK);
+
+            Group::new()
+                .add(bar)
+                .add(underline)
+                .add(title)
+                .set("class", "hide")
+        };
 
         let background = {
             let start = sched.deice - dep.taxi_deice_dur - dep.pushback_dur;
@@ -294,6 +306,7 @@ impl Visualiser {
             .add(deice_dur)
             .add(taxi_out)
             .add(lineup)
+            .add(slack)
             .add(deviation)
             .add(window)
             .add(target)
