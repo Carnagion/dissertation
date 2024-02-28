@@ -11,27 +11,21 @@ const VIOLATION_COST: u64 = 60;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Cost {
     pub current: u64,
-    pub best: u64,
+    pub lowest: u64,
 }
 
 impl Default for Cost {
     fn default() -> Self {
         Self {
             current: 0,
-            best: u64::MAX,
+            lowest: u64::MAX,
         }
     }
 }
 
 pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> u64 {
-    // NOTE: Using the flight index does not fix the worsening of solutions from
-    //       using `earliest()` instead of `target` (see below), but does make them
-    //       slightly better. Maybe breaks symmetries?
-    //
-    //       Using the flight index seems to lead to better solutions even when using
-    //       `target` instead of `earliest()`, allowing the use of smaller horizons.
     let violation = if arr.window.contains(&sched.landing) {
-        sched.flight_idx as u64
+        0
     } else {
         VIOLATION_COST.pow(2)
     };
@@ -42,16 +36,16 @@ pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> u64 {
         .unsigned_abs()
         .pow(2);
 
-    violation + deviation
+    // NOTE: Using the flight index does NOT fix the worsening of solutions from
+    //       using `earliest()` instead of `target` (see below), but does make them
+    //       slightly better. Maybe breaks symmetries?
+    //
+    //       Using the flight index seems to lead to better solutions even when using
+    //       `target` instead of `earliest()`, allowing the use of smaller horizons.
+    violation + deviation + sched.flight_idx as u64
 }
 
 pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
-    // NOTE: Using the flight index does not fix the worsening of solutions from
-    //       using `earliest()` instead of `target` (see above), but does make them
-    //       slightly better. Maybe breaks symmetries?
-    //
-    //       Not using the flight index also seems to lead to better solutions when
-    //       using `target` instead of `earliest()` (see above).
     let violation = if dep.ctot.contains(&sched.takeoff) {
         0
     } else {
@@ -69,5 +63,7 @@ pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
         .num_minutes()
         .unsigned_abs();
 
+    // NOTE: NOT using the flight index seems to lead to better solutions, regardless of
+    //       whether we are using `target` or `earliest()` (see above).
     violation + deviation + slack
 }
