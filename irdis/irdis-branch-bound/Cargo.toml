@@ -9,4 +9,5 @@ rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
 
 [dependencies]
 chrono = { version = "0.4.31", default-features = false }
+either = "1.10.0"
 irdis-instance = { version = "0.1.0", path = "../irdis-instance" }
