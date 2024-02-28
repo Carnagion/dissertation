@@ -27,8 +27,11 @@ pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> u64 {
     // NOTE: Using the flight index does not fix the worsening of solutions from
     //       using `earliest()` instead of `target` (see below), but does make them
     //       slightly better. Maybe breaks symmetries?
+    //
+    //       Using the flight index seems to lead to better solutions even when using
+    //       `target` instead of `earliest()`, allowing the use of smaller horizons.
     let violation = if arr.window.contains(&sched.landing) {
-        0
+        sched.flight_idx as u64
     } else {
         VIOLATION_COST.pow(2)
     };
@@ -46,6 +49,9 @@ pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
     // NOTE: Using the flight index does not fix the worsening of solutions from
     //       using `earliest()` instead of `target` (see above), but does make them
     //       slightly better. Maybe breaks symmetries?
+    //
+    //       Not using the flight index also seems to lead to better solutions when
+    //       using `target` instead of `earliest()` (see above).
     let violation = if dep.ctot.contains(&sched.takeoff) {
         0
     } else {

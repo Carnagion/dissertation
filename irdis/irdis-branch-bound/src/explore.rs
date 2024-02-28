@@ -107,15 +107,15 @@ fn possible_arrs(
 ) -> impl Iterator<Item = ArrivalSchedule> {
     let prev_sched = current_solution.last();
 
+    // NOTE: Using the earliest landing as the latest landing effectively limits
+    //       the operation to one time only - the earliest. This prunes the search space
+    //       a lot but requires the objective function to consider `earliest()` and not
+    //       the `target`.
     let (earliest_landing, latest_landing) = match prev_sched {
-        None => (arr.window.earliest(), arr.window.latest()),
+        None => (arr.window.earliest(), arr.window.earliest()),
         Some(prev_sched) => {
             let sep = instance.separations()[(prev_sched.flight_index(), arr_idx)];
             let earliest_landing = arr.window.earliest().max(prev_sched.flight_time() + sep);
-            // NOTE: Using the earliest landing as the latest landing effectively limits
-            //       the operation to one time only - the earliest. This prunes the search space
-            //       a lot but requires the objective function to consider `earliest()` and not
-            //       the `target`.
             // let latest_landing = arr.window.latest().max(earliest_landing);
             let latest_landing = earliest_landing;
             (earliest_landing, latest_landing)
