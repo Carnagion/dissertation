@@ -1,12 +1,14 @@
 use std::num::NonZeroUsize;
 
-use explore::explore_sep_sets;
 use irdis_instance::{schedule::Schedule, Instance, Solve};
 
 mod cost;
 use cost::Cost;
 
 mod explore;
+use explore::explore_sep_sets;
+
+mod node;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct BranchBound {
@@ -36,54 +38,7 @@ impl Default for BranchBound {
 
 impl Solve for BranchBound {
     fn solve(&self, instance: &Instance) -> Option<Vec<Schedule>> {
-        let mut sep_sets = separation_identical_sets(instance);
-        let mut next_in_sep_sets = vec![0; sep_sets.len()];
-
-        let mut current_solution = Vec::with_capacity(instance.flights().len());
-        let mut best_solution = current_solution.clone();
-
-        let mut horizon = match self.horizon {
-            None => 0..instance.flights().len(),
-            Some(horizon) => 0..usize::from(horizon).min(instance.flights().len()),
-        };
-
-        explore_sep_sets(
-            instance,
-            &sep_sets,
-            &mut next_in_sep_sets,
-            &mut current_solution,
-            &mut best_solution,
-            &mut Cost::default(),
-            horizon.clone(),
-        );
-
-        while horizon.end < instance.flights().len() {
-            next_in_sep_sets.fill(0);
-
-            let sched = best_solution.drain(..).next()?;
-
-            for sep_set in &mut sep_sets {
-                sep_set.retain(|&flight_idx| flight_idx != sched.flight_index());
-            }
-
-            current_solution.push(sched);
-
-            horizon.start += 1;
-            horizon.end += 1;
-
-            explore_sep_sets(
-                instance,
-                &sep_sets,
-                &mut next_in_sep_sets,
-                &mut current_solution,
-                &mut best_solution,
-                &mut Cost::default(),
-                horizon.clone(),
-            );
-        }
-
-        current_solution.extend(best_solution);
-        Some(current_solution)
+        node::branch_and_bound(instance, self.horizon)
     }
 }
 
