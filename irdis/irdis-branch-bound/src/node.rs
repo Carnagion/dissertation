@@ -120,7 +120,8 @@ fn branch_and_bound_once(
         current_solution.push(node);
 
         if current_solution.len() == horizon.end {
-            update_best_solution(current_solution, best_solution, &mut cost, horizon.clone());
+            cost.lowest = cost.current;
+            *best_solution = current_solution[horizon.clone()].to_vec();
             continue;
         }
 
@@ -143,17 +144,42 @@ fn generate_next_nodes<'a>(
     current_solution: &'a [Node],
     depth: usize,
 ) -> impl DoubleEndedIterator<Item = Node> + 'a {
+    let prev_earliest = current_solution.last().map(|node| {
+        let flight_idx = node.sched.flight_index();
+        let flight = &instance.flights()[flight_idx];
+        flight.time_window().earliest()
+    });
+
     let mut next_flights = sep_sets
         .iter()
         .enumerate()
         .filter_map(|(sep_set_idx, sep_set)| {
             let next_idx = next_in_sep_sets[sep_set_idx];
+
             let flight_idx = sep_set.get(next_idx).copied()?;
             let flight = &instance.flights()[flight_idx];
-            Some((flight, flight_idx, sep_set_idx))
+
+            match prev_earliest {
+                None => Some((flight, flight_idx, sep_set_idx)),
+                Some(prev_earliest) if flight.time_window().latest() > prev_earliest => {
+                    Some((flight, flight_idx, sep_set_idx))
+                },
+                Some(_) => None,
+            }
         })
         .collect::<Vec<_>>();
     next_flights.sort_unstable_by_key(|(flight, ..)| flight.time_window().earliest());
+
+    // NOTE: Gets rid of impossible combinations from the next states. For example, if `A` has a time
+    //       window which is disjoint from `B`'s and completely before `B`'s, then `A` must always be
+    //       scheduled before `B`. This means there is no point in selecting both `A` and `B` as initial
+    //       nodes, and the later flight `B` can be removed.
+    let latest = next_flights
+        .first()
+        .map(|(flight, ..)| flight.time_window().latest());
+    if let Some(latest) = latest {
+        next_flights.retain(|(flight, ..)| flight.time_window().earliest() < latest);
+    }
 
     next_flights
         .into_iter()
@@ -170,18 +196,6 @@ fn generate_next_nodes<'a>(
                 },
             )
         })
-}
-
-fn update_best_solution(
-    current_solution: &[Node],
-    best_solution: &mut Vec<Node>,
-    cost: &mut Cost,
-    horizon: Range<usize>,
-) {
-    if cost.current < cost.lowest {
-        cost.lowest = cost.current;
-        *best_solution = current_solution[horizon].to_vec();
-    }
 }
 
 fn generate_schedules<'a>(
