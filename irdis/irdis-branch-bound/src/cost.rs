@@ -21,7 +21,7 @@ impl Default for Cost {
 }
 
 pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> u64 {
-    let delay = (sched.landing - arr.release_time())
+    let delay = (sched.landing - arr.base_time)
         .num_minutes()
         .unsigned_abs()
         .pow(2);
@@ -29,7 +29,7 @@ pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> u64 {
 }
 
 pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
-    let delay = (sched.takeoff - dep.release_time())
+    let delay = (sched.takeoff - dep.base_time)
         .num_minutes()
         .unsigned_abs()
         .pow(2);
