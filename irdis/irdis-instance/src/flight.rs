@@ -1,10 +1,15 @@
 use std::time::Duration;
 
+use chrono::NaiveTime;
+
 use serde::{Deserialize, Serialize};
 
 use serde_with::serde_as;
 
-use crate::{time::TimeWindow, DurationMinutes};
+use crate::{
+    time::{Ctot, TimeWindow},
+    DurationMinutes,
+};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(tag = "kind")]
@@ -16,10 +21,24 @@ pub enum Flight {
 }
 
 impl Flight {
+    pub fn base_time(&self) -> NaiveTime {
+        match self {
+            Self::Arr(arr) => arr.base_time,
+            Self::Dep(dep) => dep.base_time,
+        }
+    }
+
     pub fn time_window(&self) -> &TimeWindow {
         match self {
             Self::Arr(arr) => &arr.window,
-            Self::Dep(dep) => &dep.ctot,
+            Self::Dep(dep) => &dep.window,
+        }
+    }
+
+    pub fn release_time(&self) -> NaiveTime {
+        match self {
+            Self::Arr(arr) => arr.release_time(),
+            Self::Dep(dep) => dep.release_time(),
         }
     }
 
@@ -52,13 +71,17 @@ impl Flight {
     }
 }
 
-#[serde_as] // NOTE: This must remain before the derive
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Arrival {
+    pub base_time: NaiveTime,
     pub window: TimeWindow,
-    #[serde_as(as = "DurationMinutes")]
-    pub taxi_in_dur: Duration,
+}
+
+impl Arrival {
+    pub fn release_time(&self) -> NaiveTime {
+        self.base_time.max(self.window.earliest)
+    }
 }
 
 impl From<Arrival> for Flight {
@@ -71,7 +94,9 @@ impl From<Arrival> for Flight {
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Departure {
-    pub ctot: TimeWindow,
+    pub base_time: NaiveTime,
+    pub window: TimeWindow,
+    pub ctot: Ctot,
     #[serde_as(as = "DurationMinutes")]
     pub pushback_dur: Duration,
     #[serde_as(as = "DurationMinutes")]
@@ -82,6 +107,14 @@ pub struct Departure {
     pub taxi_out_dur: Duration,
     #[serde_as(as = "DurationMinutes")]
     pub lineup_dur: Duration,
+}
+
+impl Departure {
+    pub fn release_time(&self) -> NaiveTime {
+        self.base_time
+            .max(self.window.earliest)
+            .max(self.ctot.earliest())
+    }
 }
 
 impl From<Departure> for Flight {

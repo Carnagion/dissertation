@@ -3,10 +3,6 @@ use std::num::NonZeroUsize;
 use irdis_instance::{schedule::Schedule, Instance, Solve};
 
 mod cost;
-use cost::Cost;
-
-mod explore;
-use explore::explore_sep_sets;
 
 mod node;
 

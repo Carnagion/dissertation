@@ -100,11 +100,11 @@ impl Visualiser {
             Group::new().add(bar).add(square).add(title)
         };
 
-        let target = {
-            let x = width(arr.window.target, starting_time) * SCALE_X;
+        let release = {
+            let x = width(arr.release_time(), starting_time) * SCALE_X;
             let y = row * SCALE_Y;
 
-            let title = title!("Target arrival at {}", arr.window.target.format(HM),);
+            let title = title!("Release time at {}", arr.release_time().format(HM),);
 
             let bar = dashed_line(x, y, SCALE_Y);
             let square = rect(x - 2, y + 8, 4, 4).set("style", HOLLOW_BLACK);
@@ -113,10 +113,10 @@ impl Visualiser {
         };
 
         let window = {
-            let x = width(arr.window.earliest(), starting_time) * SCALE_X;
+            let x = width(arr.window.earliest, starting_time) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
 
-            let width = width(arr.window.latest(), arr.window.earliest()) * SCALE_X;
+            let width = width(arr.window.latest, arr.window.earliest) * SCALE_X;
 
             let title = title!("{}-minute arrival window", width / SCALE_X);
 
@@ -126,16 +126,13 @@ impl Visualiser {
                 .add(title)
         };
 
-        let deviation = {
-            let from = arr.window.target.min(sched.landing);
-            let to = arr.window.target.max(sched.landing);
-
-            let x = width(from, starting_time) * SCALE_X;
+        let delay = {
+            let x = width(arr.release_time(), starting_time) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
 
-            let width = width(to, from) * SCALE_X;
+            let width = width(sched.landing, arr.release_time()) * SCALE_X;
 
-            let title = title!("{}-minute deviation from ideal time", width / SCALE_X);
+            let title = title!("{}-minute delay", width / SCALE_X);
 
             rect(x, y, width, 10)
                 .set("style", FILL_RED)
@@ -144,9 +141,9 @@ impl Visualiser {
         };
 
         Group::new()
-            .add(deviation)
+            .add(delay)
             .add(window)
-            .add(target)
+            .add(release)
             .add(landing)
     }
 
@@ -179,11 +176,11 @@ impl Visualiser {
             Group::new().add(bar).add(square).add(title)
         };
 
-        let target = {
-            let x = width(dep.ctot.target, starting_time) * SCALE_X;
+        let release = {
+            let x = width(dep.release_time(), starting_time) * SCALE_X;
             let y = row * SCALE_Y;
 
-            let title = title!("Target departure at {}", dep.ctot.target.format(HM),);
+            let title = title!("Release time at {}", dep.release_time().format(HM),);
 
             let bar = dashed_line(x, y, SCALE_Y);
             let square = rect(x - 2, y + 8, 4, 4).set("style", HOLLOW_BLACK);
@@ -191,11 +188,12 @@ impl Visualiser {
             Group::new().add(bar).add(square).add(title)
         };
 
+        // TODO: Also display CTOT window
         let window = {
-            let x = width(dep.ctot.earliest(), starting_time) * SCALE_X;
+            let x = width(dep.window.earliest, starting_time) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
 
-            let width = width(dep.ctot.latest(), dep.ctot.earliest()) * SCALE_X;
+            let width = width(dep.window.latest, dep.window.earliest) * SCALE_X;
 
             let title = title!("{}-minute departure window", width / SCALE_X);
 
@@ -205,16 +203,13 @@ impl Visualiser {
                 .add(title)
         };
 
-        let deviation = {
-            let from = dep.ctot.target.min(sched.takeoff);
-            let to = dep.ctot.target.max(sched.takeoff);
-
-            let x = width(from, starting_time) * SCALE_X;
+        let delay = {
+            let x = width(dep.release_time(), starting_time) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
 
-            let width = width(to, from) * SCALE_X;
+            let width = width(sched.takeoff, dep.release_time()) * SCALE_X;
 
-            let title = title!("{}-minute deviation from ideal time", width / SCALE_X);
+            let title = title!("{}-minute delay", width / SCALE_X);
 
             rect(x, y, width, 10)
                 .set("style", FILL_RED)
@@ -307,9 +302,9 @@ impl Visualiser {
             .add(taxi_out)
             .add(lineup)
             .add(slack)
-            .add(deviation)
+            .add(delay)
             .add(window)
-            .add(target)
+            .add(release)
             .add(deice)
             .add(takeoff)
     }
@@ -321,12 +316,13 @@ fn starting_time(schedule: &[Schedule], instance: &Instance) -> Option<NaiveTime
         .map(|sched| match sched {
             Schedule::Arr(sched) => {
                 let arr = instance.flights()[sched.flight_idx].as_arrival().unwrap();
-                arr.window.earliest().min(sched.landing)
+                arr.base_time.min(arr.window.earliest).min(sched.landing)
             },
             Schedule::Dep(sched) => {
                 let dep = instance.flights()[sched.flight_idx].as_departure().unwrap();
-                dep.ctot
-                    .earliest()
+                dep.base_time
+                    .min(dep.window.earliest)
+                    .min(dep.ctot.earliest())
                     .min(sched.deice - dep.taxi_deice_dur - dep.pushback_dur)
             },
         })
@@ -339,11 +335,11 @@ fn ending_time(schedule: &[Schedule], instance: &Instance) -> Option<NaiveTime> 
         .map(|sched| match sched {
             Schedule::Arr(sched) => {
                 let arr = instance.flights()[sched.flight_idx].as_arrival().unwrap();
-                arr.window.latest().max(sched.landing)
+                arr.window.latest.max(sched.landing)
             },
             Schedule::Dep(sched) => {
                 let dep = instance.flights()[sched.flight_idx].as_departure().unwrap();
-                dep.ctot.latest().max(sched.takeoff)
+                dep.window.latest.max(dep.ctot.latest()).max(sched.takeoff)
             },
         })
         .max()

@@ -7,7 +7,7 @@ use std::{
 
 use irdis::instance::{
     flight::{Arrival, Departure, Flight},
-    time::TimeWindow,
+    time::{Ctot, TimeWindow},
     Instance,
 };
 
@@ -23,7 +23,7 @@ fn main() {
             .join(format!("info_matrix_FPT{:0>2}.txt.txt", id));
         let separations = fs::read_to_string(separations_path).unwrap();
 
-        let instance = instance_from_furini(&flights, &separations, 60);
+        let instance = instance_from_furini(&flights, &separations, 10);
 
         let toml = toml::to_string(&instance).unwrap();
         let instance_path = flights_path
@@ -62,24 +62,28 @@ fn instance_from_furini(flights: &str, separations: &str, limit: usize) -> Insta
 
             let kind = parts.next();
 
-            let target = NaiveTime::parse_from_str(parts.next().unwrap(), "%H%M").unwrap();
+            let base_time = NaiveTime::parse_from_str(parts.next().unwrap(), "%H%M").unwrap();
 
             let _unknown = parts.next();
 
             let flight = match kind {
                 Some("A") => Flight::Arr(Arrival {
+                    base_time,
                     window: TimeWindow {
-                        before: minute * 5,
-                        target,
-                        after: minute * 5,
+                        earliest: base_time,
+                        latest: base_time + minute * 10,
                     },
-                    taxi_in_dur: minute * 5,
                 }),
                 Some("D") => Flight::Dep(Departure {
-                    ctot: TimeWindow {
-                        before: minute * 5,
-                        target,
-                        after: minute * 10,
+                    base_time,
+                    window: TimeWindow {
+                        earliest: base_time,
+                        latest: base_time + minute * 15,
+                    },
+                    ctot: Ctot {
+                        target: base_time + minute * 5,
+                        allow_before: minute * 5,
+                        allow_after: minute * 10,
                     },
                     pushback_dur: minute * 5,
                     taxi_deice_dur: minute * 5,

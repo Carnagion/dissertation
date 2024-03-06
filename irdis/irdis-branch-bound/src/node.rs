@@ -26,9 +26,7 @@ pub fn branch_and_bound(
 ) -> Option<Vec<Schedule>> {
     let mut sep_sets = crate::separation_identical_sets(instance);
     for sep_set in &mut sep_sets {
-        sep_set.sort_unstable_by_key(|&flight_idx| {
-            instance.flights()[flight_idx].time_window().earliest()
-        });
+        sep_set.sort_unstable_by_key(|&flight_idx| instance.flights()[flight_idx].release_time());
     }
     let mut next_in_sep_sets = vec![0; sep_sets.len()];
 
@@ -127,9 +125,9 @@ fn branch_and_bound_once(
 
         nodes.extend(generate_next_nodes(
             instance,
-            &sep_sets,
-            &next_in_sep_sets,
-            &current_solution,
+            sep_sets,
+            next_in_sep_sets,
+            current_solution,
             depth + 1,
         ));
     }
@@ -147,7 +145,7 @@ fn generate_next_nodes<'a>(
     let prev_earliest = current_solution.last().map(|node| {
         let flight_idx = node.sched.flight_index();
         let flight = &instance.flights()[flight_idx];
-        flight.time_window().earliest()
+        flight.time_window().earliest
     });
 
     let mut next_flights = sep_sets
@@ -159,26 +157,33 @@ fn generate_next_nodes<'a>(
             let flight_idx = sep_set.get(next_idx).copied()?;
             let flight = &instance.flights()[flight_idx];
 
+            // NOTE: Prunes worse combinations from the next states. For example, if a flight `A`
+            //       has a time window that is disjoint from the currently last scheduled flight and
+            //       is completely before it, then it is infeasible to schedule `A` after the last
+            //       scheduled flight. Thus, it need not be selected as a next node.
+            //
+            //       The next optimisation below also prevents such cases where a flight that should
+            //       ideally be scheduled after `A` gets selected before it.
             match prev_earliest {
                 None => Some((flight, flight_idx, sep_set_idx)),
-                Some(prev_earliest) if flight.time_window().latest() > prev_earliest => {
+                Some(prev_earliest) if flight.time_window().latest > prev_earliest => {
                     Some((flight, flight_idx, sep_set_idx))
                 },
                 Some(_) => None,
             }
         })
         .collect::<Vec<_>>();
-    next_flights.sort_unstable_by_key(|(flight, ..)| flight.time_window().earliest());
+    next_flights.sort_unstable_by_key(|(flight, ..)| flight.time_window().earliest);
 
-    // NOTE: Gets rid of impossible combinations from the next states. For example, if `A` has a time
-    //       window which is disjoint from `B`'s and completely before `B`'s, then `A` must always be
-    //       scheduled before `B`. This means there is no point in selecting both `A` and `B` as initial
-    //       nodes, and the later flight `B` can be removed.
-    let latest = next_flights
+    // NOTE: Prunes worse combinations from the next states. For example, if `A` has a time window
+    //       which is disjoint from `B`'s and completely before `B`'s, then `A` must always be
+    //       scheduled before `B`. This means there is no point in selecting both `A` and `B` as
+    //       initial nodes, and the later flight `B` can be removed.
+    let next_latest = next_flights
         .first()
-        .map(|(flight, ..)| flight.time_window().latest());
-    if let Some(latest) = latest {
-        next_flights.retain(|(flight, ..)| flight.time_window().earliest() < latest);
+        .map(|(flight, ..)| flight.time_window().latest);
+    if let Some(next_latest) = next_latest {
+        next_flights.retain(|(flight, ..)| flight.time_window().earliest < next_latest);
     }
 
     next_flights
@@ -231,13 +236,14 @@ fn generate_arrivals(
     let prev_sched = current_solution.last().map(|node| &node.sched);
 
     let landing = match prev_sched {
-        None => arr.window.earliest(),
+        None => arr.release_time(),
         Some(prev_sched) => {
             let sep = instance.separations()[(prev_sched.flight_index(), arr_idx)];
-            arr.window.earliest().max(prev_sched.flight_time() + sep)
+            arr.release_time().max(prev_sched.flight_time() + sep)
         },
     };
 
+    // TODO: Filter out solutions where the landing is outside the window
     iter::once(landing).map(move |landing| ArrivalSchedule {
         flight_idx: arr_idx,
         landing,
@@ -259,7 +265,7 @@ fn generate_departures(
 
     let (earliest_deice, latest_deice, takeoff) = match (prev_sched, prev_dep_sched) {
         (None, None) => {
-            let takeoff = dep.ctot.earliest();
+            let takeoff = dep.release_time();
 
             let earliest_deice = (takeoff
                 - instance.max_slack_dur
@@ -275,7 +281,7 @@ fn generate_departures(
         (Some(prev_sched), None) => {
             let sep = instance.separations()[(prev_sched.flight_index(), dep_idx)];
 
-            let takeoff = dep.ctot.earliest().max(prev_sched.flight_time() + sep);
+            let takeoff = dep.release_time().max(prev_sched.flight_time() + sep);
 
             let earliest_deice = (takeoff
                 - instance.max_slack_dur
@@ -297,7 +303,7 @@ fn generate_departures(
             let sep = instance.separations()[(prev_sched.flight_index(), dep_idx)];
 
             let takeoff = (prev_deice_end + dep.deice_dur + dep.taxi_out_dur + dep.lineup_dur)
-                .max(dep.ctot.earliest())
+                .max(dep.release_time())
                 .max(prev_sched.flight_time() + sep);
 
             let earliest_deice = (takeoff
@@ -315,6 +321,7 @@ fn generate_departures(
         (None, Some(_)) => unreachable!(),
     };
 
+    // TODO: Filter out solutions where the takeoff is outside the window
     iter_minutes(earliest_deice, latest_deice)
         .rev() // NOTE: Since the last added node is explored first, the best node should be added last.
                //       Here, the first node leaves the least gaps in the de-icing queue, and is thus

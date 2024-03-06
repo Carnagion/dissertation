@@ -21,36 +21,29 @@ impl Default for Cost {
 }
 
 pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> u64 {
-    let violation = if arr.window.contains(&sched.landing) {
-        0
-    } else {
-        VIOLATION_COST.pow(2)
-    };
-
-    let deviation = (sched.landing - arr.window.earliest())
+    let delay = (sched.landing - arr.release_time())
         .num_minutes()
         .unsigned_abs()
         .pow(2);
-
-    violation + deviation
+    delay
 }
 
 pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
-    let violation = if dep.ctot.contains(&sched.takeoff) {
+    let delay = (sched.takeoff - dep.release_time())
+        .num_minutes()
+        .unsigned_abs()
+        .pow(2);
+
+    let violation = if dep.ctot.contains(sched.takeoff) {
         0
     } else {
         VIOLATION_COST.pow(2)
     };
-
-    let deviation = (sched.takeoff - dep.ctot.earliest())
-        .num_minutes()
-        .unsigned_abs()
-        .pow(2);
 
     let slack = (sched.takeoff - dep.lineup_dur - dep.taxi_out_dur - dep.deice_dur - sched.deice)
         .num_minutes()
         .unsigned_abs()
-        .pow(2);
+        .pow(1); // TODO: Change this back to `pow(2)` once the CPLEX model has done the same
 
-    violation + deviation + slack
+    delay + violation + slack
 }

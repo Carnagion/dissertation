@@ -9,26 +9,40 @@ use serde_with::serde_as;
 mod duration;
 pub(crate) use duration::{DurationMinutes, SeparationsAsMinutes};
 
-#[serde_as] // NOTE: This must remain before the derive
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct TimeWindow {
-    pub target: NaiveTime,
-    #[serde_as(as = "DurationMinutes")]
-    pub before: Duration,
-    #[serde_as(as = "DurationMinutes")]
-    pub after: Duration,
+    pub earliest: NaiveTime,
+    pub latest: NaiveTime,
 }
 
 impl TimeWindow {
+    pub fn contains(&self, time: NaiveTime) -> bool {
+        (self.earliest..=self.latest).contains(&time)
+    }
+}
+
+#[serde_as] // NOTE: This must remain before the derive
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct Ctot {
+    pub target: NaiveTime,
+    #[serde_as(as = "DurationMinutes")]
+    pub allow_before: Duration,
+    #[serde_as(as = "DurationMinutes")]
+    pub allow_after: Duration,
+}
+
+impl Ctot {
     pub fn earliest(&self) -> NaiveTime {
-        self.target - self.before
+        self.target - self.allow_before
     }
 
     pub fn latest(&self) -> NaiveTime {
-        self.target + self.after
+        self.target + self.allow_after
     }
 
-    pub fn contains(&self, time: &NaiveTime) -> bool {
-        (self.earliest()..=self.latest()).contains(time)
+    pub fn contains(&self, time: NaiveTime) -> bool {
+        (self.earliest()..=self.latest()).contains(&time)
     }
 }
