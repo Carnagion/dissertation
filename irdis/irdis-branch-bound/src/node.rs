@@ -157,28 +157,29 @@ fn generate_next_nodes<'a>(
             let flight_idx = sep_set.get(next_idx).copied()?;
             let flight = &instance.flights()[flight_idx];
 
-            // NOTE: Prunes worse combinations from the next states. For example, if a flight `A`
-            //       has a time window that is disjoint from the currently last scheduled flight and
-            //       is completely before it, then it is infeasible to schedule `A` after the last
-            //       scheduled flight. Thus, it need not be selected as a next node.
+            // NOTE: Prunes nodes according to complete orders induced by disjoint time windows.
             //
-            //       The next optimisation below also prevents such cases where a flight that should
-            //       ideally be scheduled after `A` gets selected before it.
+            //       For example, let the last scheduled flight in the current solution be `i`. If
+            //       a candidate `j` flight to be scheduled next has a time window that is disjoint
+            //       with `i`'s  and the latest time of `j` is before the earliest time of `i`, then
+            //       scheduling `j` after `i` would lead to an infeasible solution. Thus, any solution
+            //       containing `j` after `i` can be pruned.
             match prev_earliest {
                 None => Some((flight, flight_idx, sep_set_idx)),
-                Some(prev_earliest) if flight.time_window().latest > prev_earliest => {
-                    Some((flight, flight_idx, sep_set_idx))
-                },
-                Some(_) => None,
+                Some(prev_earliest) if flight.time_window().latest <= prev_earliest => None,
+                Some(_) => Some((flight, flight_idx, sep_set_idx)),
             }
         })
         .collect::<Vec<_>>();
-    next_flights.sort_unstable_by_key(|(flight, ..)| flight.time_window().earliest);
+    next_flights.sort_unstable_by_key(|(flight, ..)| flight.release_time());
 
-    // NOTE: Prunes worse combinations from the next states. For example, if `A` has a time window
-    //       which is disjoint from `B`'s and completely before `B`'s, then `A` must always be
-    //       scheduled before `B`. This means there is no point in selecting both `A` and `B` as
-    //       initial nodes, and the later flight `B` can be removed.
+    // NOTE: Prunes nodes according to complete orders induced by disjoint time windows.
+    //
+    //       For example, let the earliest flight among the set of candidate flights to be scheduled
+    //       next be `i`. If there is any candidate flight `j` such that `j`'s time window is disjoint
+    //       with `i`'s and the earliest time of `j` is after the latest time of `i`, then any feasible
+    //       solution will always schedule `j` after `i`. Thus, `j` can be pruned from any candidate set
+    //       that contains `i`.
     let next_latest = next_flights
         .first()
         .map(|(flight, ..)| flight.time_window().latest);
