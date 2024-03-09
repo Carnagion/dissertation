@@ -34,8 +34,6 @@ tuple Flight {
   	
   	// NOTE: For both arrivals and departures
   	int baseTime;
-  	
-  	// NOTE: For arrivals only
   	TimeWindow window;
   	
   	// NOTE: For departures only
@@ -102,8 +100,6 @@ assert ValidMaxAllowedSlack:
 
 // TODO: Work on everything below this point
 
-range timeWindow[i in Flights] = flights[i].window.earliestTime..flights[i].window.latestTime;
-
 int earliestCtotTime[i in Departures] = deps[i].ctot.targetTime - deps[i].ctot.allowBefore;
 int latestCtotTime[i in Departures] = deps[i].ctot.targetTime + deps[i].ctot.allowAfter;
 
@@ -114,39 +110,35 @@ int earliestDepTime[i in Departures] = maxl(
 	earliestCtotTime[i],
 	deps[i].window.earliestTime,
 	deps[i].baseTime);
-int latestDepTime[i in Departures] = deps[i].window.latestTime; // NOTE: Going over the CTOT end time
-																//       is allowed, albeit heavily
-																//       penalised
+int latestDepTime[i in Departures] = deps[i].window.latestTime;
 
-int earliestTime[i in Flights] = isArrival[i] == true ? earliestArrTime[i]
+int releaseTime[i in Flights] = isArrival[i] == true ? earliestArrTime[i]
 	: isDeparture[i] == true ? earliestDepTime[i]
 	: 0;
-int latestTime[i in Flights] = isArrival[i] == true ? latestArrTime[i]
+int dueTime[i in Flights] = isArrival[i] == true ? latestArrTime[i]
 	: isDeparture[i] == true ? latestDepTime[i]
 	: 0;
 
-int releaseTime[i in Flights] = earliestTime[i];
+//int minHoldoverDur[i in Departures] = deps[i].taxiOutDur + deps[i].lineupDur;
+//int maxHoldoverDur[i in Departures] = minl(maxAllowedHoldover,
+//	deps[i].taxiOutDur
+//	+ deps[i].lineupDur
+//	+ maxAllowedSlack);
+//
+//int minTime = minl(
+//	min (i in Arrivals) minl(arrs[i].window.earliestTime, arrs[i].baseTime),
+//	min (i in Departures) minl(earliestCtotTime[i], deps[i].window.earliestTime, deps[i].baseTime)
+//);
+//int maxTime = maxl(
+//	max (i in Arrivals) arrs[i].window.latestTime,
+//	max (i in Departures) maxl(latestCtotTime[i], deps[i].window.latestTime)
+//);
+//
+//range Time = minTime..maxTime;
 
-int minHoldoverDur[i in Departures] = deps[i].taxiOutDur + deps[i].lineupDur;
-int maxHoldoverDur[i in Departures] = minl(maxAllowedHoldover,
-	deps[i].taxiOutDur
-	+ deps[i].lineupDur
-	+ maxAllowedSlack);
-
-int minTime = minl(
-	min (i in Arrivals) minl(arrs[i].window.earliestTime, arrs[i].baseTime),
-	min (i in Departures) minl(earliestCtotTime[i], deps[i].window.earliestTime, deps[i].baseTime)
-);
-int maxTime = maxl(
-	max (i in Arrivals) arrs[i].window.latestTime,
-	max (i in Departures) maxl(latestCtotTime[i], deps[i].window.latestTime)
-);
-
-range Time = minTime..maxTime;
-
-setof(int) FlightTimes[i in Flights] = { t | t in earliestTime[i]..latestTime[i] };
-setof(int) ArrivalTimes[i in Arrivals] = { t | t in earliestArrTime[i]..latestArrTime[i] };
-setof(int) DepartureTimes[i in Departures] = { t | t in earliestDepTime[i]..latestDepTime[i] };
+setof(int) FlightTimes[i in Flights] = { t | t in releaseTime[i]..dueTime[i] };
+setof(int) ArrivalTimes[i in Arrivals] = FlightTimes[i];
+setof(int) DepartureTimes[i in Departures] = FlightTimes[i];
 
 //range DeiceTimes[i in Departures] = earliestDepTime[i] - maxHoldoverDur[i] - deps[i].deiceDur
 //	..latestDepTime[i] - minHoldoverDur[i] - deps[i].deiceDur;
@@ -185,25 +177,51 @@ setof(FlightPair) DisjointWindowConsecutivePairs = { <i, j> | i, j in Flights:
 	&& flights[i].window.latestTime + sep[i, j] > flights[j].window.earliestTime
 	&& haveConsecutiveDisjointWindows[i, j] == true };
 
-int haveOverlappingWindows[i in Flights, j in Flights] = earliestTime[i] in earliestTime[j]..latestTime[j]
-		|| latestTime[i] in earliestTime[j]..latestTime[j]
-		|| earliestTime[j] in earliestTime[i]..latestTime[i]
-		|| latestTime[j] in earliestTime[i]..latestTime[i];
+int haveOverlappingWindows[i in Flights, j in Flights] =
+	flights[i].window.earliestTime in flights[j].window.earliestTime..flights[j].window.latestTime
+	|| flights[i].window.latestTime in flights[j].window.earliestTime..flights[j].window.latestTime
+	|| flights[j].window.earliestTime in flights[i].window.earliestTime..flights[i].window.latestTime
+	|| flights[j].window.latestTime in flights[i].window.earliestTime..flights[i].window.latestTime;
 
 setof(FlightPair) OverlappingWindowFlightPairs = { <i, j> | i, j in Flights:
-	i != j
+	j > i
 	&& haveOverlappingWindows[i, j] == true };
 
-// TODO: Check that it works
 int areSeparationIdentical[i in Flights, j in Flights] = prod (k in Flights:
 	i != k && j != k)
 	(sep[i, k] == sep[j, k] && sep[k, i] == sep[k, j]) == true;
 
-// TODO: Check that it works and find a way to compress this to only consecutive pairs
-setof(FlightPair) SeparationIdenticalFlightPairs = { <i, j> | i, j in Flights:
+int areCompleteOrdered[i in Arrivals, j in Arrivals] = releaseTime[i] <= releaseTime[j]
+	&& arrs[i].baseTime <= arrs[j].baseTime
+	&& arrs[i].window.latestTime <= arrs[j].window.latestTime;
+
+setof(FlightPair) CompleteOrderedFlightPairs = { <i, j> | i, j in Arrivals:
 	j > i
 	&& areSeparationIdentical[i, j] == true
-	&& releaseTime[j] >= releaseTime[i] };
+	&& (areCompleteOrdered[i, j] == true || areCompleteOrdered[j, i] == true) };
+
+// TODO: Check that it works and find a way to compress this to only consecutive pairs
+setof(FlightPair) SeparationIdenticalFlightPairsByLatestTime = { <i, j> | i, j in Flights:
+	j > i
+	&& areSeparationIdentical[i, j] == true
+	&& releaseTime[j] >= releaseTime[i]
+	&& flights[j].window.latestTime >= flights[i].window.latestTime };
+
+// TODO: Check that it works and find a way to compress this to only consecutive pairs
+setof(FlightPair) SeparationIdenticalFlightPairsByBaseTime = { <i, j> | i, j in Flights:
+	j > i
+	&& areSeparationIdentical[i, j] == true
+	&& releaseTime[j] >= releaseTime[i]
+	&& flights[j].baseTime >= flights[i].baseTime
+	&& <i, j> not in SeparationIdenticalFlightPairsByLatestTime };
+
+// TODO: Check that it works and find a way to compress this to only consecutive pairs
+setof(FlightPair) SeparationIdenticalFlightPairsByReleaseTime = { <i, j> | i, j in Flights:
+	j > i
+	&& areSeparationIdentical[i, j] == true
+	&& releaseTime[j] >= releaseTime[i]
+	&& <i, j> not in SeparationIdenticalFlightPairsByBaseTime
+	&& <i, j> not in SeparationIdenticalFlightPairsByLatestTime };
 
 dvar boolean isScheduledAt[<i, t> in PossibleFlightSchedules];
 
@@ -244,17 +262,42 @@ subject to {
   		forall (i in Departures)
   		  	maxAllowedHoldover >= deps[i].lineupDur + deps[i].taxiOutDur + slackDur[i];
 
-  	CompleteOrderInSeparationIdenticalFlights:
-  		forall (<i, j> in SeparationIdenticalFlightPairs)
-  		  	scheduledTime[j] >= scheduledTime[i] + sep[i, j];
+	MinimumSeparation: {
+	  	InDisjointWindowFlights:
+	  		forall (<i, j> in DisjointWindowConsecutivePairs)
+	  	  		scheduledTime[j] >= scheduledTime[i] + sep[i, j];
 
-  	CompleteOrderFromDisjointWindows:
-	  	forall (<i, j> in DisjointWindowConsecutivePairs)
-	  	  	scheduledTime[j] >= scheduledTime[i] + sep[i, j];
+  		InOverlappingWindowFlights:
+  			forall (<i, j> in OverlappingWindowFlightPairs)
+	  		  	scheduledTime[j] >= scheduledTime[i]
+			  		+ sep[i, j]
+			  			* (scheduledTime[j] >= scheduledTime[i] + 1)
+			  		- (flights[i].window.latestTime - flights[j].window.earliestTime)
+			  			* (scheduledTime[i] >= scheduledTime[j] + 1);
+  	};
 
-  	SeparationInOverlappingWindowFlights:
-  		forall (<i, j> in OverlappingWindowFlightPairs)
-  		  	scheduledTime[j] >= scheduledTime[i]
-		  		+ sep[i, j] * (scheduledTime[j] >= scheduledTime[i] + 1)
-		  		- (latestTime[i] - earliestTime[j]) * (scheduledTime[i] >= scheduledTime[j] + 1);
+	CompleteOrders: {
+	  	// TODO: Include makespan in objective
+//	  	FromMakespan:
+//	  		forall (<i, j> in SeparationIdenticalFlightPairsByReleaseTime)
+//  		  		scheduledTime[j] >= scheduledTime[i] + sep[i, j];
+//  		
+//  		FromDelay:
+//  			forall (<i, j> in SeparationIdenticalFlightPairsByBaseTime)
+//  			  	scheduledTime[j] >= scheduledTime[i] + sep[i, j];
+//	  	
+//	  	FromTimeWindows:
+//	  		forall (<i, j> in SeparationIdenticalFlightPairsByLatestTime)
+//	  		  	scheduledTime[j] >= scheduledTime[i] + sep[i, j];
+		forall (<i, j> in CompleteOrderedFlightPairs)
+		  	(releaseTime[i] <= releaseTime[j] && scheduledTime[j] >= scheduledTime[i] + sep[i, j])
+		  	|| (releaseTime[j] <= releaseTime[i] && scheduledTime[i] >= scheduledTime[j] + sep[j, i]);
+  	};
 };
+
+// TODO:
+// 
+// 1. There might be a conditional order between an arrival `i` and a departure `j` if they are separation-
+//    identical and their base and release times are equivalent. It always makes more sense to schedule the
+//    departure `j` before the arrival `i` since this minimizes the slack cost for `j` without changing the
+//    total delay cost overall, unless scheduling `j` before `i` pushes `i` out of its hard time window.
