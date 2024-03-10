@@ -1,6 +1,7 @@
 use irdis_instance::{
     flight::{Arrival, Departure},
-    schedule::{ArrivalSchedule, DepartureSchedule},
+    schedule::{ArrivalSchedule, DepartureSchedule, Schedule},
+    Instance,
 };
 
 const VIOLATION_COST: u64 = 60;
@@ -43,7 +44,23 @@ pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
     let slack = (sched.takeoff - dep.lineup_dur - dep.taxi_out_dur - dep.deice_dur - sched.deice)
         .num_minutes()
         .unsigned_abs()
-        .pow(1); // TODO: Change this back to `pow(2)` once the CPLEX model has done the same
+        .pow(2);
 
     delay + violation + slack
+}
+
+pub fn solution_cost(solution: &[Schedule], instance: &Instance) -> u64 {
+    solution
+        .iter()
+        .map(|sched| match sched {
+            Schedule::Arr(sched) => {
+                let arr = instance.flights()[sched.flight_idx].as_arrival().unwrap();
+                arrival_cost(sched, arr)
+            },
+            Schedule::Dep(sched) => {
+                let dep = instance.flights()[sched.flight_idx].as_departure().unwrap();
+                departure_cost(sched, dep)
+            },
+        })
+        .sum::<u64>()
 }
