@@ -10,7 +10,10 @@ use irdis_instance::{
     Instance,
 };
 
-use crate::cost::{arrival_cost, departure_cost, Cost};
+use crate::{
+    complete_orders::separation_identical_sets,
+    cost::{arrival_cost, departure_cost, Cost},
+};
 
 #[derive(Debug, Clone)]
 struct Node {
@@ -24,10 +27,16 @@ pub fn branch_and_bound(
     instance: &Instance,
     horizon: Option<NonZeroUsize>,
 ) -> Option<Vec<Schedule>> {
-    let mut sep_sets = crate::separation_identical_sets(instance);
-    for sep_set in &mut sep_sets {
-        sep_set.sort_unstable_by_key(|&flight_idx| instance.flights()[flight_idx].release_time());
-    }
+    let mut sep_sets = separation_identical_sets(instance);
+    println!("{:#?}", sep_sets);
+    // for sep_set in &mut sep_sets {
+    //     // NOTE: Orders separation-identical flights to prune nodes according to complete orders
+    //     //       induced by an objective to minimize makespan.
+    //     //
+    //     //       See section 3.2.2 of "Pruning Rules for Optimal Runway Sequencing" by De Maere et al (2017).
+    //     sep_set.sort_by_key(|&flight_idx| instance.flights()[flight_idx].release_time());
+    // }
+
     let mut next_in_sep_sets = vec![0; sep_sets.len()];
 
     let mut current_solution = Vec::with_capacity(instance.flights().len());
@@ -181,8 +190,9 @@ fn generate_next_nodes<'a>(
     //       solution will always schedule `j` after `i`. Thus, `j` can be pruned from any candidate set
     //       that contains `i`.
     let next_latest = next_flights
-        .first()
-        .map(|(flight, ..)| flight.time_window().latest);
+        .iter()
+        .map(|(flight, ..)| flight.time_window().latest)
+        .min();
     if let Some(next_latest) = next_latest {
         next_flights.retain(|(flight, ..)| flight.time_window().earliest < next_latest);
     }
