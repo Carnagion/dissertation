@@ -266,3 +266,70 @@ subject to {
 		  	scheduledTime[j] >= scheduledTime[i] + sep[i, j]
   			&& areScheduledInOrder[<i, j>] == true;
 };
+
+execute SaveSolution {
+  	var solution = new Array(flightCount);
+  	for (var i in Flights) {
+  	  	var flight = flights[i];
+
+  	  	var sched = new Object();
+  	  	sched.flightIdx = i - 1;
+  	  	if (flight.kind == arrival) {
+  	  	  	sched.landing = scheduledTime[i];
+  	  	} else if (flight.kind == departure) {
+  	  	  	sched.takeoff = scheduledTime[i];
+  	  	  	sched.deice = deiceTime[i];
+  	  	}
+
+  	  	solution[i] = sched;
+  	}
+
+  	function compareSchedules(sched, other) {
+  	  	var schedTime = scheduledTime[sched.flightIdx + 1];
+  	  	var otherTime = scheduledTime[other.flightIdx + 1];
+  	  	if (schedTime < otherTime) {
+  	  	  	return -1;
+  	  	} else if (schedTime > otherTime) {
+  	  	  	return 1;
+  	  	} else {
+  	  	  	return 0;
+  	  	}
+  	}
+
+  	solution.sort(compareSchedules);
+  	
+  	var startTime = new Object();
+  	startTime.hour = 14;
+  	startTime.minute = 55;
+  	
+  	function toHourMinute(minuteOffset) {
+  	  	var startMinute = (startTime.hour * 60) + startTime.minute;
+  	  	var schedMinute = startMinute + minuteOffset;
+  	  	
+  	  	var hour = Math.floor(schedMinute / 60);
+  	  	var minute = schedMinute % 60;
+  	  	
+  	  	var date = new Date(0, 0, 1, hour, minute, 0, 0);
+  	  	var time = date.toUTCString().split(" ")[1];
+  	  	
+  	  	return "\"" + time + "\"";
+  	}
+
+  	var file = new IloOplOutputFile("../solutions/furini/test.toml");
+  	for (var i in Flights) {
+  	  	var sched = solution[i - 1];
+  	  	var flight = flights[sched.flightIdx + 1];
+  	  	
+  	  	file.writeln("[[schedules]]")
+  	  	file.writeln("flight-idx = ", sched.flightIdx);
+  	  	if (flight.kind == arrival) {
+  	  	  	file.writeln("kind = \"arrival\"");
+  	  	  	file.writeln("landing = ", toHourMinute(sched.landing));
+  	  	} else if (flight.kind == departure) {
+  	  	  	file.writeln("kind = \"departure\"");
+  	  	  	file.writeln("deice = ", toHourMinute(sched.deice));
+  	  	  	file.writeln("takeoff = ", toHourMinute(sched.takeoff));
+  	  	}
+  	  	file.writeln();
+  	}
+};
