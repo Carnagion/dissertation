@@ -169,19 +169,16 @@ int areCompleteOrdered[i in Arrivals, j in Arrivals] =
 
 setof(FlightPair) DistinctFlightPairs = { <i, j> | i, j in Flights: i != j };
 
-setof(FlightPair) DisjointSeparatedWindowConsecutivePairs = { <i, j> | i, j in Flights:
-	i != j
-	&& flights[i].window.latestTime < flights[j].window.earliestTime
+setof(FlightPair) DisjointSeparatedWindowFlightPairs = { <i, j> | <i, j> in DistinctFlightPairs:
+	flights[i].window.latestTime < flights[j].window.earliestTime
 	&& flights[i].window.latestTime + sep[i, j] <= flights[j].window.earliestTime };
 
-setof(FlightPair) DisjointWindowConsecutivePairs = { <i, j> | i, j in Flights:
-	i != j
-	&& flights[i].window.latestTime < flights[j].window.earliestTime
+setof(FlightPair) DisjointWindowFlightPairs = { <i, j> | <i, j> in DistinctFlightPairs:
+	flights[i].window.latestTime < flights[j].window.earliestTime
 	&& flights[i].window.latestTime + sep[i, j] > flights[j].window.earliestTime };
 
-setof(FlightPair) OverlappingWindowFlightPairs = { <i, j> | i, j in Flights:
-	i != j
-	&& haveOverlappingWindows[i, j] == true };
+setof(FlightPair) OverlappingWindowFlightPairs = { <i, j> | <i, j> in DistinctFlightPairs:
+	haveOverlappingWindows[i, j] == true };
 
 setof(FlightPair) SeparationIdenticalCompleteOrderedFlightPairs = { <i, j> | i, j in Arrivals:
 	i != j
@@ -247,11 +244,11 @@ subject to {
 
 	MinimumSeparation: {
 	  	InDisjointSeparatedWindowFlights:
-	  		forall (<i, j> in DisjointSeparatedWindowConsecutivePairs)
+	  		forall (<i, j> in DisjointSeparatedWindowFlightPairs)
 	  		  	areScheduledInOrder[<i, j>] == true;
 
 	  	InDisjointWindowFlights:
-	  		forall (<i, j> in DisjointWindowConsecutivePairs)
+	  		forall (<i, j> in DisjointWindowFlightPairs)
 	  	  		scheduledTime[j] >= scheduledTime[i] + sep[i, j]
 	  	  		&& areScheduledInOrder[<i, j>] == true;
 
