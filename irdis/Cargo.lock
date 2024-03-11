@@ -231,6 +231,7 @@ dependencies = [
  "irdis-branch-bound",
  "irdis-instance",
  "irdis-vis",
+ "serde",
  "svg",
  "toml",
 ]

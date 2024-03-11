@@ -56,6 +56,7 @@ impl Schedule {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct ArrivalSchedule {
     pub flight_idx: usize,
     pub landing: NaiveTime,
@@ -68,6 +69,7 @@ impl From<ArrivalSchedule> for Schedule {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct DepartureSchedule {
     pub flight_idx: usize,
     pub deice: NaiveTime,

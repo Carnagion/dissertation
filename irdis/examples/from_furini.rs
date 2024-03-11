@@ -23,7 +23,7 @@ fn main() {
             .join(format!("info_matrix_FPT{:0>2}.txt.txt", id));
         let separations = fs::read_to_string(separations_path).unwrap();
 
-        let instance = instance_from_furini(&flights, &separations, 10);
+        let instance = instance_from_furini(&flights, &separations, 20);
 
         let toml = toml::to_string(&instance).unwrap();
         let instance_path = flights_path
