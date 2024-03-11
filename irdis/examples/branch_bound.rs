@@ -7,7 +7,7 @@ use irdis::{
 };
 
 fn main() {
-    let toml = include_str!("../instances/furini/converted/1.toml");
+    let toml = include_str!("../instances/furini/toml/1.toml");
     let instance = toml::from_str::<Instance>(toml).unwrap();
 
     // NOTE: Using a large horizon produces better results especially when using
