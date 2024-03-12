@@ -100,16 +100,18 @@ assert ValidMaxAllowedSlack:
 
 // TODO: Work on everything below this point
 
+int hasCtot[i in Departures] = deps[i].ctot.allowBefore > 0 && deps[i].ctot.allowAfter > 0;
+
 int earliestCtotTime[i in Departures] = deps[i].ctot.targetTime - deps[i].ctot.allowBefore;
 int latestCtotTime[i in Departures] = deps[i].ctot.targetTime + deps[i].ctot.allowAfter;
 
 int arrReleaseTime[i in Arrivals] = maxl(arrs[i].window.earliestTime, arrs[i].baseTime);
 int arrDueTime[i in Arrivals] = arrs[i].window.latestTime;
 
-int depReleaseTime[i in Departures] = maxl(
+int depReleaseTime[i in Departures] = hasCtot[i] == true ? maxl(
 	earliestCtotTime[i],
 	deps[i].window.earliestTime,
-	deps[i].baseTime);
+	deps[i].baseTime) : maxl(deps[i].window.earliestTime, deps[i].baseTime);
 int depDueTime[i in Departures] = deps[i].window.latestTime;
 
 int releaseTime[i in Flights] = isArrival[i] == true ? arrReleaseTime[i]
@@ -208,7 +210,8 @@ dexpr int deiceSlack[i in Departures] = scheduledTime[i]
 dexpr int delayCost[i in Flights] = sum (t in FlightTimes[i])
 	isScheduledAt[<i, t>] * ftoi(pow(t - flights[i].baseTime, 2));
 
-dexpr int ctotViolationCost[i in Departures] = (scheduledTime[i] >= latestCtotTime[i] + 1)
+dexpr int ctotViolationCost[i in Departures] = hasCtot[i]
+	* (scheduledTime[i] >= latestCtotTime[i] + 1)
 	* ftoi(pow(60, 2));
 
 dexpr int slackCost[i in Departures] = sum (takeoff in FlightTimes[i], deice in DeiceTimes[i])
