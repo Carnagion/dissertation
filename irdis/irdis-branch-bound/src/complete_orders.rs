@@ -5,13 +5,13 @@ pub fn separation_identical_sets(instance: &Instance) -> Vec<Vec<usize>> {
 
     'unclassified: for j in 0..instance.flights().len() {
         'sets: for set in &mut sets {
-            let are_complete_ordered = set.iter().copied().all(|i| {
+            let separation_identical_complete_order = set.iter().copied().all(|i| {
                 are_separation_identical(i, j, instance)
-                    && (are_complete_ordered(i, j, instance)
-                        || are_complete_ordered(j, i, instance))
+                    && (complete_order_exists(i, j, instance)
+                        || complete_order_exists(j, i, instance))
             });
 
-            if !are_complete_ordered {
+            if !separation_identical_complete_order {
                 continue 'sets;
             }
 
@@ -53,7 +53,7 @@ fn are_separation_identical(i: usize, j: usize, instance: &Instance) -> bool {
         })
 }
 
-fn are_complete_ordered(i: usize, j: usize, instance: &Instance) -> bool {
+fn complete_order_exists(i: usize, j: usize, instance: &Instance) -> bool {
     let i = &instance.flights()[i];
     let j = &instance.flights()[j];
     match (i, j) {

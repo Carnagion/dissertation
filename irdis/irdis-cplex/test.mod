@@ -100,7 +100,9 @@ assert ValidMaxAllowedSlack:
 
 // TODO: Work on everything below this point
 
-int hasCtot[i in Departures] = deps[i].ctot.allowBefore > 0 && deps[i].ctot.allowAfter > 0;
+int hasCtot[i in Flights] = isDeparture[i] == true
+	? deps[i].ctot.allowBefore > 0 && deps[i].ctot.allowAfter > 0
+	: false;
 
 int earliestCtotTime[i in Departures] = deps[i].ctot.targetTime - deps[i].ctot.allowBefore;
 int latestCtotTime[i in Departures] = deps[i].ctot.targetTime + deps[i].ctot.allowAfter;
@@ -160,14 +162,15 @@ int areSeparationIdentical[i in Flights, j in Flights] = prod (k in Flights:
 	i != k && j != k)
 	(sep[i, k] == sep[j, k] && sep[k, i] == sep[k, j]) == true;
 
-int areCompleteOrdered[i in Arrivals, j in Arrivals] =
-	releaseTime[i] <= releaseTime[j]
-	&& arrs[i].baseTime <= arrs[j].baseTime
-	&& arrs[i].window.latestTime <= arrs[j].window.latestTime
+int areCompleteOrdered[i in Flights, j in Flights] =
+	hasCtot[i] == false && hasCtot[j] == false
+	&& releaseTime[i] <= releaseTime[j]
+	&& flights[i].baseTime <= flights[j].baseTime
+	&& flights[i].window.latestTime <= flights[j].window.latestTime
 	&& (j > i ||
 		!(releaseTime[i] == releaseTime[j]
-		&& arrs[i].baseTime == arrs[j].baseTime
-		&& arrs[i].window.latestTime == arrs[j].window.latestTime));
+		&& flights[i].baseTime == flights[j].baseTime
+		&& flights[i].window.latestTime == flights[j].window.latestTime));
 
 setof(FlightPair) DistinctFlightPairs = { <i, j> | i, j in Flights: i != j };
 
@@ -182,9 +185,8 @@ setof(FlightPair) DisjointWindowFlightPairs = { <i, j> | <i, j> in DistinctFligh
 setof(FlightPair) OverlappingWindowFlightPairs = { <i, j> | <i, j> in DistinctFlightPairs:
 	haveOverlappingWindows[i, j] == true };
 
-setof(FlightPair) SeparationIdenticalCompleteOrderedFlightPairs = { <i, j> | i, j in Arrivals:
-	i != j
-	&& areSeparationIdentical[i, j] == true
+setof(FlightPair) SeparationIdenticalCompleteOrderedFlightPairs = { <i, j> | <i, j> in DistinctFlightPairs:
+	areSeparationIdentical[i, j] == true
 	&& areCompleteOrdered[i, j] == true };
 
 dvar boolean isScheduledAt[<i, t> in PossibleFlightSchedules];
