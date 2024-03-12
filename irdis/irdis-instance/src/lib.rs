@@ -24,7 +24,7 @@ pub mod time;
 use time::{DurationMinutes, SeparationsAsMinutes};
 
 #[cfg(any(feature = "furini", feature = "xlsx"))]
-mod convert;
+pub mod convert;
 
 // NOTE: This must remain before the derive. The `cfg_eval` is to make the inner `cfg_attr` attributes
 //       evaluate before `serde_as` is applied, which allows `serde_as` to function properly.
