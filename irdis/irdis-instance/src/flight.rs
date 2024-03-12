@@ -93,7 +93,7 @@ impl From<Arrival> for Flight {
 pub struct Departure {
     pub base_time: NaiveTime,
     pub window: TimeWindow,
-    pub ctot: Ctot,
+    pub ctot: Option<Ctot>,
     #[serde_as(as = "DurationMinutes")]
     pub pushback_dur: Duration,
     #[serde_as(as = "DurationMinutes")]
@@ -108,9 +108,11 @@ pub struct Departure {
 
 impl Departure {
     pub fn release_time(&self) -> NaiveTime {
-        self.base_time
-            .max(self.window.earliest)
-            .max(self.ctot.earliest())
+        let mut release = self.base_time.max(self.window.earliest);
+        if let Some(ctot) = &self.ctot {
+            release = release.max(ctot.earliest());
+        }
+        release
     }
 }
 

@@ -7,7 +7,7 @@ use thiserror::Error;
 use crate::{
     flight::{Arrival, Departure, Flight},
     sep::SeparationsLenError,
-    time::{Ctot, TimeWindow},
+    time::TimeWindow,
     Instance,
 };
 
@@ -104,11 +104,7 @@ fn parse_flight(line: &str) -> Result<Flight, FromFuriniError> {
                 earliest: base_time,
                 latest: base_time + MINUTE * 15,
             },
-            ctot: Ctot {
-                target: base_time + MINUTE * 5,
-                allow_before: MINUTE * 5,
-                allow_after: MINUTE * 10,
-            },
+            ctot: None,
             pushback_dur: MINUTE * 5,
             taxi_deice_dur: MINUTE * 5,
             deice_dur: MINUTE * 5,

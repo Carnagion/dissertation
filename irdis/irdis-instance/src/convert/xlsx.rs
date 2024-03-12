@@ -45,9 +45,12 @@ impl Instance {
                     base_time: minutes(starting_time, dep.base_time),
                     window_earliest: minutes(starting_time, dep.window.earliest),
                     window_latest: minutes(starting_time, dep.window.latest),
-                    ctot_target: Some(minutes(starting_time, dep.ctot.target)),
-                    ctot_allow_before: Some(as_minutes(dep.ctot.allow_before)),
-                    ctot_allow_after: Some(as_minutes(dep.ctot.allow_after)),
+                    ctot_target: dep
+                        .ctot
+                        .as_ref()
+                        .map(|ctot| minutes(starting_time, ctot.target)),
+                    ctot_allow_before: dep.ctot.as_ref().map(|ctot| as_minutes(ctot.allow_before)),
+                    ctot_allow_after: dep.ctot.as_ref().map(|ctot| as_minutes(ctot.allow_after)),
                     pushback_dur: Some(as_minutes(dep.pushback_dur)),
                     taxi_deice_dur: Some(as_minutes(dep.taxi_deice_dur)),
                     deice_dur: Some(as_minutes(dep.deice_dur)),
@@ -145,10 +148,13 @@ fn starting_time(flights: &[Flight]) -> Option<NaiveTime> {
         .iter()
         .map(|flight| match flight {
             Flight::Arr(arr) => arr.base_time.min(arr.window.earliest),
-            Flight::Dep(dep) => dep
-                .base_time
-                .min(dep.window.earliest)
-                .min(dep.ctot.earliest()),
+            Flight::Dep(dep) => {
+                let mut earliest = dep.base_time.min(dep.window.earliest);
+                if let Some(ctot) = &dep.ctot {
+                    earliest = earliest.min(ctot.earliest());
+                }
+                earliest
+            },
         })
         .min()
 }

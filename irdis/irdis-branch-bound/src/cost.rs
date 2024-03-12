@@ -35,11 +35,11 @@ pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> u64 {
         .unsigned_abs()
         .pow(2);
 
-    let violation = if dep.ctot.contains(sched.takeoff) {
-        0
-    } else {
-        VIOLATION_COST.pow(2)
-    };
+    let violated = dep
+        .ctot
+        .as_ref()
+        .is_some_and(|ctot| ctot.contains(sched.takeoff));
+    let violation = if violated { VIOLATION_COST.pow(2) } else { 0 };
 
     let slack = (sched.takeoff - dep.lineup_dur - dep.taxi_out_dur - dep.deice_dur - sched.deice)
         .num_minutes()

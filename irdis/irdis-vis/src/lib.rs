@@ -320,10 +320,14 @@ fn starting_time(schedule: &[Schedule], instance: &Instance) -> Option<NaiveTime
             },
             Schedule::Dep(sched) => {
                 let dep = instance.flights()[sched.flight_idx].as_departure().unwrap();
-                dep.base_time
+                let mut earliest = dep
+                    .base_time
                     .min(dep.window.earliest)
-                    .min(dep.ctot.earliest())
-                    .min(sched.deice - dep.taxi_deice_dur - dep.pushback_dur)
+                    .min(sched.deice - dep.taxi_deice_dur - dep.pushback_dur);
+                if let Some(ctot) = &dep.ctot {
+                    earliest = earliest.min(ctot.earliest());
+                }
+                earliest
             },
         })
         .min()
@@ -339,7 +343,11 @@ fn ending_time(schedule: &[Schedule], instance: &Instance) -> Option<NaiveTime> 
             },
             Schedule::Dep(sched) => {
                 let dep = instance.flights()[sched.flight_idx].as_departure().unwrap();
-                dep.window.latest.max(dep.ctot.latest()).max(sched.takeoff)
+                let mut latest = dep.window.latest.max(sched.takeoff);
+                if let Some(ctot) = &dep.ctot {
+                    latest = latest.min(ctot.latest());
+                }
+                latest
             },
         })
         .max()
