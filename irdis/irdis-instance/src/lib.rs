@@ -1,12 +1,7 @@
 use std::time::Duration;
 
-#[cfg(feature = "serde")]
-use cfg_eval::cfg_eval;
-
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "serde")]
 use serde_with::serde_as;
 
 pub mod flight;
@@ -20,25 +15,21 @@ use schedule::Schedule;
 
 pub mod time;
 
-#[cfg(feature = "serde")]
 use time::{DurationMinutes, SeparationsAsMinutes};
 
 #[cfg(any(feature = "furini", feature = "xlsx"))]
 pub mod convert;
 
-// NOTE: This must remain before the derive. The `cfg_eval` is to make the inner `cfg_attr` attributes
-//       evaluate before `serde_as` is applied, which allows `serde_as` to function properly.
-#[cfg_attr(feature = "serde", cfg_eval, serde_as)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[serde_as] // NOTE: This must remain before the derive.
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct Instance {
     flights: Box<[Flight]>,
-    #[cfg_attr(feature = "serde", serde_as(as = "SeparationsAsMinutes"))]
+    #[serde_as(as = "SeparationsAsMinutes")]
     separations: Separations,
-    #[cfg_attr(feature = "serde", serde_as(as = "DurationMinutes"))]
+    #[serde_as(as = "DurationMinutes")]
     pub max_holdover_dur: Duration,
-    #[cfg_attr(feature = "serde", serde_as(as = "DurationMinutes"))]
+    #[serde_as(as = "DurationMinutes")]
     pub max_slack_dur: Duration,
 }
 

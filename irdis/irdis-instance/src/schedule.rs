@@ -1,15 +1,13 @@
 use chrono::NaiveTime;
 
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde", serde(tag = "kind"))]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[serde(tag = "kind")]
 pub enum Schedule {
-    #[cfg_attr(feature = "serde", serde(rename = "arrival"))]
+    #[serde(rename = "arrival")]
     Arr(ArrivalSchedule),
-    #[cfg_attr(feature = "serde", serde(rename = "departure"))]
+    #[serde(rename = "departure")]
     Dep(DepartureSchedule),
 }
 
@@ -57,9 +55,8 @@ impl Schedule {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct ArrivalSchedule {
     pub flight_idx: usize,
     pub landing: NaiveTime,
@@ -71,9 +68,8 @@ impl From<ArrivalSchedule> for Schedule {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct DepartureSchedule {
     pub flight_idx: usize,
     pub deice: NaiveTime,

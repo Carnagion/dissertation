@@ -1,25 +1,17 @@
 use std::time::Duration;
 
-#[cfg(feature = "serde")]
-use cfg_eval::cfg_eval;
-
 use chrono::NaiveTime;
 
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "serde")]
 use serde_with::serde_as;
 
-#[cfg(feature = "serde")]
 mod duration;
 
-#[cfg(feature = "serde")]
 pub(crate) use duration::{DurationMinutes, SeparationsAsMinutes};
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct TimeWindow {
     pub earliest: NaiveTime,
     pub latest: NaiveTime,
@@ -31,17 +23,14 @@ impl TimeWindow {
     }
 }
 
-// NOTE: This must remain before the derive. The `cfg_eval` is to make the inner `cfg_attr` attributes
-//       evaluate before `serde_as` is applied, which allows `serde_as` to function properly.
-#[cfg_attr(feature = "serde", cfg_eval, serde_as)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[serde_as] // NOTE: This must remain before the derive.
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct Ctot {
     pub target: NaiveTime,
-    #[cfg_attr(feature = "serde", serde_as(as = "DurationMinutes"))]
+    #[serde_as(as = "DurationMinutes")]
     pub allow_before: Duration,
-    #[cfg_attr(feature = "serde", serde_as(as = "DurationMinutes"))]
+    #[serde_as(as = "DurationMinutes")]
     pub allow_after: Duration,
 }
 

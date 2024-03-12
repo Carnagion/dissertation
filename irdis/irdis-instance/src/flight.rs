@@ -1,28 +1,19 @@
 use std::time::Duration;
 
-#[cfg(feature = "serde")]
-use cfg_eval::cfg_eval;
-
 use chrono::NaiveTime;
 
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "serde")]
 use serde_with::serde_as;
 
-use crate::time::{Ctot, TimeWindow};
+use crate::time::{Ctot, DurationMinutes, TimeWindow};
 
-#[cfg(feature = "serde")]
-use crate::time::DurationMinutes;
-
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde", serde(tag = "kind"))]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[serde(tag = "kind")]
 pub enum Flight {
-    #[cfg_attr(feature = "serde", serde(rename = "arrival"))]
+    #[serde(rename = "arrival")]
     Arr(Arrival),
-    #[cfg_attr(feature = "serde", serde(rename = "departure"))]
+    #[serde(rename = "departure")]
     Dep(Departure),
 }
 
@@ -77,9 +68,8 @@ impl Flight {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct Arrival {
     pub base_time: NaiveTime,
     pub window: TimeWindow,
@@ -97,25 +87,22 @@ impl From<Arrival> for Flight {
     }
 }
 
-// NOTE: This must remain before the derive. The `cfg_eval` is to make the inner `cfg_attr` attributes
-//       evaluate before `serde_as` is applied, which allows `serde_as` to function properly.
-#[cfg_attr(feature = "serde", cfg_eval, serde_as)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[serde_as] // NOTE: This must remain before the derive.
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct Departure {
     pub base_time: NaiveTime,
     pub window: TimeWindow,
     pub ctot: Ctot,
-    #[cfg_attr(feature = "serde", serde_as(as = "DurationMinutes"))]
+    #[serde_as(as = "DurationMinutes")]
     pub pushback_dur: Duration,
-    #[cfg_attr(feature = "serde", serde_as(as = "DurationMinutes"))]
+    #[serde_as(as = "DurationMinutes")]
     pub taxi_deice_dur: Duration,
-    #[cfg_attr(feature = "serde", serde_as(as = "DurationMinutes"))]
+    #[serde_as(as = "DurationMinutes")]
     pub deice_dur: Duration,
-    #[cfg_attr(feature = "serde", serde_as(as = "DurationMinutes"))]
+    #[serde_as(as = "DurationMinutes")]
     pub taxi_out_dur: Duration,
-    #[cfg_attr(feature = "serde", serde_as(as = "DurationMinutes"))]
+    #[serde_as(as = "DurationMinutes")]
     pub lineup_dur: Duration,
 }
 

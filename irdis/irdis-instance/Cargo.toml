@@ -8,16 +8,13 @@ all-features = true
 rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
 
 [dependencies]
-cfg_eval = { version = "0.1.2", optional = true }
 chrono = { version = "0.4.31", default-features = false, features = ["std", "serde"] }
 rust_xlsxwriter = { version = "0.63.0", features = ["serde"], optional = true }
-serde = { version = "1.0.195", features = ["derive"], optional = true }
-serde_with = { version = "3.4.0", optional = true }
+serde = { version = "1.0.195", features = ["derive"] }
+serde_with = "3.4.0"
 thiserror = "1.0.56"
 
 [features]
-default = ["furini", "serde", "xlsx"]
+default = ["furini", "xlsx"]
 furini = []
-serde = ["dep:serde", "dep:serde_with", "dep:cfg_eval"]
-xlsx = ["dep:rust_xlsxwriter", "dep:serde"]
-cfg_eval = ["dep:cfg_eval"]
+xlsx = ["dep:rust_xlsxwriter"]

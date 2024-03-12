@@ -13,10 +13,9 @@ irdis-instance = { version = "0.1.0", path = "irdis-instance" }
 irdis-vis = { version = "0.1.0", path = "irdis-vis", optional = true }
 
 [features]
-default = ["branch-bound", "vis", "serde", "furini", "xlsx"]
+default = ["branch-bound", "vis", "furini", "xlsx"]
 branch-bound = ["dep:irdis-branch-bound"]
 vis = ["dep:irdis-vis"]
-serde = ["irdis-instance/serde"]
 furini = ["irdis-instance/furini"]
 xlsx = ["irdis-instance/xlsx"]
 

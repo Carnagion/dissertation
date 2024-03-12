@@ -3,17 +3,12 @@ use std::{
     time::Duration,
 };
 
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use thiserror::Error;
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-#[cfg_attr(
-    feature = "serde",
-    serde(try_from = "Vec<Vec<Duration>>", into = "Vec<Vec<Duration>>")
-)]
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[serde(try_from = "Vec<Vec<Duration>>", into = "Vec<Vec<Duration>>")]
 pub struct Separations {
     // NOTE: This is a two-dimensional matrix of size `len * len` represented
     //       as a one-dimensional slice.
