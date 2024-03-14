@@ -13,7 +13,7 @@ fn main() {
         schedules: Vec<Schedule>,
     }
 
-    let instance_toml = include_str!("../instances/furini/converted/1.toml");
+    let instance_toml = include_str!("../instances/furini/toml/1.toml");
     let instance = toml::from_str::<Instance>(instance_toml).unwrap();
 
     let solution_toml = include_str!("../solutions/furini/test.toml");
