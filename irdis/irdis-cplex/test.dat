@@ -1,4 +1,4 @@
-SheetConnection data("test.xlsx");
+SheetConnection data("../instances/furini/xlsx/test.xlsx");
 
 flightCount from SheetRead(data, "flightCount");
 
