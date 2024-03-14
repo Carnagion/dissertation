@@ -16,6 +16,16 @@
 			</ref>
             		
         </config>
+        		
+        <config default="false" name="test" category="opl">
+            			
+            <ref name="test.mod" type="model">
+			</ref>
+            			
+            <ref name="test.dat" type="data">
+			</ref>
+            		
+        </config>
         	
     </configs>
     	
