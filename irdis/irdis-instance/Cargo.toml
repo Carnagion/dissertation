@@ -9,12 +9,6 @@ rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
 
 [dependencies]
 chrono = { version = "0.4.31", default-features = false, features = ["std", "serde"] }
-rust_xlsxwriter = { version = "0.63.0", features = ["serde"], optional = true }
 serde = { version = "1.0.195", features = ["derive"] }
 serde_with = "3.4.0"
 thiserror = "1.0.56"
-
-[features]
-default = ["furini", "xlsx"]
-furini = []
-xlsx = ["dep:rust_xlsxwriter"]

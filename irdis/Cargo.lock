@@ -252,6 +252,7 @@ name = "irdis"
 version = "0.1.0"
 dependencies = [
  "irdis-branch-bound",
+ "irdis-data",
  "irdis-instance",
  "irdis-vis",
  "rust_xlsxwriter",
@@ -270,11 +271,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "irdis-data"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "irdis-instance",
+ "itertools",
+ "rust_xlsxwriter",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "irdis-instance"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "rust_xlsxwriter",
  "serde",
  "serde_with",
  "thiserror",
@@ -287,6 +299,15 @@ dependencies = [
  "chrono",
  "irdis-instance",
  "svg",
+]
+
+[[package]]
+name = "itertools"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
+dependencies = [
+ "either",
 ]
 
 [[package]]

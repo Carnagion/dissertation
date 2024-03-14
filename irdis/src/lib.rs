@@ -10,6 +10,10 @@ pub mod solve {
     pub use irdis_branch_bound::BranchBound;
 }
 
+#[cfg(feature = "data")]
+#[doc(inline)]
+pub use irdis_data as data;
+
 #[cfg(feature = "vis")]
 #[doc(inline)]
 pub use irdis_vis as vis;

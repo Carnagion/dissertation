@@ -17,9 +17,6 @@ pub mod time;
 
 use time::{DurationMinutes, SeparationsAsMinutes};
 
-#[cfg(any(feature = "furini", feature = "xlsx"))]
-pub mod convert;
-
 #[serde_as] // NOTE: This must remain before the derive.
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]

@@ -9,15 +9,18 @@ rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
 
 [dependencies]
 irdis-branch-bound = { version = "0.1.0", path = "irdis-branch-bound", optional = true }
+irdis-data = { version = "0.1.0", path = "irdis-data", optional = true }
 irdis-instance = { version = "0.1.0", path = "irdis-instance" }
 irdis-vis = { version = "0.1.0", path = "irdis-vis", optional = true }
 
 [features]
-default = ["branch-bound", "vis", "furini", "xlsx"]
+default = ["branch-bound", "data", "furini", "heathrow", "xlsx", "vis"]
 branch-bound = ["dep:irdis-branch-bound"]
+data = ["dep:irdis-data"]
+furini = ["irdis-data?/furini"]
+heathrow = ["irdis-data?/heathrow"]
+xlsx = ["irdis-data?/xlsx"]
 vis = ["dep:irdis-vis"]
-furini = ["irdis-instance/furini"]
-xlsx = ["irdis-instance/xlsx"]
 
 [dev-dependencies]
 rust_xlsxwriter = { version = "0.63.0", features = ["serde"] }
@@ -26,4 +29,4 @@ svg = "0.15.0"
 toml = "0.8.10"
 
 [workspace]
-members = ["irdis-branch-bound", "irdis-instance", "irdis-vis"]
+members = ["irdis-branch-bound", "irdis-data", "irdis-instance", "irdis-vis"]
