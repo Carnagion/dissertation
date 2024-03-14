@@ -4,6 +4,14 @@ references/
 # Problem instance data
 instances/
 
+# Solutions to instances
+solutions/
+
+# CPLEX project files
+.settings
+.oplproject
+.project
+
 # Helpful resources from Moodle
 guide/
 
