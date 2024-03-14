@@ -3,6 +3,7 @@ use std::num::NonZeroUsize;
 use irdis_instance::{schedule::Schedule, Instance, Solve};
 
 mod cost;
+use cost::solution_cost;
 
 mod complete_orders;
 
@@ -37,6 +38,9 @@ impl Default for BranchBound {
 
 impl Solve for BranchBound {
     fn solve(&self, instance: &Instance) -> Option<Vec<Schedule>> {
-        branch_and_bound(instance, self.horizon)
+        let solution = branch_and_bound(instance, self.horizon)?;
+        // TODO: Remove once testing is done
+        println!("cost = {}", solution_cost(&solution, instance));
+        Some(solution)
     }
 }
