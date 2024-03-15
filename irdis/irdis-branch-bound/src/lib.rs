@@ -7,25 +7,20 @@ use cost::solution_cost;
 
 mod complete_orders;
 
-mod search;
-use search::branch_and_bound;
+pub mod mode;
+use mode::{integrated, DeiceMode};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct BranchBound {
+    pub deice_mode: DeiceMode,
     pub horizon: Option<NonZeroUsize>,
 }
 
 impl BranchBound {
     pub fn new() -> Self {
-        Self::with_rolling_horizon(None)
-    }
-
-    pub fn with_rolling_horizon<H>(horizon: H) -> Self
-    where
-        H: Into<Option<NonZeroUsize>>,
-    {
         Self {
-            horizon: horizon.into(),
+            deice_mode: DeiceMode::default(),
+            horizon: None,
         }
     }
 }
@@ -38,7 +33,10 @@ impl Default for BranchBound {
 
 impl Solve for BranchBound {
     fn solve(&self, instance: &Instance) -> Option<Vec<Schedule>> {
-        let solution = branch_and_bound(instance, self.horizon)?;
+        let solution = match self.deice_mode {
+            DeiceMode::Sequential => todo!(),
+            DeiceMode::Integrated => integrated::branch_and_bound(instance, self.horizon),
+        }?;
         // TODO: Remove once testing is done
         println!("cost = {}", solution_cost(&solution, instance));
         Some(solution)

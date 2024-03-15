@@ -29,13 +29,6 @@ pub fn branch_and_bound(
 ) -> Option<Vec<Schedule>> {
     let mut sep_sets = separation_identical_sets(instance);
     println!("{:#?}", sep_sets);
-    // for sep_set in &mut sep_sets {
-    //     // NOTE: Orders separation-identical flights to prune nodes according to complete orders
-    //     //       induced by an objective to minimize makespan.
-    //     //
-    //     //       See section 3.2.2 of "Pruning Rules for Optimal Runway Sequencing" by De Maere et al (2017).
-    //     sep_set.sort_by_key(|&flight_idx| instance.flights()[flight_idx].release_time());
-    // }
 
     let mut next_in_sep_sets = vec![0; sep_sets.len()];
 
