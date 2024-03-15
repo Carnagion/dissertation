@@ -1,0 +1,168 @@
+# TODO: Review citations and check that all info (including issue numbers, journal names, and author orders) is provided and correct
+
+psaraftis-dynamic-programming:
+  type: article
+  title: "A Dynamic Programming Approach for Sequencing Groups of Identical Jobs"
+  author:
+    - "Psaraftis, Harilaos N."
+  date: 1980
+  doi: "10.1287/opre.28.6.1347"
+  parent:
+    title: "Operations Research"
+    publisher: "INFORMS"
+    volume: 28
+    issue: 6
+
+bianco-minimizing-time:
+  type: article
+  title: "Minimizing total completion time subject to release dates and sequence-dependent processing times"
+  author:
+    - "Bianco, Lucio"
+    - "Dell'Olmo, Paolo"
+    - "Giordani, Stefano"
+  date: 1999
+  doi: "10.1023/a:1018975323093"
+  parent:
+    title: "Annals of Operations Research"
+    publisher: "Springer"
+    volume: 86
+    page-range: 393-415
+
+beasley-scheduling-aircraft:
+  type: article
+  title: "Scheduling Aircraft Landings - The Static Case"
+  author:
+    - "Beasley, John E."
+    - "Krishnamoorthy, Mohan"
+    - "Sharaiha, Yazid M."
+    - "Abramson, David"
+  date: 2000
+  doi: "10.1287/trsc.34.2.180.12302"
+  parent:
+    title: "Transportation Science"
+    publisher: "INFORMS"
+    volume: 34
+    page-range: 180-197
+
+atkin-hybrid-metaheuristics:
+  type: article
+  title: "Hybrid Metaheuristics to Aid Runway Scheduling at London Heathrow Airport"
+  author:
+    - "Atkin, Jason A. D."
+    - "Burke, Edmund K."
+    - "Greenwood, John S."
+    - "Reeson, Dale"
+  date: 2007
+  doi: "10.1287/trsc.1060.0163"
+  parent:
+    title: "Transportation Science"
+    publisher: "INFORMS"
+    volume: 41
+    issue: 1
+    page-range: 90-106
+
+balakrishnan-runway-operations:
+  type: article
+  title: "Algorithms for Scheduling Runway Operations Under Constrained Position Shifting"
+  author:
+    - "Balakrishnan, Hamsa"
+    - "Chandran, Bala G."
+  date: 2010
+  doi: "10.1287/opre.1100.0869"
+  parent:
+    title: "Operations Research"
+    publisher: "INFORMS"
+    volume: 58
+    issue: 6
+    page-range: 1650-1665
+
+briskorn-aircraft-landing:
+  type: article
+  title: "Aircraft landing problems with aircraft classes"
+  author:
+    - "Briskorn, Dirk"
+    - "Stolletz, Raik"
+  date: 2014
+  doi: "10.1007/s10951-013-0337-x"
+  parent:
+    title: "Journal of Scheduling"
+    publisher: "Springer"
+    volume: 17
+    issue: 1
+    page-range: 31-45
+
+furini-improved-horizon:
+  type: article
+  title: "Improved rolling horizon approaches to the aircraft sequencing problem"
+  author:
+    - "Furini, Fabio"
+    - "Kidd, Martin P."
+    - "Persiani, Carlo A."
+    - "Toth, Paolo"
+  date: 2015
+  doi: "10.1007/s10951-014-0415-8"
+  parent:
+    title: "Journal of Scheduling"
+    publisher: "Springer"
+    volume: 18
+    page-range: 435-447
+
+lieder-dynamic-programming:
+  type: article
+  title: "A dynamic programming approach for the aircraft landing problem with aircraft classes"
+  author:
+    - "Lieder, Alexander"
+    - "Briskorn, Dirk"
+    - "Stolletz, Raik"
+  date: 2015
+  doi: "10.1016/j.ejor.2014.11.027"
+  parent:
+    title: "European Journal of Operational Research"
+    publisher: "Elsevier"
+    volume: 88
+    page-range: 61-69
+
+lieder-scheduling-aircraft:
+  type: article
+  title: "Scheduling aircraft take-offs and landings on interdependent and heterogeneous runways"
+  author:
+    - "Lieder, Alexander"
+    - "Stolletz, Raik"
+  date: 2016
+  doi: "10.1016/j.tre.2016.01.015"
+  parent:
+    title: "Transportation Research Part E: Logistics and Transportation Review"
+    publisher: "Elsevier"
+    volume: 88
+    page-range: 167-188
+
+avella-time-indexed:
+  type: article
+  title: "Time-Indexed Formulations for the Runway Scheduling Problem"
+  author:
+    - "Avella, Pasquale"
+    - "Boccia, Maurizio"
+    - "Mannino, Carlo"
+    - "Vasilyev, Igor"
+  date: 2017
+  doi: "10.1287/trsc.2017.0750"
+  parent:
+    title: "Transportation Science"
+    publisher: "INFORMS"
+    volume: 51
+    page-range: 1196-1209
+
+demaere-pruning-rules:
+  type: article
+  title: "Pruning Rules for Optimal Runway Sequencing"
+  author:
+    - "De Maere, Geert"
+    - "Atkin, Jason A. D."
+    - "Burke, Edmund K."
+  date: 2017
+  doi: "10.1287/trsc.2016.0733"
+  parent:
+    title: "Transportation Science"
+    publisher: "INFORMS"
+    volume: 52
+    page-range: 898-916
