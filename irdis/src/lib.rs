@@ -7,7 +7,8 @@ pub mod solve {
     pub use irdis_instance::Solve;
 
     #[cfg(feature = "branch-bound")]
-    pub use irdis_branch_bound::BranchBound;
+    #[doc(inline)]
+    pub use irdis_branch_bound as branch_bound;
 }
 
 #[cfg(feature = "data")]

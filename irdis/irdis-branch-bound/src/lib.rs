@@ -1,4 +1,6 @@
-use std::{num::NonZeroUsize, ops::Range};
+use std::{num::NonZeroUsize, ops::Range, time::Duration};
+
+use chrono::NaiveTime;
 
 use irdis_instance::{flight::Flight, schedule::Schedule, Instance, Solve};
 
@@ -7,7 +9,7 @@ use cost::{arrival_cost, departure_cost, solution_cost, Cost};
 
 mod complete_orders;
 
-mod sequential;
+mod decomposed;
 
 mod integrated;
 
@@ -35,9 +37,15 @@ impl Default for BranchBound {
 impl Solve for BranchBound {
     fn solve(&self, instance: &Instance) -> Option<Vec<Schedule>> {
         let solution = match self.deice_mode {
-            DeiceMode::Sequential => {
-                let _deice_queue = sequential::deice_queue(instance)?;
-                todo!()
+            DeiceMode::Decomposed => {
+                let deice_queue = decomposed::deice_queue(instance)?;
+                branch_and_bound(
+                    instance,
+                    self.horizon,
+                    |flight, flight_idx, instance, state| {
+                        decomposed::expand(flight, flight_idx, instance, state, &deice_queue)
+                    },
+                )
             },
             DeiceMode::Integrated => branch_and_bound(instance, self.horizon, integrated::expand),
         }?;
@@ -51,7 +59,7 @@ impl Solve for BranchBound {
 
 #[derive(Debug, Copy, Clone, Default, Eq, PartialEq, Hash)]
 pub enum DeiceMode {
-    Sequential,
+    Decomposed,
     #[default]
     Integrated,
 }
@@ -93,7 +101,6 @@ where
         .map(usize::from)
         .unwrap_or(flight_count)
         .min(flight_count);
-    let window = 0..end;
 
     let mut nodes = Vec::with_capacity(flight_count);
 
@@ -104,10 +111,10 @@ where
         best_solution,
     };
 
-    branch_and_bound_with(instance, &mut state, &mut nodes, &mut expand, window);
+    branch_and_bound_with(instance, &mut state, &mut nodes, &mut expand, 0..end);
 
     let windows = (1..)
-        .zip(end + 1..flight_count)
+        .zip(end + 1..=flight_count)
         .map(|(start, end)| start..end);
     for window in windows {
         let fixed = state.best_solution.drain(..).next()?;
@@ -124,8 +131,9 @@ where
     }
 
     let solution = state
-        .best_solution
+        .current_solution
         .into_iter()
+        .chain(state.best_solution)
         .map(|node| node.sched)
         .collect();
     Some(solution)
@@ -143,10 +151,12 @@ fn branch_and_bound_with<E, I>(
 {
     let mut cost = Cost::default();
 
-    nodes.extend(branches(instance, state, expand));
+    nodes.extend(branches(instance, state, expand, window.start));
 
     while let Some(node) = nodes.pop() {
-        for removed in state.current_solution.drain(node.depth..) {
+        let depth = node.depth;
+
+        for removed in state.current_solution.drain(depth..) {
             state.next_in_complete_order_sets[removed.complete_order_idx] -= 1;
             cost.current -= removed.cost;
         }
@@ -165,7 +175,7 @@ fn branch_and_bound_with<E, I>(
             continue;
         }
 
-        nodes.extend(branches(instance, state, expand));
+        nodes.extend(branches(instance, state, expand, depth + 1));
     }
 
     state.current_solution.drain(window.start..);
@@ -175,6 +185,7 @@ fn branches<'a, E, I>(
     instance: &'a Instance,
     state: &'a BranchBoundState,
     expand: &'a mut E,
+    depth: usize,
 ) -> impl IntoIterator<Item = PartialNode> + 'a
 where
     E: FnMut(&Flight, usize, &Instance, &BranchBoundState) -> I,
@@ -249,10 +260,18 @@ where
 
                     PartialNode {
                         sched,
-                        depth: state.current_solution.len(),
+                        depth,
                         complete_order_idx,
                         cost, // TODO
                     }
                 })
         })
+}
+
+fn iter_minutes(from: NaiveTime, to: NaiveTime) -> impl DoubleEndedIterator<Item = NaiveTime> {
+    let diff = (to - from)
+        .max(chrono::Duration::zero())
+        .num_minutes()
+        .unsigned_abs();
+    (0..=diff).map(move |minute| from + Duration::from_secs(minute * 60))
 }

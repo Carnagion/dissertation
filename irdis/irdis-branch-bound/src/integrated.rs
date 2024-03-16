@@ -1,7 +1,3 @@
-use std::time::Duration;
-
-use chrono::NaiveTime;
-
 use either::{Left, Right};
 
 use irdis_instance::{
@@ -10,7 +6,7 @@ use irdis_instance::{
     Instance,
 };
 
-use crate::BranchBoundState;
+use crate::{iter_minutes, BranchBoundState};
 
 pub fn expand(
     flight: &Flight,
@@ -46,12 +42,11 @@ fn expand_arrival(
 
     arr.window
         .contains(landing)
-        .then_some(landing)
-        .into_iter()
-        .map(move |landing| ArrivalSchedule {
+        .then_some(ArrivalSchedule {
             flight_idx: arr_idx,
             landing,
         })
+        .into_iter()
 }
 
 fn expand_departure(
@@ -141,12 +136,4 @@ fn expand_departure(
             deice,
             takeoff,
         })
-}
-
-fn iter_minutes(from: NaiveTime, to: NaiveTime) -> impl DoubleEndedIterator<Item = NaiveTime> {
-    let diff = (to - from)
-        .max(chrono::Duration::zero())
-        .num_minutes()
-        .unsigned_abs();
-    (0..=diff).map(move |minute| from + Duration::from_secs(minute * 60))
 }
