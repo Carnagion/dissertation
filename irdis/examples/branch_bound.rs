@@ -2,7 +2,10 @@ use std::num::NonZeroUsize;
 
 use irdis::{
     instance::Instance,
-    solve::{BranchBound, Solve},
+    solve::{
+        branch_bound::{BranchBound, DeiceMode},
+        Solve,
+    },
     vis::Visualiser,
 };
 
@@ -12,7 +15,7 @@ fn main() {
 
     let branch_bound = BranchBound {
         horizon: NonZeroUsize::new(12),
-        ..BranchBound::default()
+        deice_mode: DeiceMode::Integrated,
     };
     let solution = branch_bound.solve(&instance).unwrap();
     println!("{:?}", solution);

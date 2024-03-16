@@ -21,7 +21,7 @@ fn main() {
             .join(format!("info_matrix_FPT{:0>2}.txt.txt", id));
         let separations = fs::read_to_string(separations_path).unwrap();
 
-        let instance = from_furini_with_limit(&flights, &separations, 10).unwrap();
+        let instance = from_furini_with_limit(&flights, &separations, 20).unwrap();
 
         let instance_dir = flights_path.parent().unwrap().parent().unwrap();
 
