@@ -262,7 +262,7 @@ where
                         sched,
                         depth,
                         complete_order_idx,
-                        cost, // TODO
+                        cost,
                     }
                 })
         })

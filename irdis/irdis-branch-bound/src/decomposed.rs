@@ -12,12 +12,6 @@ use irdis_instance::{
 
 use crate::BranchBoundState;
 
-// TODO: Generate de-ice times by sorting departures by release time, then going through that list
-//       and allocating a de-ice time to each departure as the max of previous de-ice finish and its
-//       release time. Then perform a branch-and-bound over the aircraft with de-ice times being chosen
-//       from this pre-generated de-ice queue. Then perform post-processing on the solution if necessary
-//       to optimize for stand holding.
-
 pub fn expand(
     flight: &Flight,
     flight_idx: usize,
