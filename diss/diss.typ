@@ -116,10 +116,10 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
 
 == Constraints
 
-A feasible solution to the problem must meet satisfy separation requirements, hard time windows, earliest take-off times according to CTOT slots, and holdover times.
+A feasible solution to the problem must satisfy runway separation requirements, hard time windows, CTOT slots, and holdover times.
 A sequence that violates these hard constraints is considered to be infeasible, and can thus be eliminated from the solution space.
 
-=== Separation Requirements
+=== Runway Separations
 
 Any two consecutive aircraft $i$ and $j$ (where $i$ precedes $j$) are required to have a minimum runway separation $delta_(i j)$ between them, which is determined by their weight classes, speed groups, and (for departures) Standard Instrument Departure (SID) routes.
 An aircraft's weight class influences the severity of wake turbulence it causes, the time required for this turbulence to dissipate, and its sensitivity to the wake turbulence caused by other aircraft.
@@ -128,16 +128,17 @@ Consequently, a larger separation may be required when a large aircraft is follo
 
 // TODO: Check if we actually need to mention this or can leave it out or shorten it
 Similarly, a larger separation may be required when a slow aircraft is followed by a faster one on the same route, to prevent the latter from catching up to the former before their routes diverge.
-Separations for SID routes are also influenced by the climb and relative bearing of the route, as well as congestion in downstrea airspace sectors.
+Separations for SID routes are also influenced by the climb and relative bearing of the route, as well as congestion in downstream airspace sectors.
 The latter factor may require an increased separation upon take-off to space out traffic and prevent the overloading of en-route sectors and controllers @demaere-pruning-rules.
 
-Separation requirements are thus asymmetric.
-It is important to note that they also do not necessarily obey the triangle inequality -- given three aircraft $i$, $j$, and $k$, the relation $delta_(i j) + delta_(j k) >= delta_(i k)$ does not necessarily hold.
+// TODO: Mention successive vs complete separation from Beasley's paper
+It is thus clear from the above that separation requirements are asymmetric.
+Furthermore, they do not necessarily obey the triangle inequality -- given three aircraft $i$, $j$, and $k$, the relation $delta_(i j) + delta_(j k) >= delta_(i k)$ does not necessarily hold.
 The landing (or take-off) time of one aircraft can thus be influenced not just by the immediately preceding aircraft, but by all preceding aircraft in the sequence @demaere-pruning-rules.
 
 === Time Windows
 
-If an aircraft $i$ is subject to a hard time window $T_i$ which is defined by its earliest (start) time $e_i$ and latest (end) time $l_i$, then its landing (or take-off) time $t_i$ _must_ be within this window.
+If an aircraft $i$ is subject to a hard time window $T_i$ which is defined by its earliest (start) time $e_i$ and latest (end) time $l_i$, then its landing (or take-off) time $t_i$ must be within this window.
 In other words, $e_i <= t_i <= l_i$.
 
 In this model, each aircraft is assumed to be subject to a hard time window, although this is not always the case in the real world.
@@ -146,14 +147,16 @@ However, this assumption can be made without loss of generality -- an aircraft $
 === Calculated Take-Off Times
 
 In addition to a hard time window, a departure $i$ might be subject to a Calculated Take-Off Time (CTOT) slot $c_i$, during which it should take off.
-Typically, a CTOT has a tolerance of -5 to +10 minutes (i.e. 5 minutes before and 10 minutes after $c_i$) and its time window can thus be defined by its earliest (start) time $u_i$ and latest (end) time $v_i$; however, this model makes no such assumptions and allows for customizable CTOT tolerances per departure.
+Typically, a CTOT has a tolerance of -5 to +10 minutes (i.e. five minutes before and ten minutes after $c_i$) and its time window can thus be defined by its earliest (start) time $u_i$ and latest (end) time $v_i$; however, this model makes no such assumptions and allows for customizable CTOT tolerances per departure.
 
-Much like a hard time window, a departure cannot take off before $u_i$, but it _may_ be scheduled after $v_i$ -- although this is heavily penalized.
+Much like a hard time window, a departure cannot take off before $u_i$, but it may be scheduled after $v_i$ -- although this is heavily penalized.
 The start time of a CTOT slot is thus modeled as a hard constraint, while its end time is modeled as a soft constraint.
 
 === Holdover Times
 
-#todo("Write about holdover times as a constraint")
+Once a departure $i$ has been de-iced, the applied de-icing fluid will remain effective for a certain duration of time, called the Holdover Time (HOT) $h_i$.
+Departures must take off within this period of time -- if a departure's HOT expires before it takes off, it must be de-iced again, which could extend the de-icing queue and delay the take-off times of future aircraft.
+HOTs are thus modeled as hard constraints.
 
 == Objectives
 
@@ -172,9 +175,9 @@ The start time of a CTOT slot is thus modeled as a hard constraint, while its en
 
 #todo("Write short introduction to branch-and-bound program")
 
-=== Sequential De-Icing
+=== Decomposed De-Icing
 
-#todo("Include explanation and pseudocode for sequential de-icing mode")
+#todo("Include explanation and pseudocode for decomposed de-icing mode")
 
 === Integrated De-Icing
 
@@ -212,7 +215,7 @@ The start time of a CTOT slot is thus modeled as a hard constraint, while its en
 == Problem Instances
 
 // TODO: Check if University of Bologna should be cited
-The performance of both the branch-and-bound program and CPLEX model is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow as well as benchmark problem instances from Milan Airport. The latter were obtained from the University of Bologna Operations Research Group's freely accessible online #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[library of instances].
+The performance of both the branch-and-bound program and CPLEX model is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow as well as benchmark problem instances from Milan Airport. The latter were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
 
 #todo("Write more about problem instances if necessary")
 
