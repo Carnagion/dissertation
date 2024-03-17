@@ -186,7 +186,7 @@ fn branches<'a, E, I>(
     state: &'a BranchBoundState,
     expand: &'a mut E,
     depth: usize,
-) -> impl IntoIterator<Item = PartialNode> + 'a
+) -> impl Iterator<Item = PartialNode> + 'a
 where
     E: FnMut(&Flight, usize, &Instance, &BranchBoundState) -> I,
     I: IntoIterator<Item = Schedule> + 'a,
