@@ -10,19 +10,19 @@ tuple Ctot {
 };
 
 tuple Arrival {
-  	int baseTime;
+  	int eto;
   	TimeWindow window;
 };
 
 tuple Departure {
-  	int baseTime;
-  	TimeWindow window;
+  	int tobt;
   	Ctot ctot;
   	int pushbackDur;
   	int taxiDeiceDur;
   	int deiceDur;
   	int taxiOutDur;
   	int lineupDur;
+  	TimeWindow window;
 };
 
 string arrival = "arrival";
@@ -32,17 +32,20 @@ tuple Flight {
   	// NOTE: Must be either "arrival" or "departure" only
   	string kind;
   	
-  	// NOTE: For both arrivals and departures
-  	int baseTime;
-  	TimeWindow window;
+  	// NOTE: For arrivals only
+  	int eto;
   	
   	// NOTE: For departures only
+  	int tobt;
   	Ctot ctot;
   	int pushbackDur;
   	int taxiDeiceDur;
   	int deiceDur;
   	int taxiOutDur;
   	int lineupDur;
+  	
+  	// NOTE: For both arrivals and departures
+  	TimeWindow window;
 };
 
 int flightCount = ...;
@@ -55,8 +58,7 @@ Flight flights[i in Flights] = ...;
 assert ValidFlights:
 	forall (i in Flights)
 	  	flights[i].kind in { arrival, departure }
-	  	&& flights[i].window.earliestTime <= flights[i].window.latestTime
-	  	&& flights[i].baseTime <= flights[i].window.latestTime;
+	  	&& flights[i].window.earliestTime <= flights[i].window.latestTime;
 
 int sep[i in Flights, j in Flights] = ...;
 
@@ -67,21 +69,31 @@ setof(int) Arrivals = { i | i in Flights: isArrival[i] == true };
 setof(int) Departures = { i | i in Flights: isDeparture[i] == true };
 
 Arrival arrs[i in Arrivals] = <
-	flights[i].baseTime,
+	flights[i].eto,
 	flights[i].window>;
+assert ValidArrivals:
+	forall (i in Arrivals)
+	  	arrs[i].eto <= arrs[i].window.latestTime;
 
 Departure deps[i in Departures] = <
-	flights[i].baseTime,
-	flights[i].window,
+	flights[i].tobt,
 	flights[i].ctot,
 	flights[i].pushbackDur,
 	flights[i].taxiDeiceDur,
 	flights[i].deiceDur,
 	flights[i].taxiOutDur,
-	flights[i].lineupDur>;
+	flights[i].lineupDur,
+	flights[i].window>;
 assert ValidDepartures:
 	forall (i in Departures)
 	  	deps[i].ctot.targetTime <= deps[i].window.latestTime
+	  	&& deps[i].tobt
+	  		+ deps[i].pushbackDur
+	  		+ deps[i].taxiDeiceDur
+	  		+ deps[i].deiceDur
+	  		+ deps[i].taxiOutDur
+	  		+ deps[i].lineupDur
+	  		<= deps[i].window.latestTime
 	  	&& deps[i].ctot.allowBefore >= 0
 	  	&& deps[i].ctot.allowAfter >= 0
 	  	&& deps[i].pushbackDur >= 0
@@ -100,6 +112,18 @@ assert ValidMaxAllowedSlack:
 
 // TODO: Work on everything below this point
 
+int arrBaseTime[i in Arrivals] = arrs[i].eto;
+int depBaseTime[i in Departures] = deps[i].tobt
+	+ deps[i].pushbackDur
+	+ deps[i].taxiDeiceDur
+	+ deps[i].deiceDur
+	+ deps[i].taxiOutDur
+	+ deps[i].lineupDur;
+
+int baseTime[i in Flights] = isArrival[i] == true ? arrBaseTime[i]
+	: isDeparture[i] == true ? depBaseTime[i]
+	: 0;
+
 int hasCtot[i in Flights] = isDeparture[i] == true
 	? deps[i].ctot.allowBefore > 0 && deps[i].ctot.allowAfter > 0
 	: false;
@@ -107,13 +131,13 @@ int hasCtot[i in Flights] = isDeparture[i] == true
 int earliestCtotTime[i in Departures] = deps[i].ctot.targetTime - deps[i].ctot.allowBefore;
 int latestCtotTime[i in Departures] = deps[i].ctot.targetTime + deps[i].ctot.allowAfter;
 
-int arrReleaseTime[i in Arrivals] = maxl(arrs[i].window.earliestTime, arrs[i].baseTime);
+int arrReleaseTime[i in Arrivals] = maxl(arrs[i].window.earliestTime, arrBaseTime[i]);
 int arrDueTime[i in Arrivals] = arrs[i].window.latestTime;
 
 int depReleaseTime[i in Departures] = hasCtot[i] == true ? maxl(
 	earliestCtotTime[i],
 	deps[i].window.earliestTime,
-	deps[i].baseTime) : maxl(deps[i].window.earliestTime, deps[i].baseTime);
+	depBaseTime[i]) : maxl(deps[i].window.earliestTime, depBaseTime[i]);
 int depDueTime[i in Departures] = deps[i].window.latestTime;
 
 int releaseTime[i in Flights] = isArrival[i] == true ? arrReleaseTime[i]
@@ -165,11 +189,11 @@ int areSeparationIdentical[i in Flights, j in Flights] = prod (k in Flights:
 int areCompleteOrdered[i in Flights, j in Flights] =
 	hasCtot[i] == false && hasCtot[j] == false
 	&& releaseTime[i] <= releaseTime[j]
-	&& flights[i].baseTime <= flights[j].baseTime
+	&& baseTime[i] <= baseTime[j]
 	&& flights[i].window.latestTime <= flights[j].window.latestTime
 	&& (j > i ||
 		!(releaseTime[i] == releaseTime[j]
-		&& flights[i].baseTime == flights[j].baseTime
+		&& baseTime[i] == baseTime[j]
 		&& flights[i].window.latestTime == flights[j].window.latestTime));
 
 setof(FlightPair) DistinctFlightPairs = { <i, j> | i, j in Flights: i != j };
@@ -210,7 +234,7 @@ dexpr int deiceSlack[i in Departures] = scheduledTime[i]
 	- deiceTime[i];
 
 dexpr int delayCost[i in Flights] = sum (t in FlightTimes[i])
-	isScheduledAt[<i, t>] * ftoi(pow(t - flights[i].baseTime, 2));
+	isScheduledAt[<i, t>] * ftoi(pow(t - baseTime[i], 2));
 
 dexpr int ctotViolationCost[i in Departures] = hasCtot[i]
 	* (scheduledTime[i] >= latestCtotTime[i] + 1)
