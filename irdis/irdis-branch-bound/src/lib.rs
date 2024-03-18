@@ -15,14 +15,14 @@ mod integrated;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct BranchBound {
-    pub deice_mode: DeiceMode,
+    pub deice_strategy: DeiceStrategy,
     pub horizon: Option<NonZeroUsize>,
 }
 
 impl BranchBound {
     pub fn new() -> Self {
         Self {
-            deice_mode: DeiceMode::default(),
+            deice_strategy: DeiceStrategy::default(),
             horizon: None,
         }
     }
@@ -36,9 +36,17 @@ impl Default for BranchBound {
 
 impl Solve for BranchBound {
     fn solve(&self, instance: &Instance) -> Option<Vec<Schedule>> {
-        let solution = match self.deice_mode {
-            DeiceMode::Decomposed => {
-                let deice_queue = decomposed::deice_queue(instance)?;
+        let solution = match self.deice_strategy {
+            DeiceStrategy::ByTobt => {
+                todo!()
+            },
+            DeiceStrategy::ByCtot => {
+                let deice_queue = decomposed::deice_queue(instance, |dep| {
+                    dep.ctot
+                        .as_ref()
+                        .map(|ctot| ctot.earliest())
+                        .unwrap_or(dep.base_time)
+                })?;
                 branch_and_bound(
                     instance,
                     self.horizon,
@@ -47,7 +55,9 @@ impl Solve for BranchBound {
                     },
                 )
             },
-            DeiceMode::Integrated => branch_and_bound(instance, self.horizon, integrated::expand),
+            DeiceStrategy::Integrated => {
+                branch_and_bound(instance, self.horizon, integrated::expand)
+            },
         }?;
 
         // TODO: Remove once testing is done
@@ -58,8 +68,9 @@ impl Solve for BranchBound {
 }
 
 #[derive(Debug, Copy, Clone, Default, Eq, PartialEq, Hash)]
-pub enum DeiceMode {
-    Decomposed,
+pub enum DeiceStrategy {
+    ByTobt,
+    ByCtot,
     #[default]
     Integrated,
 }

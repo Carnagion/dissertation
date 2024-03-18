@@ -92,14 +92,18 @@ fn expand_departure(
         .into_iter()
 }
 
-pub fn deice_queue(instance: &Instance) -> Option<HashMap<usize, NaiveTime>> {
+pub fn deice_queue<K, F>(instance: &Instance, mut sort_by: F) -> Option<HashMap<usize, NaiveTime>>
+where
+    F: FnMut(&Departure) -> K,
+    K: Ord,
+{
     let mut departures = instance
         .flights()
         .iter()
         .enumerate()
         .filter_map(|(idx, flight)| flight.as_departure().zip(Some(idx)))
         .collect::<Vec<_>>();
-    departures.sort_unstable_by_key(|(dep, _)| dep.release_time());
+    departures.sort_unstable_by_key(|(dep, _)| sort_by(dep));
 
     let &(first_dep, first_dep_idx) = departures.first()?;
     let first_deice = (first_dep.release_time()
