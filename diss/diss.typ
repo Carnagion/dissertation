@@ -108,7 +108,27 @@
 
 = Existing Literature
 
-#todo("Write about existing literature")
+#todo("Write short introduction to existing literature and past approaches")
+
+== Heuristic-Based Approaches
+
+#todo("Write about heuristic-based approaches used in the past")
+
+== Linear Programming
+
+#todo("Write about linear and mixed-integer programming approaches used in the past")
+
+== Dynamic Programming
+
+#todo("Write about dynamic programs used in the past")
+
+== Constrained Position Shifts
+
+#todo("Write about CPS")
+
+== Pruning Rules
+
+#todo("Write about pruning rules")
 
 = Problem Description
 
@@ -131,10 +151,9 @@ Similarly, a larger separation may be required when a slow aircraft is followed 
 Separations for SID routes are also influenced by the climb and relative bearing of the route, as well as congestion in downstream airspace sectors.
 The latter factor may require an increased separation upon take-off to space out traffic and prevent the overloading of en-route sectors and controllers @demaere-pruning-rules.
 
-// TODO: Mention successive vs complete separation from Beasley's paper
-It is thus clear from the above that separation requirements are asymmetric.
-Furthermore, they do not necessarily obey the triangle inequality -- given three aircraft $i$, $j$, and $k$, the relation $delta_(i j) + delta_(j k) >= delta_(i k)$ does not necessarily hold.
-The landing (or take-off) time of one aircraft can thus be influenced not just by the immediately preceding aircraft, but by all preceding aircraft in the sequence @demaere-pruning-rules.
+// TODO: Check if successive vs complete separations from Beasley's and Geert's papers should be mentioned
+The minimum separation that must be maintained between two aircraft is thus the maximum of the separations due to their weight classes, speed groups, and SID routes.
+The required separations between each ordered pair of distinct aircraft can thus be expressed as a separation matrix @demaere-pruning-rules.
 
 === Time Windows
 
@@ -150,6 +169,7 @@ In addition to a hard time window, a departure $i$ might be subject to a Calcula
 Typically, a CTOT has a tolerance of -5 to +10 minutes (i.e. five minutes before and ten minutes after $c_i$) and its time window can thus be defined by its earliest (start) time $u_i$ and latest (end) time $v_i$; however, this model makes no such assumptions and allows for customizable CTOT tolerances per departure.
 
 Much like a hard time window, a departure cannot take off before $u_i$, but it may be scheduled after $v_i$ -- although this is heavily penalized.
+This is discussed in detail in @ctot-compliance.
 The start time of a CTOT slot is thus modeled as a hard constraint, while its end time is modeled as a soft constraint.
 
 === Holdover Times
@@ -162,6 +182,18 @@ HOTs are thus modeled as hard constraints.
 
 #todo("Write about objective function")
 
+=== Delay
+
+#todo("Write about cost of delay")
+
+=== Calculated Take-Off Time Compliance <ctot-compliance>
+
+#todo("Write about cost of CTOT violations")
+
+=== Stand Holding
+
+#todo("Write about optimizing stand holding")
+
 // TODO: Check if pruning rules such as complete orders and disjoint time windows should be mentioned here
 = Implementation
 
@@ -173,15 +205,15 @@ HOTs are thus modeled as hard constraints.
 
 == Branch-and-Bound Program
 
-#todo("Write short introduction to branch-and-bound program")
+#todo("Write short introduction to branch-and-bound program and various de-icing strategies")
 
 === Decomposed De-Icing
 
-#todo("Include explanation and pseudocode for decomposed de-icing mode")
+#todo("Include explanation and pseudocode for decomposed de-icing by TOBT as well as by CTOT")
 
 === Integrated De-Icing
 
-#todo("Include explanation and pseudocode for integrated de-icing mode")
+#todo("Include explanation and pseudocode for integrated de-icing")
 
 === Rolling Horizon Extension
 
@@ -221,7 +253,7 @@ The performance of both the branch-and-bound program and CPLEX model is illustra
 
 == Comparison of Approaches
 
-#todo("Write about comparison of CPLEX model as well as branch-and-bound, with different de-icing modes")
+#todo("Write about comparison of CPLEX model as well as branch-and-bound, with different de-icing strategies")
 
 == Impact
 
