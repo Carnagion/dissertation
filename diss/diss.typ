@@ -18,7 +18,7 @@
 #let pseudocode = pseudocode.with(indentation-guide-stroke: 0.1pt)
 
 #set figure(gap: 1em)
-#show figure.where(kind: table): set block(breakable: true)
+// #show figure.where(kind: table): set block(breakable: true)
 #show figure.where(kind: table): set par(justify: false)
 
 #import table: cell, header
@@ -257,24 +257,34 @@ The performance of both the branch-and-bound program and CPLEX model is illustra
 
 #todo("Write about comparison of CPLEX model as well as branch-and-bound, with different de-icing strategies")
 
-#figure(
-    table(
-        columns: 12,
-        header(
-            cell(colspan: 4)[De-icing by TOBT],
-            cell(colspan: 4)[De-icing by CTOT],
-            cell(colspan: 4)[Integrated de-icing],
+@furini-subset-results lists the results for the branch-and-bound program using each de-icing approach on subsets of the benchmarking instances introduced by #cite(<furini-improved-horizon>, form: "prose").
 
-            ..(
-                [Start time],
-                [End time],
-                [Objective value],
-                [Mean runtime (in milliseconds)],
-            ) * 3
-        ),
+#let furini-subset-results = table(
+    columns: 13,
+    header(
+        cell(rowspan: 2)[Number of aircraft],
+        cell(colspan: 4)[De-icing by TOBT],
+        cell(colspan: 4)[De-icing by CTOT],
+        cell(colspan: 4)[Integrated de-icing],
+        ..(
+            [Start time],
+            [End time],
+            [Objective value],
+            [Mean runtime (in milliseconds)],
+        ) * 3,
     ),
-    caption: [
-        Optimal results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose") using various de-icing strategies
+   ..csv("results/furini-subset-results.csv").flatten(),
+)
+
+#align(
+    center,
+    rotate(-90deg, reflow: true)[   
+        #figure(
+            furini-subset-results,
+            caption: [
+                Results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose") using various de-icing strategies
+            ],
+        ) <furini-subset-results>
     ],
 )
 
