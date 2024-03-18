@@ -230,22 +230,6 @@ HOTs are thus modeled as hard constraints.
 
 #todo("Write introduction to results")
 
-// TODO:
-// - Furini instances
-//   - Limited, 10 or 20 flights
-//     - Branch-and-bound
-//     - CPLEX
-//   - Full
-//     - Branch-and-bound
-//     - CPLEX
-// - Heathrow instances
-//   - Times in minutes
-//     - Branch-and-bound
-//     - CPLEX
-//   - Times in seconds
-//     - Branch-and-bound
-//     - CPLEX
-
 == Problem Instances
 
 // TODO: Check if University of Bologna should be cited
@@ -257,8 +241,9 @@ The performance of both the branch-and-bound program and CPLEX model is illustra
 
 #todo("Write about comparison of CPLEX model as well as branch-and-bound, with different de-icing strategies")
 
-@furini-subset-results lists the results for the branch-and-bound program using each de-icing approach on subsets of the benchmarking instances introduced by #cite(<furini-improved-horizon>, form: "prose").
+@furini-subset-results lists the results for the branch-and-bound program using each de-icing approach on subsets of the benchmark instance FPT01 introduced by #cite(<furini-improved-horizon>, form: "prose").
 
+// TODO: Pick a good table style
 #let furini-subset-results = table(
     columns: 13,
     header(
@@ -270,7 +255,7 @@ The performance of both the branch-and-bound program and CPLEX model is illustra
             [Start time],
             [End time],
             [Objective value],
-            [Mean runtime (in milliseconds)],
+            [Mean runtime (ms)],
         ) * 3,
     ),
    ..csv("results/furini-subset-results.csv").flatten(),
@@ -282,7 +267,7 @@ The performance of both the branch-and-bound program and CPLEX model is illustra
         #figure(
             furini-subset-results,
             caption: [
-                Results for subsets of the benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose") using various de-icing strategies
+                Results for subsets of the benchmark instance FPT01 introduced by #cite(<furini-improved-horizon>, form: "prose") using various de-icing strategies
             ],
         ) <furini-subset-results>
     ],
