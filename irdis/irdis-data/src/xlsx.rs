@@ -64,9 +64,9 @@ pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
 
     sheet.merge_range(
         0,
-        15,
+        16,
         0,
-        15 + instance.flights().len() as u16,
+        16 + instance.flights().len() as u16 - 1,
         "Separations",
         &Format::default(),
     )?;
@@ -75,7 +75,7 @@ pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
         .flat_map(|i| (0..instance.flights().len()).map(move |j| (i, j)));
     for (row, col) in pairs {
         let sep = as_minutes(instance.separations()[(row, col)]);
-        sheet.write(1 + row as u32, 15 + col as u16, sep)?;
+        sheet.write(1 + row as u32, 16 + col as u16, sep)?;
     }
 
     Ok(sheet)
@@ -89,11 +89,7 @@ struct RawFlight {
     eto: Option<u64>,
     #[serde(rename = "TOBT")]
     tobt: Option<u64>,
-    #[serde(rename = "Earliest time")]
-    window_earliest: u64,
-    #[serde(rename = "Latest time")]
-    window_latest: u64,
-    #[serde(rename = "Target CTOT time")]
+    #[serde(rename = "CTOT")]
     ctot_target: Option<u64>,
     #[serde(rename = "CTOT allowance before")]
     ctot_allow_before: Option<u64>,
@@ -109,6 +105,10 @@ struct RawFlight {
     taxi_out_dur: Option<u64>,
     #[serde(rename = "Lineup duration")]
     lineup_dur: Option<u64>,
+    #[serde(rename = "Earliest time")]
+    window_earliest: u64,
+    #[serde(rename = "Latest time")]
+    window_latest: u64,
 }
 
 impl RawFlight {
@@ -126,16 +126,16 @@ impl RawFlight {
             .write(row, col, kind)?
             .write(row, col + 1, self.eto)?
             .write(row, col + 2, self.tobt)?
-            .write(row, col + 3, self.window_earliest)?
-            .write(row, col + 4, self.window_latest)?
-            .write(row, col + 5, self.ctot_target)?
-            .write(row, col + 6, self.ctot_allow_before)?
-            .write(row, col + 7, self.ctot_allow_after)?
-            .write(row, col + 8, self.pushback_dur)?
-            .write(row, col + 9, self.taxi_deice_dur)?
-            .write(row, col + 10, self.deice_dur)?
-            .write(row, col + 11, self.taxi_out_dur)?
-            .write(row, col + 12, self.lineup_dur)?;
+            .write(row, col + 3, self.ctot_target)?
+            .write(row, col + 4, self.ctot_allow_before)?
+            .write(row, col + 5, self.ctot_allow_after)?
+            .write(row, col + 6, self.pushback_dur)?
+            .write(row, col + 7, self.taxi_deice_dur)?
+            .write(row, col + 8, self.deice_dur)?
+            .write(row, col + 9, self.taxi_out_dur)?
+            .write(row, col + 10, self.lineup_dur)?
+            .write(row, col + 11, self.window_earliest)?
+            .write(row, col + 12, self.window_latest)?;
         Ok(())
     }
 }
