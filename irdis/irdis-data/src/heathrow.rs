@@ -122,7 +122,7 @@ where
                     });
 
                     Flight::Dep(Departure {
-                        base_time,
+                        tobt: flight.tobt.time(),
                         window: TimeWindow {
                             earliest: base_time,
                             latest: base_time + MINUTE * 60,

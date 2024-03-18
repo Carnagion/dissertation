@@ -20,8 +20,8 @@ pub enum Flight {
 impl Flight {
     pub fn base_time(&self) -> NaiveTime {
         match self {
-            Self::Arr(arr) => arr.base_time,
-            Self::Dep(dep) => dep.base_time,
+            Self::Arr(arr) => arr.base_time(),
+            Self::Dep(dep) => dep.base_time(),
         }
     }
 
@@ -71,13 +71,17 @@ impl Flight {
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Arrival {
-    pub base_time: NaiveTime,
+    pub eto: NaiveTime,
     pub window: TimeWindow,
 }
 
 impl Arrival {
+    pub fn base_time(&self) -> NaiveTime {
+        self.eto
+    }
+
     pub fn release_time(&self) -> NaiveTime {
-        self.base_time.max(self.window.earliest)
+        self.base_time().max(self.window.earliest)
     }
 }
 
@@ -91,7 +95,7 @@ impl From<Arrival> for Flight {
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Departure {
-    pub base_time: NaiveTime,
+    pub tobt: NaiveTime,
     pub window: TimeWindow,
     pub ctot: Option<Ctot>,
     #[serde_as(as = "DurationMinutes")]
@@ -107,8 +111,17 @@ pub struct Departure {
 }
 
 impl Departure {
+    pub fn base_time(&self) -> NaiveTime {
+        self.tobt
+            + self.pushback_dur
+            + self.taxi_deice_dur
+            + self.deice_dur
+            + self.taxi_out_dur
+            + self.lineup_dur
+    }
+
     pub fn release_time(&self) -> NaiveTime {
-        let mut release = self.base_time.max(self.window.earliest);
+        let mut release = self.base_time().max(self.window.earliest);
         if let Some(ctot) = &self.ctot {
             release = release.max(ctot.earliest());
         }

@@ -87,14 +87,14 @@ fn parse_flight(line: &str) -> Result<Flight, FromFuriniError> {
 
     let flight = match kind {
         "A" => Ok(Flight::Arr(Arrival {
-            base_time,
+            eto: base_time,
             window: TimeWindow {
                 earliest: base_time,
                 latest: base_time + MINUTE * 10,
             },
         })),
         "D" => Ok(Flight::Dep(Departure {
-            base_time,
+            tobt: base_time - MINUTE * 25,
             window: TimeWindow {
                 earliest: base_time,
                 latest: base_time + MINUTE * 15,

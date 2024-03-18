@@ -27,9 +27,10 @@ pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
         let flight = match flight {
             Flight::Arr(arr) => RawFlight {
                 kind: FlightKind::Arr,
-                base_time: minutes(starting_time, arr.base_time),
+                eto: Some(minutes(starting_time, arr.eto)),
                 window_earliest: minutes(starting_time, arr.window.earliest),
                 window_latest: minutes(starting_time, arr.window.latest),
+                tobt: None,
                 ctot_target: None,
                 ctot_allow_after: None,
                 ctot_allow_before: None,
@@ -41,7 +42,7 @@ pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
             },
             Flight::Dep(dep) => RawFlight {
                 kind: FlightKind::Dep,
-                base_time: minutes(starting_time, dep.base_time),
+                tobt: Some(minutes(starting_time, dep.tobt)),
                 window_earliest: minutes(starting_time, dep.window.earliest),
                 window_latest: minutes(starting_time, dep.window.latest),
                 ctot_target: dep
@@ -55,6 +56,7 @@ pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
                 deice_dur: Some(as_minutes(dep.deice_dur)),
                 taxi_out_dur: Some(as_minutes(dep.taxi_out_dur)),
                 lineup_dur: Some(as_minutes(dep.lineup_dur)),
+                eto: None,
             },
         };
         flight.write_to_sheet(idx as u32 + 1, 2, &mut sheet)?;
@@ -83,8 +85,10 @@ pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
 struct RawFlight {
     #[serde(rename = "Kind")]
     kind: FlightKind,
-    #[serde(rename = "Base time")]
-    base_time: u64,
+    #[serde(rename = "ETO")]
+    eto: Option<u64>,
+    #[serde(rename = "TOBT")]
+    tobt: Option<u64>,
     #[serde(rename = "Earliest time")]
     window_earliest: u64,
     #[serde(rename = "Latest time")]
@@ -120,17 +124,18 @@ impl RawFlight {
         };
         sheet
             .write(row, col, kind)?
-            .write(row, col + 1, self.base_time)?
-            .write(row, col + 2, self.window_earliest)?
-            .write(row, col + 3, self.window_latest)?
-            .write(row, col + 4, self.ctot_target)?
-            .write(row, col + 5, self.ctot_allow_before)?
-            .write(row, col + 6, self.ctot_allow_after)?
-            .write(row, col + 7, self.pushback_dur)?
-            .write(row, col + 8, self.taxi_deice_dur)?
-            .write(row, col + 9, self.deice_dur)?
-            .write(row, col + 10, self.taxi_out_dur)?
-            .write(row, col + 11, self.lineup_dur)?;
+            .write(row, col + 1, self.eto)?
+            .write(row, col + 2, self.tobt)?
+            .write(row, col + 3, self.window_earliest)?
+            .write(row, col + 4, self.window_latest)?
+            .write(row, col + 5, self.ctot_target)?
+            .write(row, col + 6, self.ctot_allow_before)?
+            .write(row, col + 7, self.ctot_allow_after)?
+            .write(row, col + 8, self.pushback_dur)?
+            .write(row, col + 9, self.taxi_deice_dur)?
+            .write(row, col + 10, self.deice_dur)?
+            .write(row, col + 11, self.taxi_out_dur)?
+            .write(row, col + 12, self.lineup_dur)?;
         Ok(())
     }
 }
@@ -145,9 +150,9 @@ fn starting_time(flights: &[Flight]) -> Option<NaiveTime> {
     flights
         .iter()
         .map(|flight| match flight {
-            Flight::Arr(arr) => arr.base_time.min(arr.window.earliest),
+            Flight::Arr(arr) => arr.eto.min(arr.window.earliest),
             Flight::Dep(dep) => {
-                let mut earliest = dep.base_time.min(dep.window.earliest);
+                let mut earliest = dep.tobt.min(dep.window.earliest);
                 if let Some(ctot) = &dep.ctot {
                     earliest = earliest.min(ctot.earliest());
                 }

@@ -38,14 +38,21 @@ impl Solve for BranchBound {
     fn solve(&self, instance: &Instance) -> Option<Vec<Schedule>> {
         let solution = match self.deice_strategy {
             DeiceStrategy::ByTobt => {
-                todo!()
+                let deice_queue = decomposed::deice_queue(instance, |dep| dep.tobt)?;
+                branch_and_bound(
+                    instance,
+                    self.horizon,
+                    |flight, flight_idx, instance, state| {
+                        decomposed::expand(flight, flight_idx, instance, state, &deice_queue)
+                    },
+                )
             },
             DeiceStrategy::ByCtot => {
                 let deice_queue = decomposed::deice_queue(instance, |dep| {
                     dep.ctot
                         .as_ref()
                         .map(|ctot| ctot.earliest())
-                        .unwrap_or(dep.base_time)
+                        .unwrap_or(dep.base_time())
                 })?;
                 branch_and_bound(
                     instance,

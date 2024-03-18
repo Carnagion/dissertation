@@ -100,8 +100,8 @@ impl Visualiser {
             Group::new().add(bar).add(square).add(title)
         };
 
-        let release = {
-            let x = width(arr.release_time(), starting_time) * SCALE_X;
+        let base = {
+            let x = width(arr.base_time(), starting_time) * SCALE_X;
             let y = row * SCALE_Y;
 
             let title = title!("Release time at {}", arr.release_time().format(HM),);
@@ -127,7 +127,7 @@ impl Visualiser {
         };
 
         let delay = {
-            let x = width(arr.release_time(), starting_time) * SCALE_X;
+            let x = width(arr.base_time(), starting_time) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
 
             let width = width(sched.landing, arr.release_time()) * SCALE_X;
@@ -140,11 +140,7 @@ impl Visualiser {
                 .add(title)
         };
 
-        Group::new()
-            .add(delay)
-            .add(window)
-            .add(release)
-            .add(landing)
+        Group::new().add(delay).add(window).add(base).add(landing)
     }
 
     fn visualise_dep(
@@ -176,8 +172,8 @@ impl Visualiser {
             Group::new().add(bar).add(square).add(title)
         };
 
-        let release = {
-            let x = width(dep.release_time(), starting_time) * SCALE_X;
+        let base = {
+            let x = width(dep.base_time(), starting_time) * SCALE_X;
             let y = row * SCALE_Y;
 
             let title = title!("Release time at {}", dep.release_time().format(HM),);
@@ -204,7 +200,7 @@ impl Visualiser {
         };
 
         let delay = {
-            let x = width(dep.release_time(), starting_time) * SCALE_X;
+            let x = width(dep.base_time(), starting_time) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
 
             let width = width(sched.takeoff, dep.release_time()) * SCALE_X;
@@ -304,7 +300,7 @@ impl Visualiser {
             .add(slack)
             .add(delay)
             .add(window)
-            .add(release)
+            .add(base)
             .add(deice)
             .add(takeoff)
     }
@@ -316,12 +312,12 @@ fn starting_time(schedule: &[Schedule], instance: &Instance) -> Option<NaiveTime
         .map(|sched| match sched {
             Schedule::Arr(sched) => {
                 let arr = instance.flights()[sched.flight_idx].as_arrival().unwrap();
-                arr.base_time.min(arr.window.earliest).min(sched.landing)
+                arr.eto.min(arr.window.earliest).min(sched.landing)
             },
             Schedule::Dep(sched) => {
                 let dep = instance.flights()[sched.flight_idx].as_departure().unwrap();
                 let mut earliest = dep
-                    .base_time
+                    .tobt
                     .min(dep.window.earliest)
                     .min(sched.deice - dep.taxi_deice_dur - dep.pushback_dur);
                 if let Some(ctot) = &dep.ctot {

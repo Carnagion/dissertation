@@ -59,22 +59,22 @@ fn complete_order_exists(i: usize, j: usize, instance: &Instance) -> bool {
     match (i, j) {
         (Flight::Arr(i), Flight::Arr(j)) => {
             i.release_time() <= j.release_time()
-                && i.base_time <= j.base_time
+                && i.base_time() <= j.base_time()
                 && i.window.latest <= j.window.latest
         },
         (Flight::Dep(i), Flight::Arr(j)) if i.ctot.is_none() => {
             i.release_time() <= j.release_time()
-                && i.base_time <= j.base_time
+                && i.base_time() <= j.base_time()
                 && i.window.latest <= j.window.latest
         },
         (Flight::Arr(i), Flight::Dep(j)) if j.ctot.is_none() => {
             i.release_time() <= j.release_time()
-                && i.base_time <= j.base_time
+                && i.base_time() <= j.base_time()
                 && i.window.latest <= j.window.latest
         },
         (Flight::Dep(i), Flight::Dep(j)) if i.ctot.is_none() && j.ctot.is_none() => {
             i.release_time() <= j.release_time()
-                && i.base_time <= j.base_time
+                && i.base_time() <= j.base_time()
                 && i.window.latest <= j.window.latest
         },
         // NOTE: Complete orders cannot be inferred when one or both aircraft are subject to CTOT windows.
