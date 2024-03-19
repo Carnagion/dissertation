@@ -18,10 +18,11 @@
 #let pseudocode = pseudocode.with(indentation-guide-stroke: 0.1pt)
 
 #set figure(gap: 1em)
-// #show figure.where(kind: table): set block(breakable: true)
+#show figure.where(kind: table): set block(breakable: true)
 #show figure.where(kind: table): set par(justify: false)
 
-#import table: cell, header
+// TODO: Pick a good table style
+#set table.cell(align: center + horizon)
 
 // NOTE: Workaround to make prose citations use "et al" with a lower author count threshold
 // TODO: Check if there is a way to already do this in Typst without using a CSL file
@@ -232,8 +233,28 @@ HOTs are thus modeled as hard constraints.
 
 == Problem Instances
 
-// TODO: Check if University of Bologna should be cited
-The performance of both the branch-and-bound program and CPLEX model is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow as well as benchmark problem instances from Milan Airport. The latter were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
+// TODO: Check if Heathrow or University of Bologna should be cited
+The performance of both the branch-and-bound program and CPLEX model is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarized in @heathrow-instances -- as well as benchmark problem instances from Milan Airport. The latter were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
+
+#let heathrow-instances = {
+    let heathrow-instances = csv("results/heathrow-instances.csv")
+    
+    let headers = heathrow-instances.first()
+    let data = heathrow-instances.slice(1)
+
+    table(
+        columns: headers.len(),
+        table.header(..headers),
+        ..data.flatten(),
+    )
+}
+
+#figure(
+    heathrow-instances,
+    caption: [
+        Overview of problem instances from London Heathrow
+    ],
+) <heathrow-instances>
 
 #todo("Write more about problem instances if necessary")
 
@@ -241,35 +262,48 @@ The performance of both the branch-and-bound program and CPLEX model is illustra
 
 #todo("Write about comparison of CPLEX model as well as branch-and-bound, with different de-icing strategies")
 
-@furini-subset-results lists the results for the branch-and-bound program using each de-icing approach on subsets of the benchmark instance FPT01 introduced by #cite(<furini-improved-horizon>, form: "prose").
+@branch-bound-heathrow-subsets lists the results for the branch-and-bound program using each de-icing approach on subsets of a problem instance from London Heathrow.
 
-// TODO: Pick a good table style
-#let furini-subset-results = table(
-    columns: 13,
-    header(
-        cell(rowspan: 2)[Number of aircraft],
-        cell(colspan: 4)[De-icing by TOBT],
-        cell(colspan: 4)[De-icing by CTOT],
-        cell(colspan: 4)[Integrated de-icing],
-        ..(
-            [Start time],
-            [End time],
-            [Objective value],
-            [Mean runtime (ms)],
-        ) * 3,
-    ),
-   ..csv("results/furini-subset-results.csv").flatten(),
-)
+#let branch-bound-heathrow-subsets = {
+    let tobt = csv("results/branch-bound-tobt-heathrow-subsets.csv")
+    let ctot = csv("results/branch-bound-ctot-heathrow-subsets.csv")
+    let integrated = csv("results/branch-bound-integrated-heathrow-subsets.csv")
+
+    let aircraft = tobt.map(array.first).slice(1)
+
+    let tobt-headers = tobt.first().slice(1)
+    let tobt-data = tobt.map(row => row.slice(1)).slice(1)
+
+    let ctot-headers = ctot.first().slice(1)
+    let ctot-data = ctot.map(row => row.slice(1)).slice(1)
+
+    let integrated-headers = integrated.first().slice(1)
+    let integrated-data = integrated.map(row => row.slice(1)).slice(1)
+
+    table(
+        columns: 1 + tobt-headers.len() + ctot-headers.len() + integrated-headers.len(),
+        table.header(
+            table.cell(rowspan: 2)[Aircraft],
+            table.cell(colspan: tobt-headers.len())[De-icing by TOBT],
+            table.cell(colspan: ctot-headers.len())[De-icing by CTOT],
+            table.cell(colspan: integrated-headers.len())[Integrated de-icing],
+            ..tobt-headers,
+            ..ctot-headers,
+            ..integrated-headers,
+        ),
+        ..aircraft.zip(tobt-data, ctot-data, integrated-data).flatten(),
+    )
+}
 
 #align(
     center,
     rotate(-90deg, reflow: true)[   
         #figure(
-            furini-subset-results,
+            branch-bound-heathrow-subsets,
             caption: [
-                Results for subsets of the benchmark instance FPT01 introduced by #cite(<furini-improved-horizon>, form: "prose") using various de-icing strategies
+                Results for subsets of a problem instance from London Heathrow solved by a branch-and-bound approach utilising various de-icing strategies
             ],
-        ) <furini-subset-results>
+        ) <branch-bound-heathrow-subsets>
     ],
 )
 
