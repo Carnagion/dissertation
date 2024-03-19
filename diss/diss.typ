@@ -237,15 +237,30 @@ HOTs are thus modeled as hard constraints.
 The performance of both the branch-and-bound program and CPLEX model is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarized in @heathrow-instances -- as well as benchmark problem instances from Milan Airport. The latter were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
 
 #let heathrow-instances = {
-    let heathrow-instances = csv("results/heathrow-instances.csv")
-    
-    let headers = heathrow-instances.first()
-    let data = heathrow-instances.slice(1)
+    let small = csv("results/heathrow-instances-small.csv")
+    let medium = csv("results/heathrow-instances-medium.csv")
+    let large = csv("results/heathrow-instances-large.csv")
+
+    let small-headers = small.first()
+    let small-data = small.slice(1)
+
+    let medium-headers = medium.first()
+    let medium-data = medium.slice(1)
+
+    let large-headers = large.first()
+    let large-data = large.slice(1)
 
     table(
-        columns: headers.len(),
-        table.header(..headers),
-        ..data.flatten(),
+        columns: small-headers.len() + medium-headers.len() + large-headers.len(),
+        table.header(
+            table.cell(colspan: small-headers.len())[Small],
+            table.cell(colspan: medium-headers.len())[Medium],
+            table.cell(colspan: large-headers.len())[Large],
+            ..small-headers,
+            ..medium-headers,
+            ..large-headers,
+        ),
+        ..array.zip(small-data, medium-data, large-data).flatten(),
     )
 }
 
@@ -262,30 +277,32 @@ The performance of both the branch-and-bound program and CPLEX model is illustra
 
 #todo("Write about comparison of CPLEX model as well as branch-and-bound, with different de-icing strategies")
 
-@branch-bound-heathrow-subsets lists the results for the branch-and-bound program using each de-icing approach on subsets of a problem instance from London Heathrow.
+@branch-bound-heathrow-small-medium lists the results for the branch-and-bound program using each de-icing approach on all small and medium problem Heathrow instances.
+The small problem instances were solved without a rolling horizon.
+For the medium problem instances, a rolling horizon of 12 was used.
 
-#let branch-bound-heathrow-subsets = {
-    let tobt = csv("results/branch-bound-tobt-heathrow-subsets.csv")
-    let ctot = csv("results/branch-bound-ctot-heathrow-subsets.csv")
-    let integrated = csv("results/branch-bound-integrated-heathrow-subsets.csv")
+#let branch-bound-heathrow-small-medium = {
+    let tobt = csv("results/branch-bound-tobt-heathrow-small-medium.csv")
+    let ctot = csv("results/branch-bound-ctot-heathrow-small-medium.csv")
+    let integrated = csv("results/branch-bound-integrated-heathrow-small-medium.csv")
 
-    let aircraft = tobt.map(array.first).slice(1)
+    let aircraft = tobt.slice(1).map(array.first)
 
     let tobt-headers = tobt.first().slice(1)
-    let tobt-data = tobt.map(row => row.slice(1)).slice(1)
+    let tobt-data = tobt.slice(1).map(row => row.slice(1))
 
     let ctot-headers = ctot.first().slice(1)
-    let ctot-data = ctot.map(row => row.slice(1)).slice(1)
+    let ctot-data = ctot.slice(1).map(row => row.slice(1))
 
     let integrated-headers = integrated.first().slice(1)
-    let integrated-data = integrated.map(row => row.slice(1)).slice(1)
+    let integrated-data = integrated.slice(1).map(row => row.slice(1))
 
     table(
         columns: 1 + tobt-headers.len() + ctot-headers.len() + integrated-headers.len(),
         table.header(
-            table.cell(rowspan: 2)[Aircraft],
-            table.cell(colspan: tobt-headers.len())[De-icing by TOBT],
-            table.cell(colspan: ctot-headers.len())[De-icing by CTOT],
+            table.cell(rowspan: 2)[Instance],
+            table.cell(colspan: tobt-headers.len())[Decomposed de-icing (by TOBT)],
+            table.cell(colspan: ctot-headers.len())[Decomposed de-icing (by CTOT)],
             table.cell(colspan: integrated-headers.len())[Integrated de-icing],
             ..tobt-headers,
             ..ctot-headers,
@@ -299,13 +316,80 @@ The performance of both the branch-and-bound program and CPLEX model is illustra
     center,
     rotate(-90deg, reflow: true)[   
         #figure(
-            branch-bound-heathrow-subsets,
+            branch-bound-heathrow-small-medium,
             caption: [
-                Results for subsets of a problem instance from London Heathrow solved by a branch-and-bound approach utilising various de-icing strategies
+                Results for small and medium problem instances from London Heathrow solved by a branch-and-bound approach utilising various de-icing strategies
             ],
-        ) <branch-bound-heathrow-subsets>
+        ) <branch-bound-heathrow-small-medium>
     ],
 )
+
+@branch-bound-furini lists the results for the branch-and-bound program using each de-icing approach on all benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose").
+A rolling horizon of 12 was used for all instances.
+
+#let branch-bound-furini = {
+    let decomposed = csv("results/branch-bound-decomposed-furini.csv")
+    let integrated = csv("results/branch-bound-integrated-furini.csv")
+
+    let instances = decomposed.map(array.first).slice(1)
+
+    let decomposed-headers = decomposed.first().slice(1)
+    let decomposed-data = decomposed.slice(1).map(row => row.slice(1))
+
+    let integrated-headers = integrated.first().slice(1)
+    let integrated-data = integrated.slice(1).map(row => row.slice(1))
+
+    table(
+        columns: 1 + decomposed-headers.len() + integrated-headers.len(),
+        table.header(
+            table.cell(rowspan: 2)[Instance],
+            table.cell(colspan: decomposed-headers.len())[Decomposed de-icing],
+            table.cell(colspan: integrated-headers.len())[Integrated de-icing],
+            ..decomposed-headers,
+            ..integrated-headers,
+        ),
+        ..instances.zip(decomposed-data, integrated-data).flatten(),
+    )
+}
+
+#figure(
+    branch-bound-furini,
+    caption: [
+        Results for benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by a branch-and-bound approach utilising various de-icing strategies
+    ],
+) <branch-bound-furini>
+
+#let cplex-branch-bound-heathrow-small = {
+    let cplex = csv("results/cplex-heathrow-small.csv")
+    let branch-bound = csv("results/branch-bound-integrated-heathrow-small.csv")
+
+    let aircraft = cplex.slice(1).map(array.first)
+
+    let cplex-headers = cplex.first().slice(1)
+    let cplex-data = cplex.slice(1).map(row => row.slice(1))
+
+    let branch-bound-headers = branch-bound.first().slice(1)
+    let branch-bound-data = branch-bound.slice(1).map(row => row.slice(1))
+
+    table(
+        columns: 1 + cplex-headers.len() + branch-bound-headers.len(),
+        table.header(
+            table.cell(rowspan: 2)[Instance],
+            table.cell(colspan: cplex-headers.len())[CPLEX model],
+            table.cell(colspan: branch-bound-headers.len())[Branch-and-bound program],
+            ..cplex-headers,
+            ..branch-bound-headers,
+        ),
+        ..aircraft.zip(cplex-data, branch-bound-data).flatten(),
+    )
+}
+
+#figure(
+    cplex-branch-bound-heathrow-small,
+    caption: [
+        Results for small problem instances from London Heathrow solved by CPLEX as well as the branch-and-bound program, both performing integrated de-icing
+    ],
+) <cplex-branch-bound-heathrow-small>
 
 == Impact
 
