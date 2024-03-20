@@ -22,7 +22,10 @@
 #show figure.where(kind: table): set par(justify: false)
 
 // TODO: Pick a good table style
+#set table(inset: 6.5pt, stroke: none)
 #set table.cell(align: center + horizon)
+#show table.cell.where(y: 0, rowspan: 1): strong
+#show table.cell: set text(size: 10pt)
 
 // NOTE: Workaround to make prose citations use "et al" with a lower author count threshold
 // TODO: Check if there is a way to already do this in Typst without using a CSL file
@@ -231,38 +234,84 @@ HOTs are thus modeled as hard constraints.
 
 #todo("Write introduction to results")
 
+#let results-table(group-headers: (), side-headers: false, ..datasets) = {
+    let header-groups = datasets
+        .pos()
+        .map(array.first)
+    
+    let data-groups = datasets
+        .pos()
+        .map(data-group => data-group.slice(1))
+
+    let side-header = ()
+    let side-data = ()
+    let data = array.zip(..data-groups).flatten()
+    if side-headers {
+        side-header = (table.cell(rowspan: 2, header-groups.first().first()),)
+        side-data = data-groups.first().map(array.first)
+
+        header-groups = header-groups.map(header-group => header-group.slice(int(side-headers)))
+        data-groups = data-groups.map(data-group => data-group.map(row => row.slice(int(side-headers))))
+
+        data = side-data.zip(..data-groups).flatten()
+    }
+
+    data = data.map(str.trim).map(table.cell)
+
+    let headers = header-groups
+        .flatten()
+        .map(str.trim)
+        .map(table.cell)
+
+    let group-headers = group-headers
+        .zip(header-groups.map(array.len))
+        .map(pair => {
+            let (group-header, headers-len) = pair
+            table.cell(colspan: headers-len, group-header)
+        })
+
+    let header-rowspan = if group-headers == () { 1 } else { 2 }
+    let header-colspan = header-groups.first().len()
+    
+    let stroke = (x, y) => {
+        let stroke-style = (dash: "dashed", thickness: 0.5pt)
+        let h = if y > 0 and y <= header-rowspan {
+            stroke-style
+        }
+        let v = if x != 0 and calc.rem-euclid(x, header-colspan) == side-header.len() {
+            stroke-style
+        }
+        (
+            top: h,
+            bottom: none,
+            left: v,
+            right: none,
+        )
+    }
+
+    table(
+        columns: side-header.len() + headers.len(),
+        stroke: stroke,
+        table.header(
+            ..side-header,
+            ..group-headers,
+            ..headers,
+        ),
+        ..data,
+    )
+}
+
 == Problem Instances
 
 // TODO: Check if Heathrow or University of Bologna should be cited
 The performance of both the branch-and-bound program and CPLEX model is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarized in @heathrow-instances -- as well as benchmark problem instances from Milan Airport. The latter were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
 
-#let heathrow-instances = {
-    let small = csv("results/heathrow-instances-small.csv")
-    let medium = csv("results/heathrow-instances-medium.csv")
-    let large = csv("results/heathrow-instances-large.csv")
-
-    let small-headers = small.first()
-    let small-data = small.slice(1)
-
-    let medium-headers = medium.first()
-    let medium-data = medium.slice(1)
-
-    let large-headers = large.first()
-    let large-data = large.slice(1)
-
-    table(
-        columns: small-headers.len() + medium-headers.len() + large-headers.len(),
-        table.header(
-            table.cell(colspan: small-headers.len())[Small],
-            table.cell(colspan: medium-headers.len())[Medium],
-            table.cell(colspan: large-headers.len())[Large],
-            ..small-headers,
-            ..medium-headers,
-            ..large-headers,
-        ),
-        ..array.zip(small-data, medium-data, large-data).flatten(),
-    )
-}
+#let heathrow-instances = results-table(
+    group-headers: ([Small], [Medium], [Large]),
+    csv("results/heathrow-instances-small.csv"),
+    csv("results/heathrow-instances-medium.csv"),
+    csv("results/heathrow-instances-large.csv"),
+)
 
 #figure(
     heathrow-instances,
@@ -281,36 +330,13 @@ The performance of both the branch-and-bound program and CPLEX model is illustra
 The small problem instances were solved without a rolling horizon.
 For the medium problem instances, a rolling horizon of 12 was used.
 
-#let branch-bound-heathrow-small-medium = {
-    let tobt = csv("results/branch-bound-tobt-heathrow-small-medium.csv")
-    let ctot = csv("results/branch-bound-ctot-heathrow-small-medium.csv")
-    let integrated = csv("results/branch-bound-integrated-heathrow-small-medium.csv")
-
-    let aircraft = tobt.slice(1).map(array.first)
-
-    let tobt-headers = tobt.first().slice(1)
-    let tobt-data = tobt.slice(1).map(row => row.slice(1))
-
-    let ctot-headers = ctot.first().slice(1)
-    let ctot-data = ctot.slice(1).map(row => row.slice(1))
-
-    let integrated-headers = integrated.first().slice(1)
-    let integrated-data = integrated.slice(1).map(row => row.slice(1))
-
-    table(
-        columns: 1 + tobt-headers.len() + ctot-headers.len() + integrated-headers.len(),
-        table.header(
-            table.cell(rowspan: 2)[Instance],
-            table.cell(colspan: tobt-headers.len())[Decomposed de-icing (by TOBT)],
-            table.cell(colspan: ctot-headers.len())[Decomposed de-icing (by CTOT)],
-            table.cell(colspan: integrated-headers.len())[Integrated de-icing],
-            ..tobt-headers,
-            ..ctot-headers,
-            ..integrated-headers,
-        ),
-        ..aircraft.zip(tobt-data, ctot-data, integrated-data).flatten(),
-    )
-}
+#let branch-bound-heathrow-small-medium = results-table(
+    group-headers: ([Decomposed de-icing (by TOBT)], [Decomposed de-icing (by CTOT)], [Integrated de-icing]),
+    side-headers: true,
+    csv("results/branch-bound-tobt-heathrow-small-medium.csv"),
+    csv("results/branch-bound-ctot-heathrow-small-medium.csv"),
+    csv("results/branch-bound-integrated-heathrow-small-medium.csv"),
+)
 
 #align(
     center,
@@ -327,30 +353,12 @@ For the medium problem instances, a rolling horizon of 12 was used.
 @branch-bound-furini lists the results for the branch-and-bound program using each de-icing approach on all benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose").
 A rolling horizon of 12 was used for all instances.
 
-#let branch-bound-furini = {
-    let decomposed = csv("results/branch-bound-decomposed-furini.csv")
-    let integrated = csv("results/branch-bound-integrated-furini.csv")
-
-    let instances = decomposed.map(array.first).slice(1)
-
-    let decomposed-headers = decomposed.first().slice(1)
-    let decomposed-data = decomposed.slice(1).map(row => row.slice(1))
-
-    let integrated-headers = integrated.first().slice(1)
-    let integrated-data = integrated.slice(1).map(row => row.slice(1))
-
-    table(
-        columns: 1 + decomposed-headers.len() + integrated-headers.len(),
-        table.header(
-            table.cell(rowspan: 2)[Instance],
-            table.cell(colspan: decomposed-headers.len())[Decomposed de-icing],
-            table.cell(colspan: integrated-headers.len())[Integrated de-icing],
-            ..decomposed-headers,
-            ..integrated-headers,
-        ),
-        ..instances.zip(decomposed-data, integrated-data).flatten(),
-    )
-}
+#let branch-bound-furini = results-table(
+    group-headers: ([Decomposed de-icing], [Integrated de-icing]),
+    side-headers: true,
+    csv("results/branch-bound-decomposed-furini.csv"),
+    csv("results/branch-bound-integrated-furini.csv"),
+)
 
 #figure(
     branch-bound-furini,
@@ -359,30 +367,12 @@ A rolling horizon of 12 was used for all instances.
     ],
 ) <branch-bound-furini>
 
-#let cplex-branch-bound-heathrow-small = {
-    let cplex = csv("results/cplex-heathrow-small.csv")
-    let branch-bound = csv("results/branch-bound-integrated-heathrow-small.csv")
-
-    let aircraft = cplex.slice(1).map(array.first)
-
-    let cplex-headers = cplex.first().slice(1)
-    let cplex-data = cplex.slice(1).map(row => row.slice(1))
-
-    let branch-bound-headers = branch-bound.first().slice(1)
-    let branch-bound-data = branch-bound.slice(1).map(row => row.slice(1))
-
-    table(
-        columns: 1 + cplex-headers.len() + branch-bound-headers.len(),
-        table.header(
-            table.cell(rowspan: 2)[Instance],
-            table.cell(colspan: cplex-headers.len())[CPLEX model],
-            table.cell(colspan: branch-bound-headers.len())[Branch-and-bound program],
-            ..cplex-headers,
-            ..branch-bound-headers,
-        ),
-        ..aircraft.zip(cplex-data, branch-bound-data).flatten(),
-    )
-}
+#let cplex-branch-bound-heathrow-small = results-table(
+    group-headers: ([CPLEX model], [Branch-and-bound program]),
+    side-headers: true,
+    csv("results/cplex-heathrow-small.csv"),
+    csv("results/branch-bound-integrated-heathrow-small.csv"),
+)
 
 #figure(
     cplex-branch-bound-heathrow-small,
