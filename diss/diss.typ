@@ -274,7 +274,7 @@ HOTs are thus modeled as hard constraints.
     let header-colspan = header-groups.first().len()
     
     let stroke = (x, y) => {
-        let stroke-style = (dash: "dashed", thickness: 0.5pt)
+        let stroke-style = (dash: "solid", thickness: 0.5pt)
         let h = if y > 0 and y <= header-rowspan {
             stroke-style
         }
