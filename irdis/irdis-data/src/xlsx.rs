@@ -62,14 +62,18 @@ pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
         flight.write_to_sheet(idx as u32 + 1, 2, &mut sheet)?;
     }
 
-    sheet.merge_range(
-        0,
-        16,
-        0,
-        16 + instance.flights().len() as u16 - 1,
-        "Separations",
-        &Format::default(),
-    )?;
+    // NOTE: Merging is only possible with multiple cells and the Excel library returns an error
+    //       when trying to merge a range containing a single cell.
+    if instance.flights().len() > 1 {
+        sheet.merge_range(
+            0,
+            16,
+            0,
+            16 + instance.flights().len() as u16 - 1,
+            "Separations",
+            &Format::default(),
+        )?;
+    }
 
     let pairs = (0..instance.flights().len())
         .flat_map(|i| (0..instance.flights().len()).map(move |j| (i, j)));
