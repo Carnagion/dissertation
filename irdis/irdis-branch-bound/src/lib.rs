@@ -5,7 +5,8 @@ use chrono::NaiveTime;
 use irdis_instance::{flight::Flight, schedule::Schedule, Instance, Solve};
 
 mod cost;
-use cost::{arrival_cost, departure_cost, solution_cost, Cost};
+use cost::Cost;
+pub use cost::{arrival_cost, departure_cost, solution_cost};
 
 mod complete_orders;
 
@@ -66,9 +67,6 @@ impl Solve for BranchBound {
                 branch_and_bound(instance, self.horizon, integrated::expand)
             },
         }?;
-
-        // TODO: Remove once testing is done
-        println!("cost = {}", solution_cost(&solution, instance));
 
         Some(solution)
     }

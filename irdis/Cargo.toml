@@ -23,6 +23,7 @@ xlsx = ["irdis-data?/xlsx"]
 vis = ["dep:irdis-vis"]
 
 [dev-dependencies]
+divan = "0.1.14"
 rust_xlsxwriter = { version = "0.63.0", features = ["serde"] }
 serde = { version = "1.0.195", features = ["derive"] }
 svg = "0.15.0"
@@ -30,3 +31,7 @@ toml = "0.8.10"
 
 [workspace]
 members = ["irdis-branch-bound", "irdis-data", "irdis-instance", "irdis-vis"]
+
+[[bench]]
+name = "branch_bound"
+harness = false
