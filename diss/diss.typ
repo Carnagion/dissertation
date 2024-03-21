@@ -18,6 +18,15 @@
 #let pseudocode = pseudocode.with(indentation-guide-stroke: 0.1pt)
 
 #set figure(gap: 1em)
+#show figure.caption: caption => {
+    set text(size: 10pt)
+    strong(caption.supplement)
+    [ ]
+    context strong(caption.counter.display(caption.numbering))
+    [: ]
+    caption.body
+}
+
 #show figure.where(kind: table): set block(breakable: true)
 #show figure.where(kind: table): set par(justify: false)
 
@@ -326,9 +335,8 @@ The performance of both the branch-and-bound program and CPLEX model is illustra
 
 #todo("Write about comparison of CPLEX model as well as branch-and-bound, with different de-icing strategies")
 
-@branch-bound-heathrow-small-medium lists the results for the branch-and-bound program using each de-icing approach on all small and medium problem Heathrow instances.
-The small problem instances were solved without a rolling horizon.
-For the medium problem instances, a rolling horizon of 12 was used.
+@branch-bound-heathrow-small-medium lists the results for the branch-and-bound program using each de-icing approach on all small- and medium-sized problem Heathrow instances.
+The small problem instances were solved without a rolling horizon, while a rolling horizon of 12 was used for the medium-sized instances.
 
 #let branch-bound-heathrow-small-medium = results-table(
     group-headers: ([Decomposed de-icing (by TOBT)], [Decomposed de-icing (by CTOT)], [Integrated de-icing]),
@@ -351,7 +359,7 @@ For the medium problem instances, a rolling horizon of 12 was used.
 )
 
 @branch-bound-furini lists the results for the branch-and-bound program using each de-icing approach on all benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose").
-A rolling horizon of 12 was used for all instances.
+Each aircraft in these instances is assumed to take five minutes for pushback, taxiing, de-icing, and lineup respectively, and a rolling horizon of 12 was used to solve them.
 
 #let branch-bound-furini = results-table(
     group-headers: ([Decomposed de-icing], [Integrated de-icing]),
@@ -366,6 +374,9 @@ A rolling horizon of 12 was used for all instances.
         Results for benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by a branch-and-bound approach utilising various de-icing strategies
     ],
 ) <branch-bound-furini>
+
+#cite(<furini-improved-horizon>, form: "prose") instances are considerably easier to solve than those from London Heathrow.
+This is primarily due to the lack of CTOT slots as well as having relatively simple separation matrices where complete orders can be inferred between most aircraft.
 
 #let cplex-branch-bound-heathrow-small = results-table(
     group-headers: ([CPLEX model], [Branch-and-bound program]),
