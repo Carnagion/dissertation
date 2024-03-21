@@ -153,13 +153,13 @@ mod heathrow {
         }
     }
 
-    // TODO: Change sample size and count back to 100 after applying more pruning rules
-    #[divan::bench(args = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], sample_count = 10, sample_size = 1)]
+    #[divan::bench(args = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])]
     fn deice_integrated(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("instances/heathrow/toml/{}.toml", instance));
 
+        // TODO: Increase horizon size after adding more pruning rules
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(10),
+            horizon: NonZeroUsize::new(7),
             deice_strategy: DeiceStrategy::Integrated,
         };
 
