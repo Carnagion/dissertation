@@ -126,23 +126,31 @@
 
 #todo("Write short introduction to existing literature and past approaches")
 
-== Heuristic-Based Approaches
+== Approximate Methods
 
-#todo("Write about heuristic-based approaches used in the past")
+#todo("Write short introduction to approximate methods")
 
-== Linear Programming
+== Exact Methods
+
+#todo("Write short introduction to exact methods")
+
+=== Mathematical Programming
 
 #todo("Write about linear and mixed-integer programming approaches used in the past")
 
-== Dynamic Programming
+=== Dynamic Programming
 
 #todo("Write about dynamic programs used in the past")
 
-== Constrained Position Shifts
+== Paradigms
+
+#todo("Write short introduction to paradigms to improve tractability")
+
+=== Constrained Position Shifts
 
 #todo("Write about CPS")
 
-== Pruning Rules
+=== Pruning Rules
 
 #todo("Write about pruning rules")
 
@@ -232,7 +240,7 @@ $
 
 // TODO: Check if this should be in the constraints section instead
 // TODO: Explain this more succinctly, decide on notation, and add equations
-=== Stand Holding
+=== Runway Holding
 
 A departure $i$ would ideally start pushing back such that it exactly meets its de-ice time $d_i$ (if applicable) and take-off time $t_i$.
 This forces delays to be absorbed at the stand rather than at the runways, minimising fuel consumption.
@@ -240,14 +248,18 @@ This forces delays to be absorbed at the stand rather than at the runways, minim
 However, in some cases, pushing back earlier than necessary would enable an aircraft to de-ice earlier than necessary, freeing up the de-icing queue earlier than if it had pushed back to meet $t_i$ exactly.
 This would in turn enable the following departures to de-ice earlier, potentially reducing the total delay and CTOT violations in the sequence.
 
+== Model
+
+#todo("Include final mathematical model, objectives, and constraints")
+
 // TODO: Check if pruning rules such as complete orders and disjoint time windows should be mentioned here
 = Implementation
 
 #todo("Write short introduction to different approaches used")
 
-== Model
+== Mathematical Program
 
-#todo("Include final mathematical model, objectives, and constraints")
+#todo("Write about CPLEX model")
 
 == Branch-and-Bound Program
 
@@ -445,3 +457,15 @@ This is primarily due to the lack of CTOT slots as well as the presence of relat
 // NOTE: Title disabled since we want to use a custom title and passing in a heading as the title makes
 //       it too big and messes up the table of contents
 #bibliography("references.yml", title: none, style: "ieee")
+
+// TODO
+
+// sort by earliest de-icing time
+// then sort such that the ones with CTOTs jump in front of the others
+// in this second pass build up the deicing time
+// if you meet a CTOT airrcraft that when deiced in its current position would miss its CTOT then move it before
+// almost like a bubble sort
+
+// boxplot for runtimes
+
+// have separate subsections for de-icing strategies and CPLEX vs bnb
