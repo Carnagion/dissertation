@@ -31,8 +31,7 @@
 #show figure.where(kind: table): set par(justify: false)
 
 // TODO: Pick a good table style
-#set table(inset: 6.5pt, stroke: none)
-#set table.cell(align: center + horizon)
+#set table(align: center + horizon, inset: 6.5pt, stroke: none)
 #show table.cell.where(y: 0, rowspan: 1): strong
 #show table.cell: set text(size: 10pt)
 #set table.header(repeat: false)
@@ -156,7 +155,7 @@
 
 = Problem Description
 
-Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequencing problem for a single runway and de-icing pad consists of finding a sequence of landing and take-off times as well as a sequence of de-icing times such that an optimal value is achieved for a given objective function, subject to the satisfaction of all hard constraints.
+Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequencing problem for a single runway and single de-icing pad consists of finding a sequence of landing and take-off times as well as a sequence of de-icing times such that an optimal value is achieved for a given objective function, subject to the satisfaction of all hard constraints.
 
 == Constraints
 
@@ -193,22 +192,34 @@ In addition to a hard time window, a departure $i$ might be subject to a Calcula
 Typically, a CTOT has a tolerance of -5 to +10 minutes (i.e. five minutes before and ten minutes after $c_i$) and its time window can thus be defined by its earliest (start) time $u_i$ and latest (end) time $v_i$; however, this model makes no such assumptions and allows for customizable CTOT tolerances per departure.
 
 Much like a hard time window, a departure cannot take off before $u_i$, but it may be scheduled after $v_i$ -- although this is heavily penalized.
-This is discussed in detail in @ctot-compliance.
 The start time of a CTOT slot is thus modeled as a hard constraint, while its end time is modeled as a soft constraint.
 
 === Holdover Times
 
 Once a departure $i$ has been de-iced, the applied de-icing fluid will remain effective for a certain duration of time, called the Holdover Time (HOT) $h_i$.
 Departures must take off within this period of time -- if a departure's HOT expires before it takes off, it must be de-iced again, which could extend the de-icing queue and delay the take-off times of future aircraft.
-HOTs are thus modeled as hard constraints.
+
+The HOT of a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $d_i$ and take-off time $t_i$ must not be greater than $h_i$.
+
+// TODO: Check if this should be in the objectives section instead
+=== Runway Holding
+
+Delays are ideally absorbed by stand holding -- a departure $i$ would ideally wait at its gate and only push back only when absolutely necessary to meet its de-ice time $d_i$ (if applicable) and take-off time $t_i$, thus minimizing fuel consumption.
+
+However, in some cases it may be better to absorb delays at the runway instead by runway holding -- arriving at the run.
+A departure that pushes back earlier than absoltuely necessary would be able to de-ice earlier than necessary, freeing up the de-icing queue earlier.
+This could in turn enable the following departures to de-ice earlier and potentially reduce the total delay and CTOT violations in the sequence, at the cost of higher fuel consumption for certain aircraft from queueing up and waiting at the runway.
+
+The maximim runway holding duration for a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $d_i$ and take-off time $t_i$ must not be greater than the sum of its post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $r_i$.
+That is, $t_i - d_i <= n_i + q_i + r_i$.
 
 == Objectives
 
 The objective function $F(s)$ used for this problem is defined in @objective-function.
-It considers overall runway utilization (makespan), delay, CTOT compliance, and stand holding time, and is partially based on the function described by #cite(<demaere-pruning-rules>, form: "prose"). 
+It considers overall runway utilization (makespan), delay, CTOT compliance, and runway holding duration, and is partially based on the function described by #cite(<demaere-pruning-rules>, form: "prose"). 
 
 $
-F(s) = (max_(i in s) t_i, sum_(i in s) (B(i) + V(i) + G(i)))
+F(s) = (max_(i in s) t_i, sum_(i in s) (B(i) + V(i) + R(i)))
 $ <objective-function>
 
 === Runway Utilization
@@ -225,9 +236,10 @@ $
 B(i) = (t_i - b_i)^2
 $
 
-Squaring the delay penalizes disproportionately large delays more severely and encourages a more equitable distribution of delay across all aircraft.
+Raising the delay cost to a power greater than one penalizes disproportionately large delays more severely and encourages a more equitable distribution of delay across all aircraft @demaere-pruning-rules.
+For instance, two aircraft with delays of one and three minutes each would have a total delay cost of $1^2 + 3^2 = 10$, whereas the same two aircraft with delays of two minutes each would only have a total delay cost of $2^2 + 2^2 = 8$, making the latter more preferable.
 
-=== Calculated Take-Off Time Compliance <ctot-compliance>
+=== Calculated Take-Off Time Compliance
 
 The CTOT violation cost $V(i)$ for a departure $i$ is a piecewise non-linear function given by 0 if it takes off within its CTOT slot and the squared difference between its takeoff time $t_i$ and its CTOT slot end time $v_i$ if it misses its CTOT slot:
 
@@ -238,28 +250,65 @@ V(i) = cases(
 )
 $
 
-// TODO: Check if this should be in the constraints section instead
-// TODO: Explain this more succinctly, decide on notation, and add equations
 === Runway Holding
 
-A departure $i$ would ideally start pushing back such that it exactly meets its de-ice time $d_i$ (if applicable) and take-off time $t_i$.
-This forces delays to be absorbed at the stand rather than at the runways, minimising fuel consumption.
+The runway holding time for a departure $i$ is calculated as the difference between its latest possible de-ice time for its take-off time $t_i$ and its actual de-ice time $d_i$, the former of which is calculated as its take-off time $t_i$ minus the sum of its lineup duration $q_i$, post de-ice taxi duration $n_i$, and de-ice duration $z_i$.
+Its runway holding cost $R(i)$ is then calculated as the square of its runway holding time:
 
-However, in some cases, pushing back earlier than necessary would enable an aircraft to de-ice earlier than necessary, freeing up the de-icing queue earlier than if it had pushed back to meet $t_i$ exactly.
-This would in turn enable the following departures to de-ice earlier, potentially reducing the total delay and CTOT violations in the sequence.
+$
+R(i) = (t_i - q_i - n_i - z_i - d_i)^2
+$
+
+Much like with delay, raising the runway holding cost to a power greater than one encourages a more equitable distribution of runway holding durations across all aircraft.
 
 == Model
 
 #todo("Include final mathematical model, objectives, and constraints")
 
+// TODO: Check if notation should be provided at the start of the problem description section
+A summary of the notation used thus far is provided in @notation.
+
+// TODO: Complete notation table
+#let notation = table(
+    columns: 2,
+    stroke: (x, y) => (
+        top: if y == 1 { (dash: "solid", thickness: 0.5pt) },
+        left: if x == 1 { (dash: "solid", thickness: 0.5pt) },
+    ),
+    align: (x, y) => if x > 0 and y > 0 { left + horizon } else { center + horizon },
+    table.header[Symbol][Definition],
+    $A$, [Set of arrivals],
+    $D$, [Set of departures],
+    $p_i$, [Pushback duration for departure $i$],
+    $m_i$, [Duration to taxi from gates to de-icing pad for departure $i$],
+    $z_i$, [De-icing duration for departure $i$],
+    $n_i$, [Taxi-out duration for departure $i$],
+    $q_i$, [Lineup duration for departure $i$],
+    $h_i$, [Maximum holdover duration for departure $i$],
+    $u_i$, [Start of CTOT slot for departure $i$],
+    $v_i$, [End of CTOT slot for departure $i$],
+    $C_i$, [CTOT slot for departure $i$],
+    $e_i$, [Start of hard time window for aircraft $i$],
+    $l_i$, [End of hard time window for aircraft $i$],
+    $T_i$, [Hard time window for aircraft $i$],
+    $delta_(i j)$, [Minimum separation between aircraft $i$ and $j$, where $i$ precedes $j$],
+    $t_i$, [Landing or take-off time for aircraft $i$],
+    $d_i$, [De-ice time for departure $i$],
+    $F(i)$, [Objective value for aircraft $i$],
+    $B(i)$, [Delay cost for aircraft $i$],
+    $V(i)$, [CTOT violation cost for departure $i$],
+    $R(i)$, [Runway holding cost for departure $i$],
+)
+
+#figure(
+    notation,
+    caption: [Summary of notation and definitions],
+) <notation>
+
 // TODO: Check if pruning rules such as complete orders and disjoint time windows should be mentioned here
 = Implementation
 
 #todo("Write short introduction to different approaches used")
-
-== Mathematical Program
-
-#todo("Write about CPLEX model")
 
 == Branch-and-Bound Program
 
@@ -276,6 +325,10 @@ This would in turn enable the following departures to de-ice earlier, potentiall
 === Rolling Horizon Extension
 
 #todo("Include explanation and pseudocode for rolling horizon")
+
+== Mathematical Program
+
+#todo("Write about CPLEX model")
 
 // TODO: Check if this belongs here or is better off somewhere else
 == Sequence Visualizer
