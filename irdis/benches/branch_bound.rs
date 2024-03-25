@@ -83,18 +83,7 @@ mod furini {
             FURINI_INSTANCES,
             &branch_bound,
             "instances/furini/toml/",
-            "stats/branch-bound-tobt-furini.csv",
-        );
-
-        let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(12),
-            deice_strategy: DeiceStrategy::ByCtot,
-        };
-        save_stats(
-            FURINI_INSTANCES,
-            &branch_bound,
-            "instances/furini/toml/",
-            "stats/branch-bound-ctot-furini.csv",
+            "stats/branch-bound-decomposed-furini.csv",
         );
 
         let branch_bound = BranchBound {
