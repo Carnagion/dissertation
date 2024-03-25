@@ -12,6 +12,40 @@
 
 #set math.equation(numbering: "(1)")
 
+// NOTE: Spacing needs to be explicitly set to exactly this value for the hack below to work
+#show math.equation: set block(spacing: 0.65em)
+
+// NOTE: Hack for fine-grained equation numbering - see https://github.com/typst/typst/issues/380 and https://github.com/typst/typst/issues/380#issuecomment-1523884719
+#let multi-equation(equations) = {
+    let reduce(array, f) = array.slice(1).fold(array.first(), f)
+    let concat(array) = reduce(array, (acc, elem) => acc + elem)
+
+    if equations.has("children") {
+        let children = equations.children.filter(child => child != [ ])
+
+        let body-or-children(equation) = if equation.body.has("children") {
+            concat(equation.body.children)
+        } else {
+            equation.body
+        }
+
+        let hide-equation(equation) = if equation.has("numbering") and equation.numbering == none {
+            math.equation(block: true, numbering: none, hide(equation))
+        } else [
+            $ #hide(body-or-children(equation)) $ #if equation.has("label") { equation.label }
+        ]
+
+        let hidden = box(concat(children.map(hide-equation)))
+
+        let align-equations(acc, equation) = acc + if acc != [] { linebreak() } + equation
+        let aligned = math.equation(block: true, numbering: none, children.fold([], align-equations))
+
+        hidden
+        style(style => v(-measure(hidden, style).height, weak: true))
+        aligned
+    }
+}
+
 // NOTE: Workaround to get non-math text to use EB Garamond in math equations until Typst ships a native function for doing so
 #let mathtext = math.text.with(font: "EB Garamond", weight: "regular")
 
@@ -180,7 +214,7 @@ The required separations between each ordered pair of distinct aircraft can thus
 
 === Time Windows
 
-If an aircraft $i$ is subject to a hard time window $T_i$ which is defined by its earliest (start) time $e_i$ and latest (end) time $l_i$, then its landing (or take-off) time $t_i$ must be within this window.
+If an aircraft $i$ is subject to a hard time window which is defined by its earliest (start) time $e_i$ and latest (end) time $l_i$, then its landing (or take-off) time $t_i$ must be within this window.
 In other words, $e_i <= t_i <= l_i$.
 
 In this model, each aircraft is assumed to be subject to a hard time window, although this is not always the case in the real world.
@@ -188,7 +222,7 @@ However, this assumption can be made without loss of generality -- an aircraft $
 
 === Calculated Take-Off Times
 
-In addition to a hard time window, a departure $i$ might be subject to a Calculated Take-Off Time (CTOT) slot $C_i$, during which it should take off.
+In addition to a hard time window, a departure $i$ might be subject to a Calculated Take-Off Time (CTOT) slot, during which it should take off.
 Typically, a CTOT has a tolerance of -5 to +10 minutes (i.e. five minutes before and ten minutes after $c_i$) and its time window can thus be defined by its earliest (start) time $u_i$ and latest (end) time $v_i$; however, this model makes no such assumptions and allows for customizable CTOT tolerances per departure.
 
 Much like a hard time window, a departure cannot take off before $u_i$, but it may be scheduled after $v_i$ -- although this is heavily penalized.
@@ -199,18 +233,18 @@ The start time of a CTOT slot is thus modeled as a hard constraint, while its en
 Once a departure $i$ has been de-iced, the applied de-icing fluid will remain effective for a certain duration of time, called the Holdover Time (HOT) $h_i$.
 Departures must take off within this period of time -- if a departure's HOT expires before it takes off, it must be de-iced again, which could extend the de-icing queue and delay subsequent aircraft.
 
-The HOT of a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $d_i$ and take-off time $t_i$ must not be greater than $h_i$.
+The HOT of a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $z_i$ and take-off time $t_i$ must not be greater than $h_i$.
 
 // TODO: Check if this should be in the objectives section instead
 === Runway Holding
 
-Delays are ideally absorbed by stand holding -- a departure $i$ would ideally wait at its gate and only push back only when absolutely necessary to meet its de-ice time $d_i$ (if applicable) and take-off time $t_i$, thus minimizing fuel consumption.
+Delays are ideally absorbed by stand holding -- a departure $i$ would ideally wait at its gate and only push back only when absolutely necessary to meet its de-ice time $z_i$ (if applicable) and take-off time $t_i$, thus minimizing fuel consumption.
 
 However, in some cases it may be better to absorb delays at the runway instead by runway holding -- arriving at the run.
 A departure that pushes back earlier than absoltuely necessary would be able to de-ice earlier than necessary, freeing up the de-icing queue earlier.
 This could in turn enable the following departures to de-ice earlier and potentially reduce the total delay and CTOT violations in the sequence, at the cost of higher fuel consumption for certain aircraft from queueing up and waiting at the runway.
 
-The maximim runway holding duration for a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $d_i$ and take-off time $t_i$ must not be greater than the sum of its post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $r_i$.
+The maximim runway holding duration for a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $z_i$ and take-off time $t_i$ must not be greater than the sum of its post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $r_i$.
 That is, $t_i - d_i <= n_i + q_i + r_i$.
 
 == Objectives
@@ -252,11 +286,11 @@ $
 
 === Runway Holding
 
-The runway holding time for a departure $i$ is calculated as the difference between its latest possible de-ice time for its take-off time $t_i$ and its actual de-ice time $d_i$, the former of which is calculated as its take-off time $t_i$ minus the sum of its lineup duration $q_i$, post de-ice taxi duration $n_i$, and de-ice duration $z_i$.
+The runway holding time for a departure $i$ is calculated as the difference between its latest possible de-ice time for its take-off time $t_i$ and its actual de-ice time $z_i$, the former of which is calculated as its take-off time $t_i$ minus the sum of its lineup duration $q_i$, post de-ice taxi duration $n_i$, and de-ice duration $o_i$.
 Its runway holding cost $c_h (i)$ is then calculated as the square of its runway holding time:
 
 $
-c_h (i) = (t_i - q_i - n_i - z_i - d_i)^2
+c_h (i) = (t_i - q_i - n_i - o_i - z_i)^2
 $
 
 Much like with delay, raising the runway holding cost to a power greater than one encourages a more equitable distribution of runway holding durations across all aircraft.
@@ -265,31 +299,27 @@ Much like with delay, raising the runway holding cost to a power greater than on
 
 #todo("Include final mathematical model, objectives, and constraints")
 
-#let model = $
-"Minimise" space
-    &f(s) = (max_(i in s) t_i, sum_(i in s) c_d (i) + c_v (i) + c_h (i)) \
-
-"Subject to" space
-    &sum_(t in T_i) tau_(i t) = 1 &forall i in F \
-    &sum_(z in Z_i) zeta_(i z) = 1 &forall i in D \
-    &gamma_(i j) + gamma_(j i) = 1 &forall i in F, j in F, i != j \
-    &z_j >= z_i + o_i or z_i >= z_j + o_j &forall i in D, j in D, i != j \
-    &t_i >= z_i + o_i + n_i + q_i &forall i in D \
-    &t_i - z_i - o_i <= h_i &forall i in D \
-    &t_i - q_i - n_i - o_i - z_i <= r_i &forall i in D \
-    &tau_(i t) in { 0, 1 } &forall i in F \
-    &zeta_(i z) in { 0, 1 } &forall i in D \
-    &gamma_(i j) in { 0, 1 } &forall i in F, j in F, i != j \
-
-"Where" space
-    &c_d (i) = sum_(t in T_i) tau_(i t) dot (t - b_i)^2 &forall i in F \
-    &c_v (i) = sum_(t in T_i) tau_(i t) dot (t > v_i) dot (t - v_i)^2 &forall i in D \
-    &c_h (i) = sum_(t in T_i) sum_(z in Z_i) tau_(i t) dot zeta_(i z) dot (t - q_i - n_i - o_i - z)^2 &forall i in D \
-    &t_i = sum_(t in T_i) tau_(i t) dot t &forall i in F \
-    &z_i = sum_(z in Z_i) zeta_(i z) dot z &forall i in D \
-$
-
-#math.equation(block: true, numbering: none, model)
+#multi-equation[
+    $ "Minimise" space &f(s) = (max_(i in s) t_i, sum_(i in s) c_d (i) + c_v (i) + c_h (i)) $
+    $ &c_d (i) = sum_(t in T_i) tau_(i t) dot (t - b_i)^2 &forall i in F $
+    $ &c_v (i) = sum_(t in T_i) tau_(i t) dot (t > v_i) dot (t - v_i)^2 &forall i in D $
+    $ &c_h (i) = sum_(t in T_i) sum_(z in Z_i) tau_(i t) dot zeta_(i z) dot (t - q_i - n_i - o_i - z)^2 &forall i in D $
+    $ &t_i = sum_(t in T_i) tau_(i t) dot t &forall i in F $
+    $ &z_i = sum_(z in Z_i) zeta_(i z) dot z &forall i in D $
+    $ "Subject to" space &sum_(t in T_i) tau_(i t) = 1 &forall i in F $
+    $ &sum_(z in Z_i) zeta_(i z) = 1 &forall i in D $
+    $ &gamma_(i j) + gamma_(j i) = 1 &forall i in F, j in F, i != j $
+    $ &z_j >= z_i + o_i or z_i >= z_j + o_j &forall i in D, j in D, i != j $
+    $ &t_i >= z_i + o_i + n_i + q_i &forall i in D $
+    $ &t_i - z_i - o_i <= h_i &forall i in D $
+    $ &t_i - q_i - n_i - o_i - z_i <= r_i &forall i in D $
+    $ &tau_(i t) in { 0, 1 } &forall i in F $
+    $ &zeta_(i z) in { 0, 1 } &forall i in D $
+    $ &gamma_(i j) in { 0, 1 } &forall i in F, j in F, i != j $
+    $ &gamma_(i j) = 1 &forall (i, j) in F_S union F_D union F_C $
+    $ &t_j >= t_i + delta_(i j) &forall (i, j) in F_D union F_C $
+    $ &t_j >= t_i + delta_(i j) dot gamma_(i j) - (l_i - e_j) dot gamma_(j i) &forall (i, j) in F_O $
+]
 
 // TODO: Check if notation should be provided at the start of the problem description section
 A summary of the notation used thus far is provided in @notation.
@@ -318,8 +348,11 @@ A summary of the notation used thus far is provided in @notation.
     $l_i$, [End of hard time window for aircraft $i$],
     $delta_(i j)$, [Minimum separation between aircraft $i$ and $j$, where $i$ precedes $j$],
     $T_i$, [Set of possible landing or take-off times for aircraft $i$],
-    $t_i$, [Scheduled landing or take-off time for aircraft $i$],
     $Z_i$, [Set of possible de-icing times for departure $i$],
+    $tau_(i t)$, [Boolean decision variable indicating if an aircraft $i$ is scheduled to land or take off at time $t$],
+    $zeta_(i z)$, [Boolean decision variable indicating if a departure $i$ is scheduled to de-ice at time $z$],
+    $gamma_(i j)$, [Boolean decision variable indicating whether an aircraft $i$ lands or takes off before an aircraft $j$],
+    $t_i$, [Scheduled landing or take-off time for aircraft $i$],
     $z_i$, [Scheduled de-ice time for departure $i$],
     $f(s)$, [Objective value for partial or final sequence $s$],
     $c_d (i)$, [Delay cost for aircraft $i$],
