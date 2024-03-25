@@ -1,5 +1,7 @@
 use std::{fs, num::NonZeroUsize, path::Path};
 
+use csv::Writer;
+
 use divan::Bencher;
 
 use irdis::{
@@ -12,6 +14,9 @@ use irdis::{
 
 fn main() {
     divan::main();
+
+    furini::record_all();
+    heathrow::record_all();
 }
 
 fn load_instance(path: impl AsRef<Path>) -> Instance {
@@ -20,30 +25,13 @@ fn load_instance(path: impl AsRef<Path>) -> Instance {
     instance
 }
 
-// TODO: Save these stats in a file somewhere
-fn save_stats(solution: &[Schedule], instance: &Instance) {
-    let start = solution.iter().map(|sched| sched.flight_time()).min();
-    let end = solution.iter().map(|sched| sched.flight_time()).max();
-
-    let deice_start = solution
-        .iter()
-        .filter_map(Schedule::as_departure)
-        .map(|sched| sched.deice)
-        .min();
-    let deice_end = solution
-        .iter()
-        .filter_map(Schedule::as_departure)
-        .map(|sched| sched.deice)
-        .max();
-
-    let cost = branch_bound::solution_cost(&solution, &instance);
-}
-
 mod furini {
     use super::*;
 
+    const FURINI_INSTANCES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
     // NOTE: De-icing by TOBT fails on instances FPT06 and FPT07
-    #[divan::bench(args = [1, 2, 3, 4, 5, 8, 9, 10, 11, 12])]
+    #[divan::bench(args = FURINI_INSTANCES)]
     fn deice_by_tobt(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("instances/furini/toml/{}.toml", instance));
 
@@ -52,20 +40,13 @@ mod furini {
             deice_strategy: DeiceStrategy::ByTobt,
         };
 
-        let mut solutions = Vec::with_capacity(12);
-
         bencher.bench_local(|| {
-            let solution = branch_bound.solve(&instance).unwrap();
-            solutions.push(solution);
+            branch_bound.solve(&instance);
         });
-
-        for solution in solutions {
-            save_stats(&solution, &instance);
-        }
     }
 
     // NOTE: De-icing by CTOT fails on instances FPT06 and FPT07
-    #[divan::bench(args = [1, 2, 3, 4, 5, 8, 9, 10, 11, 12])]
+    #[divan::bench(args = FURINI_INSTANCES)]
     fn deice_by_ctot(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("instances/furini/toml/{}.toml", instance));
 
@@ -74,19 +55,12 @@ mod furini {
             deice_strategy: DeiceStrategy::ByCtot,
         };
 
-        let mut solutions = Vec::with_capacity(12);
-
         bencher.bench_local(|| {
-            let solution = branch_bound.solve(&instance).unwrap();
-            solutions.push(solution);
+            branch_bound.solve(&instance);
         });
-
-        for solution in solutions {
-            save_stats(&solution, &instance);
-        }
     }
 
-    #[divan::bench(args = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])]
+    #[divan::bench(args = FURINI_INSTANCES)]
     fn deice_integrated(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("instances/furini/toml/{}.toml", instance));
 
@@ -95,23 +69,53 @@ mod furini {
             deice_strategy: DeiceStrategy::Integrated,
         };
 
-        let mut solutions = Vec::with_capacity(12);
-
         bencher.bench_local(|| {
-            let solution = branch_bound.solve(&instance).unwrap();
-            solutions.push(solution);
+            branch_bound.solve(&instance);
         });
+    }
 
-        for solution in solutions {
-            save_stats(&solution, &instance);
-        }
+    pub fn record_all() {
+        let branch_bound = BranchBound {
+            horizon: NonZeroUsize::new(12),
+            deice_strategy: DeiceStrategy::ByTobt,
+        };
+        save_stats(
+            FURINI_INSTANCES,
+            &branch_bound,
+            "instances/furini/toml/",
+            "stats/branch-bound-tobt-furini.csv",
+        );
+
+        let branch_bound = BranchBound {
+            horizon: NonZeroUsize::new(12),
+            deice_strategy: DeiceStrategy::ByCtot,
+        };
+        save_stats(
+            FURINI_INSTANCES,
+            &branch_bound,
+            "instances/furini/toml/",
+            "stats/branch-bound-ctot-furini.csv",
+        );
+
+        let branch_bound = BranchBound {
+            horizon: NonZeroUsize::new(12),
+            deice_strategy: DeiceStrategy::Integrated,
+        };
+        save_stats(
+            FURINI_INSTANCES,
+            &branch_bound,
+            "instances/furini/toml/",
+            "stats/branch-bound-integrated-furini.csv",
+        );
     }
 }
 
 mod heathrow {
     use super::*;
 
-    #[divan::bench(args = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])]
+    const HEATHROW_INSTANCES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    #[divan::bench(args = HEATHROW_INSTANCES)]
     fn deice_by_tobt(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("instances/heathrow/toml/{}.toml", instance));
 
@@ -120,19 +124,12 @@ mod heathrow {
             deice_strategy: DeiceStrategy::ByTobt,
         };
 
-        let mut solutions = Vec::with_capacity(10);
-
         bencher.bench_local(|| {
-            let solution = branch_bound.solve(&instance).unwrap();
-            solutions.push(solution);
+            branch_bound.solve(&instance);
         });
-
-        for solution in solutions {
-            save_stats(&solution, &instance);
-        }
     }
 
-    #[divan::bench(args = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])]
+    #[divan::bench(args = HEATHROW_INSTANCES)]
     fn deice_by_ctot(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("instances/heathrow/toml/{}.toml", instance));
 
@@ -141,19 +138,12 @@ mod heathrow {
             deice_strategy: DeiceStrategy::ByCtot,
         };
 
-        let mut solutions = Vec::with_capacity(10);
-
         bencher.bench_local(|| {
-            let solution = branch_bound.solve(&instance).unwrap();
-            solutions.push(solution);
+            branch_bound.solve(&instance);
         });
-
-        for solution in solutions {
-            save_stats(&solution, &instance);
-        }
     }
 
-    #[divan::bench(args = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])]
+    #[divan::bench(args = HEATHROW_INSTANCES)]
     fn deice_integrated(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("instances/heathrow/toml/{}.toml", instance));
 
@@ -163,15 +153,119 @@ mod heathrow {
             deice_strategy: DeiceStrategy::Integrated,
         };
 
-        let mut solutions = Vec::with_capacity(10);
-
         bencher.bench_local(|| {
-            let solution = branch_bound.solve(&instance).unwrap();
-            solutions.push(solution);
+            branch_bound.solve(&instance);
         });
-
-        for solution in solutions {
-            save_stats(&solution, &instance);
-        }
     }
+
+    pub fn record_all() {
+        let branch_bound = BranchBound {
+            horizon: NonZeroUsize::new(10),
+            deice_strategy: DeiceStrategy::ByTobt,
+        };
+        save_stats(
+            HEATHROW_INSTANCES,
+            &branch_bound,
+            "instances/heathrow/toml/",
+            "stats/branch-bound-tobt-heathrow-small.csv",
+        );
+
+        let branch_bound = BranchBound {
+            horizon: NonZeroUsize::new(10),
+            deice_strategy: DeiceStrategy::ByCtot,
+        };
+        save_stats(
+            HEATHROW_INSTANCES,
+            &branch_bound,
+            "instances/heathrow/toml/",
+            "stats/branch-bound-ctot-heathrow-small.csv",
+        );
+
+        // TODO: Increase horizon size after adding more pruning rules
+        let branch_bound = BranchBound {
+            horizon: NonZeroUsize::new(7),
+            deice_strategy: DeiceStrategy::Integrated,
+        };
+        save_stats(
+            HEATHROW_INSTANCES,
+            &branch_bound,
+            "instances/heathrow/toml/",
+            "stats/branch-bound-integrated-heathrow-small.csv",
+        );
+    }
+}
+
+fn save_stats(
+    instances: &[usize],
+    branch_bound: &BranchBound,
+    input: impl AsRef<Path>,
+    output: impl AsRef<Path>,
+) {
+    let mut csv = Writer::from_path(output).unwrap();
+
+    csv.write_record([
+        "Instance",
+        "Start",
+        "End",
+        "De-ice start",
+        "De-ice end",
+        "Obj. value",
+    ])
+    .unwrap();
+
+    for id in instances {
+        let instance = load_instance(input.as_ref().join(format!("{}.toml", id)));
+
+        let solution = branch_bound.solve(&instance);
+        let Some(solution) = solution else {
+            csv.write_record([
+                id.to_string(),
+                "".to_owned(),
+                "".to_owned(),
+                "".to_owned(),
+                "".to_owned(),
+                "".to_owned(),
+            ])
+            .unwrap();
+            continue;
+        };
+
+        let start = solution
+            .iter()
+            .map(|sched| sched.flight_time())
+            .min()
+            .unwrap();
+        let end = solution
+            .iter()
+            .map(|sched| sched.flight_time())
+            .max()
+            .unwrap();
+
+        let deice_start = solution
+            .iter()
+            .filter_map(Schedule::as_departure)
+            .map(|sched| sched.deice)
+            .min()
+            .unwrap();
+        let deice_end = solution
+            .iter()
+            .filter_map(Schedule::as_departure)
+            .map(|sched| sched.deice)
+            .max()
+            .unwrap();
+
+        let cost = branch_bound::solution_cost(&solution, &instance);
+
+        csv.write_record([
+            id.to_string(),
+            start.format("%H:%M").to_string(),
+            end.format("%H:%M").to_string(),
+            deice_start.format("%H:%M").to_string(),
+            deice_end.format("%H:%M").to_string(),
+            cost.to_string(),
+        ])
+        .unwrap();
+    }
+
+    csv.flush().unwrap();
 }
