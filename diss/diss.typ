@@ -297,7 +297,7 @@ Much like with delay, raising the runway holding cost to a power greater than on
 
 == Model
 
-#todo("Include final mathematical model, objectives, and constraints")
+#todo("Write introduction to model")
 
 #multi-equation[
     $ "Minimise" space &f(s) = (max_(i in s) t_i, sum_(i in s) c_d (i) + c_v (i) + c_h (i)) $
@@ -320,6 +320,8 @@ Much like with delay, raising the runway holding cost to a power greater than on
     $ &t_j >= t_i + delta_(i j) &forall (i, j) in F_D union F_C $
     $ &t_j >= t_i + delta_(i j) dot gamma_(i j) - (l_i - e_j) dot gamma_(j i) &forall (i, j) in F_O $
 ]
+
+#todo("Write explanation and overview of model")
 
 // TODO: Check if notation should be provided at the start of the problem description section
 A summary of the notation used thus far is provided in @notation.
@@ -358,6 +360,10 @@ A summary of the notation used thus far is provided in @notation.
     $c_d (i)$, [Delay cost for aircraft $i$],
     $c_v (i)$, [CTOT violation cost for departure $i$],
     $c_h (i)$, [Runway holding cost for departure $i$],
+    $F_S$, [Set of pairs of distinct aircraft $(i, j)$ with disjoint hard time windows such that $e_j >= l_i + delta_(i j)$],
+    $F_D$, [Set of pairs of distinct aircraft $(i, j)$ with disjoint hard time windows such that $e_j < l_i + delta_(i j)$],
+    $F_O$, [Set of pairs of distinct aircraft $(i, j)$ with overlapping hard time windows],
+    $F_C$, [Set of pairs of distinct separation-identical aircraft $(i, j)$ with a complete order such that $i$ lands or takes off before $j$],
 )
 
 #figure(
