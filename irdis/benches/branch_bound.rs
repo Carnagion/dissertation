@@ -25,10 +25,13 @@ fn load_instance(path: impl AsRef<Path>) -> Instance {
     instance
 }
 
+#[divan::bench_group(sample_count = 1, sample_size = 1)]
 mod furini {
     use super::*;
 
     const FURINI_INSTANCES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+    const HORIZON: Option<NonZeroUsize> = NonZeroUsize::new(10);
 
     // NOTE: De-icing by TOBT fails on instances FPT06 and FPT07
     #[divan::bench(args = FURINI_INSTANCES)]
@@ -36,7 +39,7 @@ mod furini {
         let instance = load_instance(format!("instances/furini/toml/{}.toml", instance));
 
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(12),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::ByTobt,
         };
 
@@ -51,7 +54,7 @@ mod furini {
         let instance = load_instance(format!("instances/furini/toml/{}.toml", instance));
 
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(12),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::ByCtot,
         };
 
@@ -65,7 +68,7 @@ mod furini {
         let instance = load_instance(format!("instances/furini/toml/{}.toml", instance));
 
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(12),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::Integrated,
         };
 
@@ -76,7 +79,7 @@ mod furini {
 
     pub fn record_all() {
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(12),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::ByTobt,
         };
         save_stats(
@@ -87,7 +90,7 @@ mod furini {
         );
 
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(12),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::Integrated,
         };
         save_stats(
@@ -104,12 +107,15 @@ mod heathrow {
 
     const HEATHROW_INSTANCES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
+    // TODO: Increase horizon size after adding more pruning rules
+    const HORIZON: Option<NonZeroUsize> = NonZeroUsize::new(7);
+
     #[divan::bench(args = HEATHROW_INSTANCES)]
     fn deice_by_tobt(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("instances/heathrow/toml/{}.toml", instance));
 
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(10),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::ByTobt,
         };
 
@@ -123,7 +129,7 @@ mod heathrow {
         let instance = load_instance(format!("instances/heathrow/toml/{}.toml", instance));
 
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(10),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::ByCtot,
         };
 
@@ -136,9 +142,8 @@ mod heathrow {
     fn deice_integrated(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("instances/heathrow/toml/{}.toml", instance));
 
-        // TODO: Increase horizon size after adding more pruning rules
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(7),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::Integrated,
         };
 
@@ -149,7 +154,7 @@ mod heathrow {
 
     pub fn record_all() {
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(10),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::ByTobt,
         };
         save_stats(
@@ -160,7 +165,7 @@ mod heathrow {
         );
 
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(10),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::ByCtot,
         };
         save_stats(
@@ -170,9 +175,8 @@ mod heathrow {
             "stats/branch-bound-ctot-heathrow-small.csv",
         );
 
-        // TODO: Increase horizon size after adding more pruning rules
         let branch_bound = BranchBound {
-            horizon: NonZeroUsize::new(7),
+            horizon: HORIZON,
             deice_strategy: DeiceStrategy::Integrated,
         };
         save_stats(
