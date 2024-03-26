@@ -96,6 +96,21 @@ struct BranchBoundState {
     best_solution: Vec<PartialNode>,
 }
 
+fn init_state(instance: &Instance) -> BranchBoundState {
+    let complete_order_sets = crate::complete_orders::separation_identical_sets(instance);
+    let next_in_complete_order_sets = vec![0; complete_order_sets.len()];
+
+    let current_solution = Vec::with_capacity(instance.flights().len());
+    let best_solution = current_solution.clone();
+
+    BranchBoundState {
+        complete_order_sets,
+        next_in_complete_order_sets,
+        current_solution,
+        best_solution,
+    }
+}
+
 fn branch_and_bound<E, I>(
     instance: &Instance,
     horizon: Option<NonZeroUsize>,
@@ -105,13 +120,9 @@ where
     E: FnMut(&Flight, usize, &Instance, &BranchBoundState) -> I,
     I: IntoIterator<Item = Schedule>,
 {
-    let complete_order_sets = crate::complete_orders::separation_identical_sets(instance);
-    let next_in_complete_order_sets = vec![0; complete_order_sets.len()];
-
     let flight_count = instance.flights().len();
 
-    let current_solution = Vec::with_capacity(flight_count);
-    let best_solution = current_solution.clone();
+    let mut state = init_state(instance);
 
     let end = horizon
         .map(usize::from)
@@ -119,13 +130,6 @@ where
         .min(flight_count);
 
     let mut nodes = Vec::with_capacity(flight_count);
-
-    let mut state = BranchBoundState {
-        complete_order_sets,
-        next_in_complete_order_sets,
-        current_solution,
-        best_solution,
-    };
 
     branch_and_bound_with(instance, &mut state, &mut nodes, &mut expand, 0..end);
 
@@ -146,10 +150,12 @@ where
         branch_and_bound_with(instance, &mut state, &mut nodes, &mut expand, window);
     }
 
+    let last_best_solution = (!state.best_solution.is_empty()).then_some(state.best_solution)?;
+
     let solution = state
         .current_solution
         .into_iter()
-        .chain(state.best_solution)
+        .chain(last_best_solution)
         .map(|node| node.sched)
         .collect();
     Some(solution)
