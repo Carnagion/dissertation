@@ -61,25 +61,22 @@ fn expand_departure(
     state: &BranchBoundState,
     deice_queue: &HashMap<usize, NaiveTime>,
 ) -> impl Iterator<Item = DepartureSchedule> {
-    let prev_sched = state.current_solution.last().map(|node| &node.sched);
+    let deice = deice_queue[&dep_idx];
 
-    let (deice, takeoff) = match prev_sched {
+    let prev_sched = state.current_solution.last().map(|node| &node.sched);
+    let takeoff = match prev_sched {
         None => {
-            let deice = deice_queue[&dep_idx];
             let takeoff =
                 (deice + dep.deice_dur + dep.taxi_out_dur + dep.lineup_dur).max(dep.release_time());
-
-            (deice, takeoff)
+            takeoff
         },
         Some(prev_sched) => {
             let sep = instance.separations()[(prev_sched.flight_index(), dep_idx)];
 
-            let deice = deice_queue[&dep_idx];
             let takeoff = (deice + dep.deice_dur + dep.taxi_out_dur + dep.lineup_dur)
                 .max(dep.release_time())
                 .max(prev_sched.flight_time() + sep);
-
-            (deice, takeoff)
+            takeoff
         },
     };
 
