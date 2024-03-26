@@ -173,7 +173,7 @@ fn branch_and_bound_with<E, I>(
 {
     let mut cost = Cost::default();
 
-    nodes.extend(branches(instance, state, expand, window.start));
+    nodes.extend(branches(instance, state, expand));
 
     while let Some(node) = nodes.pop() {
         let depth = node.depth;
@@ -197,7 +197,7 @@ fn branch_and_bound_with<E, I>(
             continue;
         }
 
-        nodes.extend(branches(instance, state, expand, depth + 1));
+        nodes.extend(branches(instance, state, expand));
     }
 
     state.current_solution.drain(window.start..);
@@ -207,7 +207,6 @@ fn branches<'a, E, I>(
     instance: &'a Instance,
     state: &'a BranchBoundState,
     expand: &'a mut E,
-    depth: usize,
 ) -> impl Iterator<Item = PartialNode> + 'a
 where
     E: FnMut(&Flight, usize, &Instance, &BranchBoundState) -> I,
@@ -282,7 +281,7 @@ where
 
                     PartialNode {
                         sched,
-                        depth,
+                        depth: state.current_solution.len(),
                         complete_order_idx,
                         cost,
                     }
