@@ -13,6 +13,11 @@ use irdis_instance::{
 
 const MINUTE: Duration = Duration::from_secs(60);
 
+const MAX_TIME: NaiveTime = match NaiveTime::from_hms_opt(23, 59, 59) {
+    Some(time) => time,
+    None => panic!(),
+};
+
 pub fn from_furini(flights: &str, separations: &str) -> Result<Instance, FromFuriniError> {
     from_furini_with_limit(flights, separations, usize::MAX)
 }
@@ -90,14 +95,14 @@ fn parse_flight(line: &str) -> Result<Flight, FromFuriniError> {
             eto: base_time,
             window: TimeWindow {
                 earliest: base_time,
-                latest: base_time + MINUTE * 10,
+                latest: MAX_TIME,
             },
         })),
         "D" => Ok(Flight::Dep(Departure {
             tobt: base_time - MINUTE * 25,
             window: TimeWindow {
                 earliest: base_time,
-                latest: base_time + MINUTE * 15,
+                latest: MAX_TIME,
             },
             ctot: None,
             pushback_dur: MINUTE * 5,
