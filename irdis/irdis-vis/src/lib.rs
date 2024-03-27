@@ -104,7 +104,7 @@ impl Visualiser {
             let x = width(arr.base_time(), starting_time) * SCALE_X;
             let y = row * SCALE_Y;
 
-            let title = title!("Release time at {}", arr.release_time().format(HM),);
+            let title = title!("Base time at {}", arr.base_time().format(HM),);
 
             let bar = dashed_line(x, y, SCALE_Y);
             let square = rect(x - 2, y + 8, 4, 4).set("style", HOLLOW_BLACK);
@@ -130,7 +130,7 @@ impl Visualiser {
             let x = width(arr.base_time(), starting_time) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
 
-            let width = width(sched.landing, arr.release_time()) * SCALE_X;
+            let width = width(sched.landing, arr.base_time()) * SCALE_X;
 
             let title = title!("{}-minute delay", width / SCALE_X);
 
@@ -176,7 +176,7 @@ impl Visualiser {
             let x = width(dep.base_time(), starting_time) * SCALE_X;
             let y = row * SCALE_Y;
 
-            let title = title!("Release time at {}", dep.release_time().format(HM),);
+            let title = title!("Base time at {}", dep.base_time().format(HM),);
 
             let bar = dashed_line(x, y, SCALE_Y);
             let square = rect(x - 2, y + 8, 4, 4).set("style", HOLLOW_BLACK);
@@ -203,7 +203,7 @@ impl Visualiser {
             let x = width(dep.base_time(), starting_time) * SCALE_X;
             let y = (row * SCALE_Y) + 5;
 
-            let width = width(sched.takeoff, dep.release_time()) * SCALE_X;
+            let width = width(sched.takeoff, dep.base_time()) * SCALE_X;
 
             let title = title!("{}-minute delay", width / SCALE_X);
 
@@ -341,7 +341,7 @@ fn ending_time(schedule: &[Schedule], instance: &Instance) -> Option<NaiveTime> 
                 let dep = instance.flights()[sched.flight_idx].as_departure().unwrap();
                 let mut latest = dep.window.latest.max(sched.takeoff);
                 if let Some(ctot) = &dep.ctot {
-                    latest = latest.min(ctot.latest());
+                    latest = latest.max(ctot.latest());
                 }
                 latest
             },
