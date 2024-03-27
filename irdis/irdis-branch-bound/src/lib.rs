@@ -212,11 +212,15 @@ where
     E: FnMut(&Flight, usize, &Instance, &BranchBoundState) -> I,
     I: IntoIterator<Item = Schedule> + 'a,
 {
-    let prev_sched_earliest = state.current_solution.last().map(|node| {
-        let flight_idx = node.sched.flight_index();
-        let flight = &instance.flights()[flight_idx];
-        flight.time_window().earliest
-    });
+    let latest_start = state
+        .current_solution
+        .iter()
+        .map(|node| {
+            let flight_idx = node.sched.flight_index();
+            let flight = &instance.flights()[flight_idx];
+            flight.time_window().earliest
+        })
+        .max();
 
     // NOTE: Prunes nodes according to complete orders induced by disjoint time windows.
     //
@@ -235,11 +239,9 @@ where
             let flight_idx = complete_order_set.get(next_in_set_idx).copied()?;
             let flight = &instance.flights()[flight_idx];
 
-            match prev_sched_earliest {
+            match latest_start {
                 None => Some((flight, flight_idx, set_idx)),
-                Some(prev_sched_earliest) if flight.time_window().latest <= prev_sched_earliest => {
-                    None
-                },
+                Some(latest_start) if flight.time_window().latest <= latest_start => None,
                 Some(_) => Some((flight, flight_idx, set_idx)),
             }
         })
