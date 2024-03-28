@@ -292,9 +292,9 @@ Departures must take off within this period of time -- if a departure's HOT expi
 
 The HOT of a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $z_i$ and take-off time $t_i$ must not be greater than $h_i$.
 
-// TODO: Write a better explanation for this section
 === Runway Hold Times
 
+// TODO: Write a better explanation for this section
 Delays are ideally absorbed by stand holding -- a departure $i$ only needs to push back only when absolutely necessary to meet its de-ice time $z_i$ (if applicable) and take-off time $t_i$.
 
 However, in some cases it may be better to absorb delays at the runway instead by runway holding -- i.e. arriving and waiting at the runway before a departure's scheduled take-off time.
@@ -317,22 +317,21 @@ Although not directly modeled as an objective, it is utilized for the evaluation
 
 === Delay
 
+// TODO: Maybe word this better
 The delay for an aircraft $i$ is defined as the difference between its landing or take-off time $t_i$ and its base time $b_i$.
-Its delay cost $c_d (i)$ is then calculated as the delay squared:
+Its delay cost $c_d (i)$, defined in @delay-cost, is then calculated as the delay squared, and is equivalent to the following function:
 
 $
 c_d (i) = (t_i - b_i)^2
 $
-
-// TODO: Word this better
-An equivalent formulation used in the model is provided in @delay-cost.
 
 Raising the delay cost to a power greater than one penalizes disproportionately large delays more severely and encourages a more equitable distribution of delay across all aircraft @demaere-pruning-rules.
 For instance, two aircraft with delays of one and three minutes each would have a total delay cost of $1^2 + 3^2 = 10$, whereas the same two aircraft with delays of two minutes each would have a total delay cost of only $2^2 + 2^2 = 8$, making the latter more preferable.
 
 === Calculated Take-Off Time Compliance
 
-The CTOT violation cost $c_v (i)$ for a departure $i$ is a piecewise non-linear function given by 0 if it takes off within its CTOT slot and the squared difference between its takeoff time $t_i$ and its CTOT slot end time $v_i$ if it misses its CTOT slot:
+// TODO: Maybe word this better
+The CTOT violation cost $c_v (i)$ for a departure $i$ is defined in @ctot-violation-cost, and is equivalent to the following piecewise non-linear function given by 0 if it takes off within its CTOT slot and the squared difference between its takeoff time $t_i$ and its CTOT slot end time $v_i$ if it misses its CTOT slot:
 
 $
 c_v (i) = cases(
@@ -340,9 +339,6 @@ c_v (i) = cases(
     &(t_i - v_i)^2 &"if" &t_i > v_i,
 )
 $
-
-// TODO: Word this better
-An equivalent formulation used in the model is defined in @ctot-violation-cost.
 
 == Model
 
