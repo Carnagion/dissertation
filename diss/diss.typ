@@ -163,6 +163,10 @@
 
 #todo("Write short introduction to approximate methods")
 
+=== Heuristics
+
+#todo("Write about heuristic-based approaches")
+
 == Exact Methods
 
 #todo("Write short introduction to exact methods")
@@ -187,9 +191,62 @@
 
 #todo("Write about pruning rules")
 
+=== Rolling Horizons
+
+#todo("Write about rolling horizon approaches")
+
 = Problem Description
 
 Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequencing problem for a single runway and single de-icing pad consists of finding a sequence of landing and take-off times as well as a sequence of de-icing times such that an optimal value is achieved for a given objective function, subject to the satisfaction of all hard constraints.
+
+== Notation
+
+@notation provides an overview of the symbols used in the following sections and their definitions.
+
+// TODO: Complete notation table
+#let notation = table(
+    columns: 2,
+    stroke: (x, y) => (
+        top: if y == 1 { (dash: "solid", thickness: 0.5pt) },
+        left: if x == 1 { (dash: "solid", thickness: 0.5pt) },
+    ),
+    align: (x, y) => if x > 0 and y > 0 { left + horizon } else { center + horizon },
+    table.header[Symbol][Definition],
+    $A$, [Set of arrivals],
+    $D$, [Set of departures],
+    $F$, [Set of aircraft, defined as $A union D$],
+    $b_i$, [Base landing or take-off time for aircraft $i$],
+    $p_i$, [Pushback duration for departure $i$],
+    $m_i$, [Duration to taxi from gates to de-icing pad for departure $i$],
+    $o_i$, [De-icing duration for departure $i$],
+    $n_i$, [Taxi-out duration for departure $i$],
+    $q_i$, [Lineup duration for departure $i$],
+    $h_i$, [Maximum holdover duration for departure $i$],
+    $u_i$, [Start of CTOT slot for departure $i$],
+    $v_i$, [End of CTOT slot for departure $i$],
+    $e_i$, [Start of hard time window for aircraft $i$],
+    $l_i$, [End of hard time window for aircraft $i$],
+    $delta_(i j)$, [Minimum separation between aircraft $i$ and $j$, where $i$ precedes $j$],
+    $T_i$, [Set of possible landing or take-off times for aircraft $i$],
+    $Z_i$, [Set of possible de-icing times for departure $i$],
+    $tau_(i t)$, [Boolean decision variable indicating if an aircraft $i$ is scheduled to land or take off at time $t$],
+    $zeta_(i z)$, [Boolean decision variable indicating if a departure $i$ is scheduled to de-ice at time $z$],
+    $gamma_(i j)$, [Boolean decision variable indicating whether an aircraft $i$ lands or takes off before an aircraft $j$],
+    $t_i$, [Scheduled landing or take-off time for aircraft $i$],
+    $z_i$, [Scheduled de-ice time for departure $i$],
+    $f(s)$, [Objective value for partial or final sequence $s$],
+    $c_d (i)$, [Delay cost for aircraft $i$],
+    $c_v (i)$, [CTOT violation cost for departure $i$],
+    $F_S$, [Set of pairs of distinct aircraft $(i, j)$ with disjoint hard time windows such that $e_j >= l_i + delta_(i j)$],
+    $F_D$, [Set of pairs of distinct aircraft $(i, j)$ with disjoint hard time windows such that $e_j < l_i + delta_(i j)$],
+    $F_O$, [Set of pairs of distinct aircraft $(i, j)$ with overlapping hard time windows],
+    $F_C$, [Set of pairs of distinct separation-identical aircraft $(i, j)$ with a complete order such that $i$ lands or takes off before $j$],
+)
+
+#figure(
+    notation,
+    caption: [Summary of notation and definitions used in model],
+) <notation>
 
 == Constraints
 
@@ -208,7 +265,7 @@ Similarly, a larger separation may be required when a slow aircraft is followed 
 Separations for SID routes are also influenced by the climb and relative bearing of the route, as well as congestion in downstream airspace sectors.
 The latter factor may require an increased separation upon take-off to space out traffic and prevent the overloading of en-route sectors and controllers @demaere-pruning-rules.
 
-// TODO: Check if successive vs complete separations from Beasley's and Geert's papers should be mentioned
+// TODO: Check if successive vs complete separations and the triangle inequality should be mentioned
 The minimum separation that must be maintained between two aircraft is thus the maximum of the separations due to their weight classes, speed groups, and SID routes.
 The required separations between each ordered pair of distinct aircraft can thus be expressed as a separation matrix @demaere-pruning-rules.
 
@@ -235,31 +292,28 @@ Departures must take off within this period of time -- if a departure's HOT expi
 
 The HOT of a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $z_i$ and take-off time $t_i$ must not be greater than $h_i$.
 
-// TODO: Check if this should be in the objectives section instead
-=== Runway Holding
+// TODO: Write a better explanation for this section
+=== Runway Hold Times
 
-Delays are ideally absorbed by stand holding -- a departure $i$ would ideally wait at its gate and only push back only when absolutely necessary to meet its de-ice time $z_i$ (if applicable) and take-off time $t_i$, thus minimizing fuel consumption.
+Delays are ideally absorbed by stand holding -- a departure $i$ only needs to push back only when absolutely necessary to meet its de-ice time $z_i$ (if applicable) and take-off time $t_i$.
 
-However, in some cases it may be better to absorb delays at the runway instead by runway holding -- arriving at the run.
+However, in some cases it may be better to absorb delays at the runway instead by runway holding -- i.e. arriving and waiting at the runway before a departure's scheduled take-off time.
 A departure that pushes back earlier than absoltuely necessary would be able to de-ice earlier than necessary, freeing up the de-icing queue earlier.
-This could in turn enable the following departures to de-ice earlier and potentially reduce the total delay and CTOT violations in the sequence, at the cost of higher fuel consumption for certain aircraft from queueing up and waiting at the runway.
+This could in turn enable the following departures to de-ice earlier and potentially reduce the total delay and CTOT violations in the remaining sequence.
 
-The maximim runway holding duration for a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $z_i$ and take-off time $t_i$ must not be greater than the sum of its post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $r_i$.
-That is, $t_i - d_i <= n_i + q_i + r_i$.
+The maximim runway holding duration for a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $z_i$ and take-off time $t_i$ must not be greater than the sum of its de-ice duration $o_i$, post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $r_i$.
+That is, $t_i - z_i <= o_i + n_i + q_i + r_i$.
 
 == Objectives
 
 The objective function $f(s)$ for a partial or final sequence $s$ is defined in @objective-function.
-It considers overall runway utilization (makespan), delay, CTOT compliance, and runway holding duration, and is partially based on the function described by #cite(<demaere-pruning-rules>, form: "prose"). 
+It considers total delay and CTOT compliance, and is based on the function described by #cite(<demaere-pruning-rules>, form: "prose").
 
-$
-f(s) = (max_(i in s) t_i, sum_(i in s) c_d (i) + c_v (i) + c_h (i))
-$ <objective-function>
-
+// TODO: Check if this looks better when mentioned elsewhere, like in the branch-and-bound section
 === Runway Utilization
 
 The runway utilization of a partial or final sequence $s$ is modeled as the makespan of $s$, i.e. $max_(i in s) t_i$.
-This is utilized for the evaluation of partial sequences generated by the branch-and-bound program and their subsequent pruning according to the pruning rules introduced by #cite(<demaere-pruning-rules>, form: "prose").
+Although not directly modeled as an objective, it is utilized for the evaluation of partial sequences generated by the branch-and-bound program and their subsequent pruning according to the pruning rules introduced by #cite(<demaere-pruning-rules>, form: "prose").
 
 === Delay
 
@@ -269,6 +323,9 @@ Its delay cost $c_d (i)$ is then calculated as the delay squared:
 $
 c_d (i) = (t_i - b_i)^2
 $
+
+// TODO: Word this better
+An equivalent formulation used in the model is provided in @delay-cost.
 
 Raising the delay cost to a power greater than one penalizes disproportionately large delays more severely and encourages a more equitable distribution of delay across all aircraft @demaere-pruning-rules.
 For instance, two aircraft with delays of one and three minutes each would have a total delay cost of $1^2 + 3^2 = 10$, whereas the same two aircraft with delays of two minutes each would have a total delay cost of only $2^2 + 2^2 = 8$, making the latter more preferable.
@@ -284,26 +341,17 @@ c_v (i) = cases(
 )
 $
 
-=== Runway Holding
-
-The runway holding time for a departure $i$ is calculated as the difference between its latest possible de-ice time for its take-off time $t_i$ and its actual de-ice time $z_i$, the former of which is calculated as its take-off time $t_i$ minus the sum of its lineup duration $q_i$, post de-ice taxi duration $n_i$, and de-ice duration $o_i$.
-Its runway holding cost $c_h (i)$ is then calculated as the square of its runway holding time:
-
-$
-c_h (i) = (t_i - q_i - n_i - o_i - z_i)^2
-$
-
-Much like with delay, raising the runway holding cost to a power greater than one encourages a more equitable distribution of runway holding durations across all aircraft.
+// TODO: Word this better
+An equivalent formulation used in the model is defined in @ctot-violation-cost.
 
 == Model
 
 #todo("Write introduction to model")
 
 #multi-equation[
-    $ "Minimise" space &f(s) = (max_(i in s) t_i, sum_(i in s) c_d (i) + c_v (i) + c_h (i)) $
-    $ &c_d (i) = sum_(t in T_i) tau_(i t) dot (t - b_i)^2 &forall i in F $
-    $ &c_v (i) = sum_(t in T_i) tau_(i t) dot (t > v_i) dot (t - v_i)^2 &forall i in D $
-    $ &c_h (i) = sum_(t in T_i) sum_(z in Z_i) tau_(i t) dot zeta_(i z) dot (t - q_i - n_i - o_i - z)^2 &forall i in D $
+    $ "Minimise" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <objective-function>
+    $ &c_d (i) = sum_(t in T_i) tau_(i t) dot (t - b_i)^2 &forall i in F $ <delay-cost>
+    $ &c_v (i) = sum_(t in T_i) tau_(i t) dot (t > v_i) dot (t - v_i)^2 &forall i in D $ <ctot-violation-cost>
     $ &t_i = sum_(t in T_i) tau_(i t) dot t &forall i in F $
     $ &z_i = sum_(z in Z_i) zeta_(i z) dot z &forall i in D $
     $ "Subject to" space &sum_(t in T_i) tau_(i t) = 1 &forall i in F $
@@ -312,64 +360,16 @@ Much like with delay, raising the runway holding cost to a power greater than on
     $ &z_j >= z_i + o_i or z_i >= z_j + o_j &forall i in D, j in D, i != j $
     $ &t_i >= z_i + o_i + n_i + q_i &forall i in D $
     $ &t_i - z_i - o_i <= h_i &forall i in D $
-    $ &t_i - q_i - n_i - o_i - z_i <= r_i &forall i in D $
-    $ &tau_(i t) in { 0, 1 } &forall i in F $
-    $ &zeta_(i z) in { 0, 1 } &forall i in D $
-    $ &gamma_(i j) in { 0, 1 } &forall i in F, j in F, i != j $
+    $ &t_i - z_i - o_i <= n_i + r_i + q_i &forall i in D $
     $ &gamma_(i j) = 1 &forall (i, j) in F_S union F_D union F_C $
     $ &t_j >= t_i + delta_(i j) &forall (i, j) in F_D union F_C $
     $ &t_j >= t_i + delta_(i j) dot gamma_(i j) - (l_i - e_j) dot gamma_(j i) &forall (i, j) in F_O $
+    $ &tau_(i t) in { 0, 1 } &forall i in F, t in T_i $
+    $ &zeta_(i z) in { 0, 1 } &forall i in D, z in Z_i $
+    $ &gamma_(i j) in { 0, 1 } &forall i in F, j in F, i != j $
 ]
 
 #todo("Write explanation and overview of model")
-
-// TODO: Check if notation should be provided at the start of the problem description section
-A summary of the notation used thus far is provided in @notation.
-
-// TODO: Complete notation table
-#let notation = table(
-    columns: 2,
-    stroke: (x, y) => (
-        top: if y == 1 { (dash: "solid", thickness: 0.5pt) },
-        left: if x == 1 { (dash: "solid", thickness: 0.5pt) },
-    ),
-    align: (x, y) => if x > 0 and y > 0 { left + horizon } else { center + horizon },
-    table.header[Symbol][Definition],
-    $A$, [Set of arrivals],
-    $D$, [Set of departures],
-    $F$, [Set of aircraft, defined as $A union D$],
-    $p_i$, [Pushback duration for departure $i$],
-    $m_i$, [Duration to taxi from gates to de-icing pad for departure $i$],
-    $o_i$, [De-icing duration for departure $i$],
-    $n_i$, [Taxi-out duration for departure $i$],
-    $q_i$, [Lineup duration for departure $i$],
-    $h_i$, [Maximum holdover duration for departure $i$],
-    $u_i$, [Start of CTOT slot for departure $i$],
-    $v_i$, [End of CTOT slot for departure $i$],
-    $e_i$, [Start of hard time window for aircraft $i$],
-    $l_i$, [End of hard time window for aircraft $i$],
-    $delta_(i j)$, [Minimum separation between aircraft $i$ and $j$, where $i$ precedes $j$],
-    $T_i$, [Set of possible landing or take-off times for aircraft $i$],
-    $Z_i$, [Set of possible de-icing times for departure $i$],
-    $tau_(i t)$, [Boolean decision variable indicating if an aircraft $i$ is scheduled to land or take off at time $t$],
-    $zeta_(i z)$, [Boolean decision variable indicating if a departure $i$ is scheduled to de-ice at time $z$],
-    $gamma_(i j)$, [Boolean decision variable indicating whether an aircraft $i$ lands or takes off before an aircraft $j$],
-    $t_i$, [Scheduled landing or take-off time for aircraft $i$],
-    $z_i$, [Scheduled de-ice time for departure $i$],
-    $f(s)$, [Objective value for partial or final sequence $s$],
-    $c_d (i)$, [Delay cost for aircraft $i$],
-    $c_v (i)$, [CTOT violation cost for departure $i$],
-    $c_h (i)$, [Runway holding cost for departure $i$],
-    $F_S$, [Set of pairs of distinct aircraft $(i, j)$ with disjoint hard time windows such that $e_j >= l_i + delta_(i j)$],
-    $F_D$, [Set of pairs of distinct aircraft $(i, j)$ with disjoint hard time windows such that $e_j < l_i + delta_(i j)$],
-    $F_O$, [Set of pairs of distinct aircraft $(i, j)$ with overlapping hard time windows],
-    $F_C$, [Set of pairs of distinct separation-identical aircraft $(i, j)$ with a complete order such that $i$ lands or takes off before $j$],
-)
-
-#figure(
-    notation,
-    caption: [Summary of notation and definitions used in model],
-) <notation>
 
 // TODO: Check if pruning rules such as complete orders and disjoint time windows should be mentioned here
 = Implementation
