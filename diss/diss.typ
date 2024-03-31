@@ -226,19 +226,19 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
     $v_i$, [End of CTOT slot for departure $i$],
     $e_i$, [Start of hard time window for aircraft $i$],
     $l_i$, [End of hard time window for aircraft $i$],
-    $delta_(i j)$, [Minimum separation between aircraft $i$ and $j$, where $i$ precedes $j$],
+    $delta_(i, j)$, [Minimum separation between aircraft $i$ and $j$, where $i$ precedes $j$],
     $T_i$, [Set of possible landing or take-off times for aircraft $i$],
     $Z_i$, [Set of possible de-icing times for departure $i$],
-    $tau_(i t)$, [Boolean decision variable indicating if an aircraft $i$ is scheduled to land or take off at time $t$],
-    $zeta_(i z)$, [Boolean decision variable indicating if a departure $i$ is scheduled to de-ice at time $z$],
-    $gamma_(i j)$, [Boolean decision variable indicating whether an aircraft $i$ lands or takes off before an aircraft $j$],
+    $tau_(i, t)$, [Boolean decision variable indicating if an aircraft $i$ is scheduled to land or take off at time $t$],
+    $zeta_(i, z)$, [Boolean decision variable indicating if a departure $i$ is scheduled to de-ice at time $z$],
+    $gamma_(i, j)$, [Boolean decision variable indicating whether an aircraft $i$ lands or takes off before an aircraft $j$],
     $t_i$, [Scheduled landing or take-off time for aircraft $i$],
     $z_i$, [Scheduled de-ice time for departure $i$],
     $f(s)$, [Objective value for partial or final sequence $s$],
     $c_d (i)$, [Delay cost for aircraft $i$],
     $c_v (i)$, [CTOT violation cost for departure $i$],
-    $F_S$, [Set of pairs of distinct aircraft $(i, j)$ with disjoint hard time windows such that $e_j >= l_i + delta_(i j)$],
-    $F_D$, [Set of pairs of distinct aircraft $(i, j)$ with disjoint hard time windows such that $e_j < l_i + delta_(i j)$],
+    $F_S$, [Set of pairs of distinct aircraft $(i, j)$ with disjoint hard time windows such that $e_j >= l_i + delta_(i, j)$],
+    $F_D$, [Set of pairs of distinct aircraft $(i, j)$ with disjoint hard time windows such that $e_j < l_i + delta_(i, j)$],
     $F_O$, [Set of pairs of distinct aircraft $(i, j)$ with overlapping hard time windows],
     $F_C$, [Set of pairs of distinct separation-identical aircraft $(i, j)$ with a complete order such that $i$ lands or takes off before $j$],
 )
@@ -255,7 +255,7 @@ A sequence that violates these hard constraints is considered to be infeasible, 
 
 === Runway Separations
 
-Any two consecutive aircraft $i$ and $j$ (where $i$ precedes $j$) are required to have a minimum runway separation $delta_(i j)$ between them, which is determined by their weight classes, speed groups, and (for departures) Standard Instrument Departure (SID) routes.
+Any two consecutive aircraft $i$ and $j$ (where $i$ precedes $j$) are required to have a minimum runway separation $delta_(i, j)$ between them, which is determined by their weight classes, speed groups, and (for departures) Standard Instrument Departure (SID) routes.
 An aircraft's weight class influences the severity of wake turbulence it causes, the time required for this turbulence to dissipate, and its sensitivity to the wake turbulence caused by other aircraft.
 Larger or heavier aircraft typically generate greater turbulence, to which smaller or lighter aircraft are more sensitive.
 Consequently, a larger separation may be required when a large aircraft is followed by a small one, than when a small aircraft is followed by a large one @demaere-pruning-rules.
@@ -346,23 +346,23 @@ $
 
 #multi-equation[
     $ "Minimise" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <objective-function>
-    $ &c_d (i) = sum_(t in T_i) tau_(i t) dot (t - b_i)^2 &forall i in F $ <delay-cost>
-    $ &c_v (i) = sum_(t in T_i) tau_(i t) dot (t > v_i) dot (t - v_i)^2 &forall i in D $ <ctot-violation-cost>
-    $ &t_i = sum_(t in T_i) tau_(i t) dot t &forall i in F $
-    $ &z_i = sum_(z in Z_i) zeta_(i z) dot z &forall i in D $
-    $ "Subject to" space &sum_(t in T_i) tau_(i t) = 1 &forall i in F $
-    $ &sum_(z in Z_i) zeta_(i z) = 1 &forall i in D $
-    $ &gamma_(i j) + gamma_(j i) = 1 &forall i in F, j in F, i != j $
+    $ &c_d (i) = sum_(t in T_i) tau_(i, t) dot (t - b_i)^2 &forall i in F $ <delay-cost>
+    $ &c_v (i) = sum_(t in T_i) tau_(i, t) dot (t > v_i) dot (t - v_i)^2 &forall i in D $ <ctot-violation-cost>
+    $ &t_i = sum_(t in T_i) tau_(i, t) dot t &forall i in F $
+    $ &z_i = sum_(z in Z_i) zeta_(i, z) dot z &forall i in D $
+    $ "Subject to" space &sum_(t in T_i) tau_(i, t) = 1 &forall i in F $
+    $ &sum_(z in Z_i) zeta_(i, z) = 1 &forall i in D $
+    $ &gamma_(i, j) + gamma_(j, i) = 1 &forall i in F, j in F, i != j $
     $ &z_j >= z_i + o_i or z_i >= z_j + o_j &forall i in D, j in D, i != j $
     $ &t_i >= z_i + o_i + n_i + q_i &forall i in D $
     $ &t_i - z_i - o_i <= h_i &forall i in D $
     $ &t_i - z_i - o_i <= n_i + r_i + q_i &forall i in D $
-    $ &gamma_(i j) = 1 &forall (i, j) in F_S union F_D union F_C $
-    $ &t_j >= t_i + delta_(i j) &forall (i, j) in F_D union F_C $
-    $ &t_j >= t_i + delta_(i j) dot gamma_(i j) - (l_i - e_j) dot gamma_(j i) &forall (i, j) in F_O $
-    $ &tau_(i t) in { 0, 1 } &forall i in F, t in T_i $
-    $ &zeta_(i z) in { 0, 1 } &forall i in D, z in Z_i $
-    $ &gamma_(i j) in { 0, 1 } &forall i in F, j in F, i != j $
+    $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D union F_C $
+    $ &t_j >= t_i + delta_(i, j) &forall (i, j) in F_D union F_C $
+    $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (l_i - e_j) dot gamma_(j, i) &forall (i, j) in F_O $
+    $ &tau_(i, t) in { 0, 1 } &forall i in F, t in T_i $
+    $ &zeta_(i, z) in { 0, 1 } &forall i in D, z in Z_i $
+    $ &gamma_(i, j) in { 0, 1 } &forall i in F, j in F, i != j $
 ]
 
 #todo("Write explanation and overview of model")
