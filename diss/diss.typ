@@ -12,40 +12,6 @@
 
 #set math.equation(numbering: "(1)")
 
-// NOTE: Spacing needs to be explicitly set to exactly this value for the hack below to work
-#show math.equation: set block(spacing: 0.65em)
-
-// NOTE: Hack for fine-grained equation numbering - see https://github.com/typst/typst/issues/380 and https://github.com/typst/typst/issues/380#issuecomment-1523884719
-#let multi-equation(equations) = {
-    let reduce(array, f) = array.slice(1).fold(array.first(), f)
-    let concat(array) = reduce(array, (acc, elem) => acc + elem)
-
-    if equations.has("children") {
-        let children = equations.children.filter(child => child != [ ])
-
-        let body-or-children(equation) = if equation.body.has("children") {
-            concat(equation.body.children)
-        } else {
-            equation.body
-        }
-
-        let hide-equation(equation) = if equation.has("numbering") and equation.numbering == none {
-            math.equation(block: true, numbering: none, hide(equation))
-        } else [
-            $ #hide(body-or-children(equation)) $ #if equation.has("label") { equation.label }
-        ]
-
-        let hidden = box(concat(children.map(hide-equation)))
-
-        let align-equations(acc, equation) = acc + if acc != [] { linebreak() } + equation
-        let aligned = math.equation(block: true, numbering: none, children.fold([], align-equations))
-
-        hidden
-        style(style => v(-measure(hidden, style).height, weak: true))
-        aligned
-    }
-}
-
 // NOTE: Workaround to get non-math text to use EB Garamond in math equations until Typst ships a native function for doing so
 #let mathtext = math.text.with(font: "EB Garamond", weight: "regular")
 
@@ -222,6 +188,7 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
     $n_i$, [Taxi-out duration for departure $i$],
     $q_i$, [Lineup duration for departure $i$],
     $h_i$, [Maximum holdover duration for departure $i$],
+    $r_i$, [Maximum runway hold duration for departure $i$],
     $u_i$, [Start of CTOT slot for departure $i$],
     $v_i$, [End of CTOT slot for departure $i$],
     $e_i$, [Start of hard time window for aircraft $i$],
@@ -250,7 +217,7 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
 
 == Constraints
 
-A feasible solution to the problem must satisfy runway separation requirements, hard time windows, CTOT slots, and holdover times.
+A feasible solution to the problem must satisfy runway separation requirements, hard time windows, CTOT slots, holdover times, and runway hold times.
 A sequence that violates these hard constraints is considered to be infeasible, and can thus be eliminated from the solution space.
 
 === Runway Separations
@@ -342,30 +309,84 @@ $
 
 == Model
 
-#todo("Write introduction to model")
+The mathematical model for the aforementioned problem is shown below:
+
+// NOTE: Hack for fine-grained equation numbering - see https://github.com/typst/typst/issues/380 and https://github.com/typst/typst/issues/380#issuecomment-1523884719
+#let multi-equation(equations) = {
+    let reduce(array, f) = array.slice(1).fold(array.first(), f)
+    let concat(array) = reduce(array, (acc, elem) => acc + elem)
+
+    if equations.has("children") {
+        let children = equations.children.filter(child => child != [ ])
+
+        let body-or-children(equation) = if equation.body.has("children") {
+            concat(equation.body.children)
+        } else {
+            equation.body
+        }
+
+        let hide-equation(equation) = if equation.has("numbering") and equation.numbering == none {
+            math.equation(block: true, numbering: none, hide(equation))
+        } else [
+            $ #hide(body-or-children(equation)) $ #if equation.has("label") { equation.label }
+        ]
+
+        let hidden = box(concat(children.map(hide-equation)))
+
+        let align-equations(acc, equation) = acc + if acc != [] { linebreak() } + equation
+        let aligned = math.equation(block: true, numbering: none, children.fold([], align-equations))
+
+        // NOTE: Spacing needs to be explicitly set to exactly this value for the hack to work
+        show math.equation: set block(spacing: 0.65em)
+
+        hidden
+        style(style => v(-measure(hidden, style).height, weak: true))
+        aligned
+    }
+}
 
 #multi-equation[
     $ "Minimise" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <objective-function>
     $ &c_d (i) = sum_(t in T_i) tau_(i, t) dot (t - b_i)^2 &forall i in F $ <delay-cost>
     $ &c_v (i) = sum_(t in T_i) tau_(i, t) dot (t > v_i) dot (t - v_i)^2 &forall i in D $ <ctot-violation-cost>
-    $ &t_i = sum_(t in T_i) tau_(i, t) dot t &forall i in F $
-    $ &z_i = sum_(z in Z_i) zeta_(i, z) dot z &forall i in D $
-    $ "Subject to" space &sum_(t in T_i) tau_(i, t) = 1 &forall i in F $
-    $ &sum_(z in Z_i) zeta_(i, z) = 1 &forall i in D $
-    $ &gamma_(i, j) + gamma_(j, i) = 1 &forall i in F, j in F, i != j $
-    $ &z_j >= z_i + o_i or z_i >= z_j + o_j &forall i in D, j in D, i != j $
-    $ &t_i >= z_i + o_i + n_i + q_i &forall i in D $
-    $ &t_i - z_i - o_i <= h_i &forall i in D $
-    $ &t_i - z_i - o_i <= n_i + r_i + q_i &forall i in D $
+    $ &t_i = sum_(t in T_i) tau_(i, t) dot t &forall i in F $ <define-scheduled-time>
+    $ &z_i = sum_(z in Z_i) zeta_(i, z) dot z &forall i in D $ <define-deice-time>
+    $ "Subject to" space &sum_(t in T_i) tau_(i, t) = 1 &forall i in F $ <schedule-once>
+    $ &sum_(z in Z_i) zeta_(i, z) = 1 &forall i in D $ <deice-once>
+    $ &gamma_(i, j) + gamma_(j, i) = 1 &forall i in F, j in F, i != j $ <schedule-precedence>
+    $ &z_j >= z_i + o_i or z_i >= z_j + o_j &forall i in D, j in D, i != j $ <no-deice-overlap>
+    $ &t_i >= z_i + o_i + n_i + q_i &forall i in D $ <takeoff-after-deice>
+    $ &t_i - z_i - o_i <= h_i &forall i in D $ <max-holdover>
+    $ &t_i - z_i - o_i <= n_i + r_i + q_i &forall i in D $ <max-runway-hold>
     $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D union F_C $
     $ &t_j >= t_i + delta_(i, j) &forall (i, j) in F_D union F_C $
     $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (l_i - e_j) dot gamma_(j, i) &forall (i, j) in F_O $
-    $ &tau_(i, t) in { 0, 1 } &forall i in F, t in T_i $
-    $ &zeta_(i, z) in { 0, 1 } &forall i in D, z in Z_i $
-    $ &gamma_(i, j) in { 0, 1 } &forall i in F, j in F, i != j $
+    $ &tau_(i, t) in { 0, 1 } &forall i in F, t in T_i $ <schedule-binary>
+    $ &zeta_(i, z) in { 0, 1 } &forall i in D, z in Z_i $ <deice-binary>
+    $ &gamma_(i, j) in { 0, 1 } &forall i in F, j in F, i != j $ <precedence-binary>
 ]
 
-#todo("Write explanation and overview of model")
+// TODO: Improve wording of this section if necessary
+
+The objective function used in the model (@objective-function) minimises total delay and CTOT violations, whose individual costs are given by @delay-cost and @ctot-violation-cost respectively.
+
+@define-scheduled-time and @define-deice-time define the scheduled landing or take-off time and the de-ice time (if applicable) for an aircraft.
+
+@schedule-once and @deice-once ensure that every aircraft is scheduled to land or take off and de-ice exactly once.
+
+@schedule-precedence enforces precedence constraints for every aircraft -- either $i$ must land (or take off) before $j$, or the other way around.
+
+@no-deice-overlap enforces de-icing precedence constraints for every departure, and ensures that a departure can only begin de-icing after the current aircraft (if any) has finished being de-iced.
+
+@takeoff-after-deice ensures that a departure has enough time to taxi out after it finishes de-icing and lineup at the runway to meet its scheduled take-off time.
+
+@max-holdover ensures that the time between a departure's scheduled take-off time and de-ice time does not exceed its allowed HOT -- i.e. once de-iced, departures take off before their HOT expires.
+
+@max-runway-hold ensures that the runway holding time of a departure does not exceed its maximum allowed runway holding time.
+
+@schedule-binary, @deice-binary, and @precedence-binary restrict the decision variables for landings or take-offs, de-icing, and aircraft precedences to binary values.
+
+#todo("Explain the disjoint windows and complete order constraints")
 
 // TODO: Check if pruning rules such as complete orders and disjoint time windows should be mentioned here
 = Implementation
