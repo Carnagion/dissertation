@@ -1,0 +1,22 @@
+[package]
+name = "runseq-data"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
+
+[dependencies]
+chrono = { version = "0.4.31", default-features = false }
+runseq-instance = { version = "0.1.0", path = "../runseq-instance" }
+itertools = { version = "0.12.1", optional = true }
+rust_xlsxwriter = { version = "0.63.0", features = ["serde"], optional = true }
+serde = { version = "1.0.195", features = ["derive"], optional = true }
+thiserror = "1.0.56"
+
+[features]
+default = ["furini", "heathrow", "xlsx"]    # TODO: Remove default features after testing
+furini = []
+heathrow = ["dep:itertools"]
+xlsx = ["dep:rust_xlsxwriter", "dep:serde"]

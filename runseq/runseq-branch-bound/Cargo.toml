@@ -1,0 +1,13 @@
+[package]
+name = "runseq-branch-bound"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--generate-link-to-definition", "--cfg", "docsrs"]
+
+[dependencies]
+chrono = { version = "0.4.31", default-features = false }
+either = "1.10.0"
+runseq-instance = { version = "0.1.0", path = "../runseq-instance" }
