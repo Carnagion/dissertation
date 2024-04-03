@@ -1,28 +1,76 @@
 use chrono::NaiveDateTime;
 
-use rust_xlsxwriter::{ColNum, Format, RowNum, Worksheet, XlsxError};
+use rust_xlsxwriter::{
+    utility::cell_range_absolute,
+    ColNum,
+    Format,
+    RowNum,
+    Workbook,
+    Worksheet,
+    XlsxError,
+};
 
 use serde::Deserialize;
 
 use runseq_instance::{flight::Flight, Instance};
 
-pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
+pub fn to_xlsx(instance: &Instance) -> Result<Workbook, XlsxError> {
+    let mut workbook = Workbook::new();
+
     let mut sheet = Worksheet::new();
+    sheet.set_name("Data")?;
 
-    let starting_time = starting_time(instance.flights()).unwrap();
+    write_flight_count(instance, &mut sheet, &mut workbook)?;
+    write_max_runway_hold(instance, &mut sheet, &mut workbook)?;
+    write_flights(instance, &mut sheet, &mut workbook)?;
+    write_separations(instance, &mut sheet, &mut workbook)?;
 
+    workbook.push_worksheet(sheet);
+
+    Ok(workbook)
+}
+
+fn write_flight_count(
+    instance: &Instance,
+    sheet: &mut Worksheet,
+    workbook: &mut Workbook,
+) -> Result<(), XlsxError> {
     sheet.write(0, 0, "Number of flights")?;
     sheet.write(1, 0, instance.flights().len() as u64)?;
 
+    let range = cell_range_absolute(1, 0, 1, 0);
+    workbook.define_name("flightCount", &format!("=Data!{}", range))?;
+
+    Ok(())
+}
+
+fn write_max_runway_hold(
+    instance: &Instance,
+    sheet: &mut Worksheet,
+    workbook: &mut Workbook,
+) -> Result<(), XlsxError> {
     sheet.write(3, 0, "Maximum allowed runway hold")?;
     sheet.write(4, 0, instance.max_runway_hold_duration.as_secs())?;
+
+    let range = cell_range_absolute(4, 0, 4, 0);
+    workbook.define_name("maxRunwayHold", &format!("=Data!{}", range))?;
+
+    Ok(())
+}
+
+fn write_flights(
+    instance: &Instance,
+    sheet: &mut Worksheet,
+    workbook: &mut Workbook,
+) -> Result<(), XlsxError> {
+    let start = starting_time(instance.flights()).unwrap();
 
     sheet.deserialize_headers::<RawFlight>(0, 2)?;
     for (idx, flight) in instance.flights().iter().enumerate() {
         let flight = match flight {
             Flight::Arr(arr) => RawFlight {
                 kind: FlightKind::Arr,
-                base_time: Some(seconds(starting_time, arr.base_time)),
+                base_time: Some(seconds(start, arr.base_time)),
                 tobt: None,
                 pushback_duration: None,
                 deice_taxi_duration: None,
@@ -36,13 +84,13 @@ pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
                 window_earliest: arr
                     .window
                     .as_ref()
-                    .map(|window| seconds(starting_time, window.earliest)),
+                    .map(|window| seconds(start, window.earliest)),
                 window_length: arr.window.as_ref().map(|window| window.duration.as_secs()),
             },
             Flight::Dep(dep) => RawFlight {
                 kind: FlightKind::Dep,
-                base_time: Some(seconds(starting_time, dep.base_time)),
-                tobt: Some(seconds(starting_time, dep.tobt)),
+                base_time: Some(seconds(start, dep.base_time)),
+                tobt: Some(seconds(start, dep.tobt)),
                 pushback_duration: Some(dep.pushback_duration.as_secs()),
                 deice_taxi_duration: dep
                     .deice
@@ -52,22 +100,30 @@ pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
                 deice_hot: dep.deice.as_ref().map(|deice| deice.hot.as_secs()),
                 taxi_duration: Some(dep.taxi_duration.as_secs()),
                 lineup_duration: Some(dep.lineup_duration.as_secs()),
-                ctot_target: dep
-                    .ctot
-                    .as_ref()
-                    .map(|ctot| seconds(starting_time, ctot.target)),
+                ctot_target: dep.ctot.as_ref().map(|ctot| seconds(start, ctot.target)),
                 ctot_allow_early: dep.ctot.as_ref().map(|ctot| ctot.allow_early.as_secs()),
                 ctot_allow_late: dep.ctot.as_ref().map(|ctot| ctot.allow_late.as_secs()),
                 window_earliest: dep
                     .window
                     .as_ref()
-                    .map(|window| seconds(starting_time, window.earliest)),
+                    .map(|window| seconds(start, window.earliest)),
                 window_length: dep.window.as_ref().map(|window| window.duration.as_secs()),
             },
         };
-        flight.write_to_sheet(idx as u32 + 1, 2, &mut sheet)?;
+        flight.write_to_sheet(idx as u32 + 1, 2, sheet)?;
     }
 
+    let range = cell_range_absolute(1, 2, instance.flights().len() as u32, 15);
+    workbook.define_name("flights", &format!("=Data!{}", range))?;
+
+    Ok(())
+}
+
+fn write_separations(
+    instance: &Instance,
+    sheet: &mut Worksheet,
+    workbook: &mut Workbook,
+) -> Result<(), XlsxError> {
     // NOTE: Merging is only possible with multiple cells and the Excel library returns an error
     //       when trying to merge a range containing a single cell.
     if instance.flights().len() > 1 {
@@ -88,7 +144,15 @@ pub fn to_xlsx(instance: &Instance) -> Result<Worksheet, XlsxError> {
         sheet.write(1 + row as u32, 17 + col as u16, sep)?;
     }
 
-    Ok(sheet)
+    let range = cell_range_absolute(
+        1,
+        17,
+        instance.flights().len() as u32,
+        17 + instance.flights().len() as u16 - 1,
+    );
+    workbook.define_name("sep", &format!("=Data!{}", range))?;
+
+    Ok(())
 }
 
 #[derive(Deserialize)]
@@ -171,7 +235,7 @@ fn starting_time(flights: &[Flight]) -> Option<NaiveDateTime> {
                 time
             },
             Flight::Dep(dep) => {
-                let mut time = dep.base_time;
+                let mut time = dep.base_time.min(dep.tobt);
                 if let Some(window) = &dep.window {
                     time = time.min(window.earliest);
                 }

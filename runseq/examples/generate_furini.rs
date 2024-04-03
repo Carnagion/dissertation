@@ -4,8 +4,6 @@ use std::{
     path::Path,
 };
 
-use rust_xlsxwriter::Workbook;
-
 use runseq::{
     data::{furini::from_furini_with_limit, xlsx::to_xlsx},
     instance::Instance,
@@ -40,8 +38,6 @@ fn save_toml(instance: &Instance, path: impl AsRef<Path>) {
 }
 
 fn save_xlsx(instance: &Instance, path: impl AsRef<Path>) {
-    let mut workbook = Workbook::new();
-    let sheet = to_xlsx(instance).unwrap();
-    workbook.push_worksheet(sheet);
+    let mut workbook = to_xlsx(instance).unwrap();
     workbook.save(path).unwrap();
 }

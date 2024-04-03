@@ -11,7 +11,7 @@ use runseq::{
 const FMT: &str = "%F %T";
 
 fn main() {
-    let deice_strategy = DeiceStrategy::ByTobt;
+    let deice_strategy = DeiceStrategy::Integrated;
     let branch_bound = BranchBound {
         horizon: NonZeroUsize::new(12),
         deice_strategy,
@@ -19,7 +19,7 @@ fn main() {
 
     let vis = Visualiser::new();
 
-    let mut csv = Writer::from_path("../stats/furini/deice-decomposed.csv").unwrap();
+    let mut csv = Writer::from_path("../stats/furini/deice-integrated.csv").unwrap();
     csv.write_record([
         "Instance",
         "Start",
