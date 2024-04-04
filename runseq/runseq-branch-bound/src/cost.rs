@@ -97,7 +97,7 @@ impl Sum for Cost {
 
 pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> Cost {
     let delay = (sched.landing - arr.base_time)
-        .num_minutes()
+        .num_seconds()
         .unsigned_abs()
         .pow(2);
 
@@ -110,7 +110,7 @@ pub fn arrival_cost(sched: &ArrivalSchedule, arr: &Arrival) -> Cost {
 
 pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> Cost {
     let delay = (sched.takeoff - dep.base_time)
-        .num_minutes()
+        .num_seconds()
         .unsigned_abs()
         .pow(2);
 
@@ -118,7 +118,7 @@ pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> Cost {
         None => 0,
         Some(ctot) if ctot.as_range().contains(&sched.takeoff) => 0,
         Some(ctot) => (sched.takeoff - ctot.latest())
-            .num_minutes()
+            .num_seconds()
             .unsigned_abs()
             .pow(2),
     };
@@ -129,7 +129,7 @@ pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> Cost {
             let deice_duration = dep.deice.as_ref().unwrap().duration;
             let runway_hold =
                 sched.takeoff - dep.lineup_duration - dep.taxi_duration - deice_duration - deice;
-            runway_hold.num_minutes().unsigned_abs().pow(2)
+            runway_hold.num_seconds().unsigned_abs().pow(2)
         },
     };
 
