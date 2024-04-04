@@ -22,8 +22,7 @@ fn main() {
     let mut csv = Writer::from_path("../stats/furini/deice-integrated.csv").unwrap();
     csv.write_record([
         "Instance",
-        "Start",
-        "End",
+        "Makespan (s)",
         "De-ice start",
         "De-ice end",
         "Obj. value",
@@ -45,7 +44,6 @@ fn main() {
                 "".to_owned(),
                 "".to_owned(),
                 "".to_owned(),
-                "".to_owned(),
             ])
             .unwrap();
             continue;
@@ -61,26 +59,28 @@ fn main() {
             .map(|sched| sched.flight_time())
             .max()
             .unwrap();
+        let makespan = end - start;
 
         let deice_start = solution
             .iter()
             .filter_map(Schedule::as_departure)
             .filter_map(|sched| sched.deice)
             .min()
-            .unwrap();
+            .unwrap()
+            .time();
         let deice_end = solution
             .iter()
             .filter_map(Schedule::as_departure)
             .filter_map(|sched| sched.deice)
             .max()
-            .unwrap();
+            .unwrap()
+            .time();
 
         let cost = branch_bound::solution_cost(&solution, &instance);
 
         csv.write_record([
             format!("FPT{:0>2}", id),
-            start.format(FMT).to_string(),
-            end.format(FMT).to_string(),
+            makespan.num_seconds().to_string(),
             deice_start.format(FMT).to_string(),
             deice_end.format(FMT).to_string(),
             cost.as_u64().to_string(),
