@@ -66,14 +66,12 @@ fn main() {
             .iter()
             .filter_map(Schedule::as_departure)
             .filter_map(|sched| sched.deice)
-            .min()
-            .unwrap();
+            .min();
         let deice_end = solution
             .iter()
             .filter_map(Schedule::as_departure)
             .filter_map(|sched| sched.deice)
-            .max()
-            .unwrap();
+            .max();
 
         let cost = branch_bound::solution_cost(&solution, &instance);
 
@@ -81,8 +79,12 @@ fn main() {
             id.to_string(),
             start.format(FMT).to_string(),
             end.format(FMT).to_string(),
-            deice_start.format(FMT).to_string(),
-            deice_end.format(FMT).to_string(),
+            deice_start
+                .map(|deice_start| deice_start.format(FMT).to_string())
+                .unwrap_or_default(),
+            deice_end
+                .map(|deice_end| deice_end.format(FMT).to_string())
+                .unwrap_or_default(),
             cost.as_u64().to_string(),
         ])
         .unwrap();
