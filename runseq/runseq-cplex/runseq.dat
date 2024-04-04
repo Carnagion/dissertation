@@ -1,0 +1,11 @@
+SheetConnection data("../../instances/heathrow/xlsx/10.xlsx");
+
+flightCount from SheetRead(data, "flightCount");
+
+flights from SheetRead(data, "flights");
+
+sep from SheetRead(data, "sep");
+
+maxRunwayHold from SheetRead(data, "maxRunwayHold");
+
+maxTime = 6000;
