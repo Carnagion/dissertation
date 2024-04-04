@@ -87,12 +87,7 @@ fn expand_arrival(
         },
     };
 
-    let valid = match &arr.window {
-        None => true,
-        Some(window) => window.as_range().contains(&landing),
-    };
-
-    valid
+    within_window(landing, arr.window.as_ref())
         .then_some(ArrivalSchedule {
             flight_index,
             landing,
