@@ -105,15 +105,18 @@ fn expand_arrival(
     instance: &Instance,
     state: &BranchBoundState,
 ) -> impl Iterator<Item = ArrivalSchedule> {
-    let prev_sched = state.current_solution.last().map(|node| &node.sched);
+    let sep_end = state
+        .current_solution
+        .iter()
+        .rev()
+        .map(|node| {
+            let sep = instance.separations()[(node.sched.flight_index(), flight_index)];
+            node.sched.flight_time() + sep
+        })
+        .max()
+        .unwrap_or(NaiveDateTime::MIN);
 
-    let landing = match prev_sched {
-        None => arr.release_time(),
-        Some(prev_sched) => {
-            let sep = instance.separations()[(prev_sched.flight_index(), flight_index)];
-            arr.release_time().max(prev_sched.flight_time() + sep)
-        },
-    };
+    let landing = arr.release_time().max(sep_end);
 
     within_window(landing, arr.window.as_ref())
         .then_some(ArrivalSchedule {
@@ -145,24 +148,26 @@ fn expand_departure(
 
 fn expand_direct_departure(
     dep: &Departure,
-    dep_idx: usize,
+    flight_index: usize,
     instance: &Instance,
     state: &BranchBoundState,
 ) -> impl Iterator<Item = DepartureSchedule> {
-    let prev_sched = state.current_solution.last().map(|node| &node.sched);
+    let sep_end = state
+        .current_solution
+        .iter()
+        .rev()
+        .map(|node| {
+            let sep = instance.separations()[(node.sched.flight_index(), flight_index)];
+            node.sched.flight_time() + sep
+        })
+        .max()
+        .unwrap_or(NaiveDateTime::MIN);
 
-    let takeoff = match prev_sched {
-        None => dep.release_time(),
-        Some(prev_sched) => {
-            let sep = instance.separations()[(prev_sched.flight_index(), dep_idx)];
-            let takeoff = dep.release_time().max(prev_sched.flight_time() + sep);
-            takeoff
-        },
-    };
+    let takeoff = dep.release_time().max(sep_end);
 
     within_window(takeoff, dep.window.as_ref())
         .then_some(DepartureSchedule {
-            flight_index: dep_idx,
+            flight_index,
             deice: None,
             takeoff,
         })
@@ -177,27 +182,23 @@ fn expand_deiced_departure(
     state: &BranchBoundState,
     deice_queue: &HashMap<usize, NaiveDateTime>,
 ) -> impl Iterator<Item = DepartureSchedule> {
-    let prev_sched = state.current_solution.last().map(|node| &node.sched);
+    let sep_end = state
+        .current_solution
+        .iter()
+        .rev()
+        .map(|node| {
+            let sep = instance.separations()[(node.sched.flight_index(), flight_index)];
+            node.sched.flight_time() + sep
+        })
+        .max()
+        .unwrap_or(NaiveDateTime::MIN);
 
-    let (deice, takeoff) = match prev_sched {
-        None => {
-            let deice = deice_queue[&flight_index];
-            let takeoff = (deice + deice_params.duration + dep.taxi_duration + dep.lineup_duration)
-                .max(dep.release_time());
+    let deice = deice_queue[&flight_index];
 
-            (deice, takeoff)
-        },
-        Some(prev_sched) => {
-            let sep = instance.separations()[(prev_sched.flight_index(), flight_index)];
-
-            let deice = deice_queue[&flight_index];
-            let takeoff = (deice + deice_params.duration + dep.taxi_duration + dep.lineup_duration)
-                .max(dep.release_time())
-                .max(prev_sched.flight_time() + sep);
-
-            (deice, takeoff)
-        },
-    };
+    let takeoff = dep
+        .release_time()
+        .max(sep_end)
+        .max(deice + deice_params.duration + dep.taxi_duration + dep.lineup_duration);
 
     let valid = within_window(takeoff, dep.window.as_ref())
         && takeoff <= deice + deice_params.duration + deice_params.hot
