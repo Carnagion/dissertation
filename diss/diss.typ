@@ -228,6 +228,8 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
     $e_i$, [Start of hard time window for aircraft $i$],
     $l_i$, [End of hard time window for aircraft $i$],
     $delta_(i, j)$, [Minimum separation between aircraft $i$ and $j$, where $i$ precedes $j$],
+    $r_i$, [Release time for aircraft $i$],
+    $d_i$, [Due time for aircraft $i$],
     $T_i$, [Set of possible landing or take-off times for aircraft $i$],
     $Z_i$, [Set of possible de-icing times for departure $i$],
     $tau_(i, t)$, [Boolean decision variable indicating if an aircraft $i$ is scheduled to land or take off at time $t$],
@@ -256,7 +258,7 @@ A sequence that violates these hard constraints is considered to be infeasible, 
 
 === Runway Separations
 
-Any two consecutive aircraft $i$ and $j$ (where $i$ precedes $j$) are required to have a minimum runway separation $delta_(i, j)$ between them, which is determined by their weight classes, speed groups, and (for departures) Standard Instrument Departure (SID) routes.
+Any two consecutive aircraft $i$ and $j$ (where $i$ precedes $j$) are required to have a minimum _runway separation_ $delta_(i, j)$ between them, which is determined by their weight classes, speed groups, and (for departures) Standard Instrument Departure (SID) routes.
 An aircraft's weight class influences the severity of wake turbulence it causes, the time required for this turbulence to dissipate, and its sensitivity to the wake turbulence caused by other aircraft.
 Larger or heavier aircraft typically generate greater turbulence, to which smaller or lighter aircraft are more sensitive.
 Consequently, a larger separation may be required when a large aircraft is followed by a small one, than when a small aircraft is followed by a large one @demaere-pruning-rules.
@@ -270,10 +272,10 @@ The latter factor may require an increased separation upon take-off to space out
 The minimum separation that must be maintained between two aircraft is thus the maximum of the separations due to their weight classes, speed groups, and SID routes.
 The required separations between each ordered pair of distinct aircraft can therefore be expressed as a separation matrix @demaere-pruning-rules.
 
-However, runway separations do not necessarily obey the triangle inequality -- i.e. for any three aircraft $i$, $j$, and $k$, the inequality $delta_(i, j) + delta_(j, k) >= delta_(i, k)$ is not necessarily true @demaere-pruning-rules.
+However, runway separations do not necessarily obey the _triangle inequality_ -- i.e. for any three aircraft $i$, $j$, and $k$, the inequality $delta_(i, j) + delta_(j, k) >= delta_(i, k)$ is not necessarily true @demaere-pruning-rules.
 An aircraft's landing or take-off time can thus be influenced by not just the immediately preceding aircraft, but by multiple preceding aircraft.
 
-=== Precedence
+=== Runway and De-Icing Precedence
 
 Since this is a single runway formulation, no two aircraft can land or take off at the same time -- this would violate their separation requirement.
 Let $gamma_(i, j)$ be a boolean decision variable indicating whether aircraft $i$ lands or takes off before aircraft $j$.
@@ -286,7 +288,7 @@ $ z_j >= z_i + o_i or z_i >= z_j + o_j $
 === Base Times
 
 Every aircraft has an earliest possible landing or take-off time -- henceforth referred to as its _base time_ -- which is defined as the time the aircraft enters the runway queue and finishes lining up (for departures), or the local airspace (for arrivals).
-The base time $b_i$ of an aircraft $i$ is a hard constraint - $i$ cannot be scheduled to land or take off before $b_i$.
+The base time $b_i$ of an aircraft $i$ is modeled as a hard constraint -- $i$ cannot be scheduled to land or take off before $b_i$.
 
 === Time Windows
 
@@ -316,7 +318,7 @@ The HOT of a departure $i$ is thus modeled as a hard constraint -- the time betw
 // TODO: Write a better explanation for this section
 Delays are ideally absorbed by stand holding -- a departure $i$ only needs to push back only when absolutely necessary to meet its de-ice time $z_i$ (if applicable) and take-off time $t_i$.
 
-However, in some cases it may be better to absorb delays at the runway instead by runway holding -- i.e. arriving and waiting at the runway before a departure's scheduled take-off time.
+However, in some cases it may be better to absorb delays at the runway by _runway holding_ instead -- i.e. arriving and waiting at the runway before a departure's scheduled take-off time.
 A departure that pushes back earlier than absoltuely necessary would be able to de-ice earlier than necessary, freeing up the de-icing queue earlier.
 This could in turn enable the following departures to de-ice earlier and potentially reduce the total delay and CTOT violations in the remaining sequence.
 
@@ -325,20 +327,20 @@ That is, $t_i - z_i <= o_i + n_i + q_i + w_i$.
 
 === Complete Orders
 
-The earliest time an aircraft $i$ can be scheduled to land or take off, irrespective of any other aircraft -- its release time $r_i$ -- can thus be calculated as the maximum of its base time $b_i$, start time $e_i$ of its hard time window, and start time $u_i$ of its CTOT slot (if applicable):
+The earliest time an aircraft $i$ can be scheduled to land or take off, irrespective of any other aircraft -- its _release time_ $r_i$ -- can thus be calculated as the maximum of its base time $b_i$, start time $e_i$ of its hard time window, and start time $u_i$ of its CTOT slot (if applicable):
 
 $ r_i = max(b_i, e_i, u_i) $
 
-Meanwhile, the latest time an aircraft $i$ can be scheduled to land or take off -- its due time $d_i$ -- is simply the end time $l_i$ of its hard time window.
+Meanwhile, the latest time an aircraft $i$ can be scheduled to land or take off -- its _due time_ $d_i$ -- is simply the end time $l_i$ of its hard time window.
 
 A feasible runway sequence will always schedule an aircraft $i$ at a time between $r_i$ and $d_i$.
 The set of possible landing or take-off times $T_i$ for an aircraft $i$ can thus be defined as the set of all times between $r_i$ and $d_i$:
 
 $ T_i = { r_i, ..., d_i } $
 
-Based on these sets of possible landing and take-off times, #cite(<beasley-scheduling-aircraft>, form: "prose") show that it can be determined for certain pairs of distinct aircraft $(i, j)$ whether $i$ lands or takes off before $j$ does.
-For example, if two planes $i$ and $j$ have their release times and due times as $r_i = 10$, $d_i = 50$, $r_j = 70$, and $d_j = 110$ respectively, then it is clear that $i$ must land or take off first (i.e. before $j$) since $T_i$ and $T_j$ are disjoint.
-On the other hand, if their release times and due times are $r_i = 10$, $d_i = 70$, $r_j = 50$, and $d_j = 110$ respectively, then it is not always the case that $i$ lands or takes off before $j$ does (or vice-versa).
+#cite(<beasley-scheduling-aircraft>, form: "prose") show that it can be determined for certain pairs of distinct aircraft $(i, j)$ whether $i$ lands or takes off before $j$ does, based on their sets of possible landing or take-off times.
+For example, if two aircraft $i$ and $j$ have their release times and due times as $r_i = 10$, $d_i = 50$, $r_j = 70$, and $d_j = 110$ respectively, then it is clear that $i$ must land or take off first (i.e. before $j$) since $T_i$ and $T_j$ are disjoint.
+On the other hand, if $r_i = 10$, $d_i = 70$, $r_j = 50$, and $d_j = 110$, then it is not always the case that $i$ lands or takes off before $j$ does (or vice-versa).
 
 Additionally, even if the order of $i$ and $j$ can be inferred due to $T_i$ and $T_j$ being disjoint, their separation constraint may not automatically be satisfied @beasley-scheduling-aircraft.
 Continuing the former example above with $r_i = 10$, $d_i = 50$, $r_j = 70$, and $d_j = 110$, if the required separation $delta_(i, j) = 15$, then the separation constraint is automatically satisfied regardless of what times $i$ and $j$ are scheduled to land or take off at.
@@ -349,7 +351,8 @@ From these observations, #cite(<beasley-scheduling-aircraft>, form: "prose") sho
 2. The set of pairs of distinct aircraft $(i, j)$ for which $i$ definitely lands or takes off before $j$ does, but for which the separation constraint is not automatically satisfied
 3. The set of pairs of distinct aircraft $(i, j)$ for which $i$ may or may not land before $j$ and vice-versa
 
-These sets are henceforth referred to as $F_S$, $F_D$, and $F_O$ respectively, and can be defined as shown below:
+Let $F_S$, $F_D$, and $F_O$ be the first, second, and third set respectively.
+They can then be defined as shown below:
 
 #multi-equation[
     $ F_S = { (i, j) | &d_i < r_j and d_i + delta_(i, j) <= r_j, i in F, j in F, i != j } $ <separated-windows>
@@ -374,7 +377,7 @@ It considers total delay and CTOT compliance, and is based on the function descr
 // TODO: Check if this looks better when mentioned elsewhere, like in the branch-and-bound section
 === Runway Utilization
 
-The runway utilization of a partial or final sequence $s$ is modeled as the makespan of $s$, i.e. $max_(i in s) t_i$.
+The runway utilization of a partial or final sequence $s$ is modeled as the _makespan_ of $s$, i.e. $max_(i in s) t_i$.
 Although not directly included as an objective, it is utilized for the evaluation of partial sequences generated by the branch-and-bound program and their subsequent pruning according to the pruning rules introduced by #cite(<demaere-pruning-rules>, form: "prose").
 
 === Delay
