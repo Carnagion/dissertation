@@ -12,6 +12,40 @@
 
 #set math.equation(numbering: "(1)")
 
+// NOTE: Hack for fine-grained equation numbering - see https://github.com/typst/typst/issues/380 and https://github.com/typst/typst/issues/380#issuecomment-1523884719
+#let multi-equation(equations) = {
+    let reduce(array, f) = array.slice(1).fold(array.first(), f)
+    let concat(array) = reduce(array, (acc, elem) => acc + elem)
+
+    if equations.has("children") {
+        let children = equations.children.filter(child => child != [ ])
+
+        let body-or-children(equation) = if equation.body.has("children") {
+            concat(equation.body.children)
+        } else {
+            equation.body
+        }
+
+        let hide-equation(equation) = if equation.has("numbering") and equation.numbering == none {
+            math.equation(block: true, numbering: none, hide(equation))
+        } else [
+            $ #hide(body-or-children(equation)) $ #if equation.has("label") { equation.label }
+        ]
+
+        let hidden = box(concat(children.map(hide-equation)))
+
+        let align-equations(acc, equation) = acc + if acc != [] { linebreak() } + equation
+        let aligned = math.equation(block: true, numbering: none, children.fold([], align-equations))
+
+        // NOTE: Spacing needs to be explicitly set to exactly this value for the hack to work
+        show math.equation: set block(spacing: 0.65em)
+
+        hidden
+        style(style => v(-measure(hidden, style).height, weak: true))
+        aligned
+    }
+}
+
 // NOTE: Workaround to get non-math text to use EB Garamond in math equations until Typst ships a native function for doing so
 #let mathtext = math.text.with(font: "EB Garamond", weight: "regular")
 
@@ -188,7 +222,7 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
     $n_i$, [Taxi-out duration for departure $i$],
     $q_i$, [Lineup duration for departure $i$],
     $h_i$, [Maximum holdover duration for departure $i$],
-    $r_i$, [Maximum runway hold duration for departure $i$],
+    $w_i$, [Maximum runway hold duration for departure $i$],
     $u_i$, [Start of CTOT slot for departure $i$],
     $v_i$, [End of CTOT slot for departure $i$],
     $e_i$, [Start of hard time window for aircraft $i$],
@@ -239,9 +273,25 @@ The required separations between each ordered pair of distinct aircraft can ther
 However, runway separations do not necessarily obey the triangle inequality -- i.e. for any three aircraft $i$, $j$, and $k$, the inequality $delta_(i, j) + delta_(j, k) >= delta_(i, k)$ is not necessarily true @demaere-pruning-rules.
 An aircraft's landing or take-off time can thus be influenced by not just the immediately preceding aircraft, but by multiple preceding aircraft.
 
+=== Precedence
+
+Since this is a single runway formulation, no two aircraft can land or take off at the same time -- this would violate their separation requirement.
+Let $gamma_(i, j)$ be a boolean decision variable indicating whether aircraft $i$ lands or takes off before aircraft $j$.
+Then $gamma_(i, j) + gamma_(j, i) = 1$ for all pairs of distinct aircraft $(i, j)$ -- i.e. either $i$ must land or take off before $j$, or the other way around.
+
+Similarly, precedence constraints exist for de-icing -- given any two distinct departures $i$ and $j$, either $i$ must finish its de-icing before $j$ can start de-icing, or the other way around:
+
+$ z_j >= z_i + o_i or z_i >= z_j + o_j $
+
+=== Base Times
+
+Every aircraft has an earliest possible landing or take-off time -- henceforth referred to as its _base time_ -- which is defined as the time the aircraft enters the runway queue and finishes lining up (for departures), or the local airspace (for arrivals).
+The base time $b_i$ of an aircraft $i$ is a hard constraint - $i$ cannot be scheduled to land or take off before $b_i$.
+
 === Time Windows
 
 If an aircraft $i$ is subject to a hard time window which is defined by its earliest (start) time $e_i$ and latest (end) time $l_i$, then its landing or take-off time $t_i$ must be within this window -- i.e. $e_i <= t_i <= l_i$.
+Note that the start of the time window is independent of the aircraft's base time $b_i$.
 
 In this model, each aircraft is assumed to be subject to a hard time window, although this is not always the case in the real world.
 However, this assumption can be made without loss of generality -- an aircraft $i$ that is not subject to a hard time window can instead be considered to be subject to a very large time window, such that its start time $e_i$ is early enough and its end time $l_i$ late enough so as to never affect solutions in practice @demaere-pruning-rules.
@@ -270,8 +320,51 @@ However, in some cases it may be better to absorb delays at the runway instead b
 A departure that pushes back earlier than absoltuely necessary would be able to de-ice earlier than necessary, freeing up the de-icing queue earlier.
 This could in turn enable the following departures to de-ice earlier and potentially reduce the total delay and CTOT violations in the remaining sequence.
 
-The maximum runway holding duration $r_i$ for a departure $i$ is thus modeled as a hard constraint -- the time between $z_i$ and $t_i$ must not be greater than the sum of its de-ice duration $o_i$, post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $r_i$.
-That is, $t_i - z_i <= o_i + n_i + q_i + r_i$.
+The maximum runway holding duration $w_i$ for a departure $i$ is thus modeled as a hard constraint -- the time between $z_i$ and $t_i$ must not be greater than the sum of its de-ice duration $o_i$, post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $w_i$.
+That is, $t_i - z_i <= o_i + n_i + q_i + w_i$.
+
+=== Complete Orders
+
+The earliest time an aircraft $i$ can be scheduled to land or take off, irrespective of any other aircraft -- its release time $r_i$ -- can thus be calculated as the maximum of its base time $b_i$, start time $e_i$ of its hard time window, and start time $u_i$ of its CTOT slot (if applicable):
+
+$ r_i = max(b_i, e_i, u_i) $
+
+Meanwhile, the latest time an aircraft $i$ can be scheduled to land or take off -- its due time $d_i$ -- is simply the end time $l_i$ of its hard time window.
+
+A feasible runway sequence will always schedule an aircraft $i$ at a time between $r_i$ and $d_i$.
+The set of possible landing or take-off times $T_i$ for an aircraft $i$ can thus be defined as the set of all times between $r_i$ and $d_i$:
+
+$ T_i = { r_i, ..., d_i } $
+
+Based on these sets of possible landing and take-off times, #cite(<beasley-scheduling-aircraft>, form: "prose") show that it can be determined for certain pairs of distinct aircraft $(i, j)$ whether $i$ lands or takes off before $j$ does.
+For example, if two planes $i$ and $j$ have their release times and due times as $r_i = 10$, $d_i = 50$, $r_j = 70$, and $d_j = 110$ respectively, then it is clear that $i$ must land or take off first (i.e. before $j$) since $T_i$ and $T_j$ are disjoint.
+On the other hand, if their release times and due times are $r_i = 10$, $d_i = 70$, $r_j = 50$, and $d_j = 110$ respectively, then it is not always the case that $i$ lands or takes off before $j$ does (or vice-versa).
+
+Additionally, even if the order of $i$ and $j$ can be inferred due to $T_i$ and $T_j$ being disjoint, their separation constraint may not automatically be satisfied @beasley-scheduling-aircraft.
+Continuing the former example above with $r_i = 10$, $d_i = 50$, $r_j = 70$, and $d_j = 110$, if the required separation $delta_(i, j) = 15$, then the separation constraint is automatically satisfied regardless of what times $i$ and $j$ are scheduled to land or take off at.
+However, if $delta_(i, j) = 25$, then there exist certain landing or take-off times for $i$ and $j$ such that their separation constraint is violated.
+
+From these observations, #cite(<beasley-scheduling-aircraft>, form: "prose") show that it is possible to define three disjoint sets:
+1. The set of pairs of distinct aircraft $(i, j)$ for which $i$ definitely lands or takes off before $j$ does, and for which the separation constraint is automatically satisfied
+2. The set of pairs of distinct aircraft $(i, j)$ for which $i$ definitely lands or takes off before $j$ does, but for which the separation constraint is not automatically satisfied
+3. The set of pairs of distinct aircraft $(i, j)$ for which $i$ may or may not land before $j$ and vice-versa
+
+These sets are henceforth referred to as $F_S$, $F_D$, and $F_O$ respectively, and can be defined as shown below:
+
+#multi-equation[
+    $ F_S = { (i, j) | &d_i < r_j and d_i + delta_(i, j) <= r_j, i in F, j in F, i != j } $ <separated-windows>
+    $ F_D = { (i, j) | &d_i < r_j and d_i + delta_(i, j) > r_j, i in F, j in F, i != j } $ <disjoint-windows>
+    $ F_O = { (i, j) | &r_j <= r_i <= d_j or r_j <= d_i <= d_j or r_i <= r_j <= d_i or r_i <= d_j <= d_i,\
+        &i in F, j in F, i != j } $ <overlapping-windows>
+]
+
+It is then possible to impose the following precedence and separation constraints on every pair of distinct aircraft using @separated-windows, @disjoint-windows, and @overlapping-windows:
+
+#multi-equation[
+    $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D $
+    $ &t_j >= t_i + delta_(i, j) &forall (i, j) in F_D $
+    $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (d_i - r_j) dot gamma_(j, i) &forall (i, j) in F_O $
+]
 
 == Objectives
 
@@ -290,9 +383,7 @@ Although not directly included as an objective, it is utilized for the evaluatio
 The delay for an aircraft $i$ is defined as the difference between its landing or take-off time $t_i$ and its base time $b_i$.
 Its delay cost $c_d (i)$, defined in @delay-cost, is then calculated as the delay squared, and is equivalent to the following function:
 
-$
-c_d (i) = (t_i - b_i)^2
-$
+$ c_d (i) = (t_i - b_i)^2 $
 
 Raising the delay cost to a power greater than one penalizes disproportionately large delays more severely and encourages a more equitable distribution of delay across all aircraft @demaere-pruning-rules.
 For instance, two aircraft with delays of one and three minutes each would have a total delay cost of $1^2 + 3^2 = 10$, whereas the same two aircraft with delays of two minutes each would have a total delay cost of only $2^2 + 2^2 = 8$, making the latter more preferable.
@@ -300,54 +391,16 @@ For instance, two aircraft with delays of one and three minutes each would have 
 === Calculated Take-Off Time Compliance
 
 // TODO: Maybe word this better
-The CTOT violation cost $c_v (i)$ for a departure $i$ is defined in @ctot-violation-cost, and is equivalent to the following piecewise non-linear function given by 0 if it takes off within its CTOT slot and the squared difference between its takeoff time $t_i$ and its CTOT slot end time $v_i$ if it misses its CTOT slot:
+The CTOT violation cost $c_v (i)$ for a departure $i$ is defined in @ctot-violation-cost, and is equivalent to the following piecewise discontinuous non-linear function given by 0 if it takes off within its CTOT slot and the squared difference between its take-off time $t_i$ and its CTOT slot end time $v_i$ if it misses its CTOT slot:
 
-$
-c_v (i) = cases(
+$ c_v (i) = cases(
     &0 &"if" &u_i <= t_i <= v_i,
     &(t_i - v_i)^2 &"if" &t_i > v_i,
-)
-$
+) $
 
 == Model
 
 Based on the constraints and objectives discussed above, a 0-1 integer linear model of the runway and de-icing sequencing problem for a single runway and single de-icing pad is presented below:
-
-// NOTE: Hack for fine-grained equation numbering - see https://github.com/typst/typst/issues/380 and https://github.com/typst/typst/issues/380#issuecomment-1523884719
-#let multi-equation(equations) = {
-    let reduce(array, f) = array.slice(1).fold(array.first(), f)
-    let concat(array) = reduce(array, (acc, elem) => acc + elem)
-
-    if equations.has("children") {
-        let children = equations.children.filter(child => child != [ ])
-
-        let body-or-children(equation) = if equation.body.has("children") {
-            concat(equation.body.children)
-        } else {
-            equation.body
-        }
-
-        let hide-equation(equation) = if equation.has("numbering") and equation.numbering == none {
-            math.equation(block: true, numbering: none, hide(equation))
-        } else [
-            $ #hide(body-or-children(equation)) $ #if equation.has("label") { equation.label }
-        ]
-
-        let hidden = box(concat(children.map(hide-equation)))
-
-        let align-equations(acc, equation) = acc + if acc != [] { linebreak() } + equation
-        let aligned = math.equation(block: true, numbering: none, children.fold([], align-equations))
-
-        // NOTE: Spacing needs to be explicitly set to exactly this value for the hack to work
-        show math.equation: set block(spacing: 0.65em)
-
-        hidden
-        style(style => v(-measure(hidden, style).height, weak: true))
-        aligned
-    }
-}
-
-#let demath = text.with(font: "EB Garamond", weight: "regular")
 
 #multi-equation[
     $ "Minimize" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <objective-function>
@@ -361,7 +414,7 @@ Based on the constraints and objectives discussed above, a 0-1 integer linear mo
     $ &z_j >= z_i + o_i or z_i >= z_j + o_j &forall i in D, j in D, i != j $ <deice-precedence>
     $ &t_i >= z_i + o_i + n_i + q_i &forall i in D $ <min-taxi>
     $ &t_i - z_i - o_i <= h_i &forall i in D $ <max-holdover>
-    $ &t_i - z_i - o_i <= n_i + r_i + q_i &forall i in D $ <max-runway-hold>
+    $ &t_i - z_i - o_i <= n_i + w_i + q_i &forall i in D $ <max-runway-hold>
     $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D union F_C $ <certain-precedence>
     $ &t_j >= t_i + delta_(i, j) &forall (i, j) in F_D union F_C $ <complete-order-separation>
     $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (l_i - e_j) dot gamma_(j, i) &forall (i, j) in F_O $ <overlapping-window-separation>
@@ -372,42 +425,26 @@ Based on the constraints and objectives discussed above, a 0-1 integer linear mo
 
 // TODO: Improve wording of this section if necessary
 
-// NOTE: The supplement of these references are customised in a way to group multiple references into one
-//       (i.e. "Constraints 1, 2, and 3" instead of "Constraint 1, Constraint 2, and Constraint 3"). This
-//       is a hack, but Typst currently has no native or external solutions (package) for this.
-
 The objective function used in the model (@objective-function) minimises total delay and CTOT violations, whose individual costs are given by @delay-cost and @ctot-violation-cost respectively.
 
-@scheduled-time[Constraints] and @deice-time[] define the scheduled landing or take-off time and the de-ice time (if applicable) for an aircraft.
+@scheduled-time and @deice-time define the scheduled landing or take-off time and the de-ice time (if applicable) for an aircraft.
 
-@schedule-once[Constraints] and @deice-once[] ensure that every aircraft is scheduled to land or take off and de-ice exactly once, and within its time window.
+@schedule-once ensures that every aircraft is assigned exactly one landing or take-off time within its time window, and @deice-once ensures that every departure that must de-ice is assigned a de-ice time within its de-ice time window.
 
-@schedule-precedence[Constraint] enforces precedence constraints for every aircraft -- either $i$ must land (or take off) before $j$, or the other way around.
+@schedule-precedence enforces precedence constraints for every aircraft -- either $i$ must land (or take off) before $j$, or the other way around.
 
-@deice-precedence[Constraint] enforces de-icing precedence constraints for every departure, and ensures that a departure can only begin de-icing after the current aircraft (if any) has finished being de-iced.
+@deice-precedence enforces de-icing precedence constraints for every departure, and ensures that a departure can only begin de-icing after the current aircraft (if any) has finished being de-iced.
 
-@min-taxi[Constraint] ensures that a departure has enough time to taxi out after it finishes de-icing and lineup at the runway to meet its scheduled take-off time.
+@min-taxi ensures that a departure has enough time to taxi out after it finishes de-icing and lineup at the runway to meet its scheduled take-off time.
 
-@max-holdover[Constraint] ensures that the time between a departure's scheduled take-off time and de-ice time does not exceed its allowed HOT -- i.e. once de-iced, departures take off before their HOT expires.
+@max-holdover ensures that the time between a departure's scheduled take-off time and de-ice time does not exceed its allowed HOT -- i.e. once de-iced, departures take off before their HOT expires.
 
-@max-runway-hold[Constraint] ensures that the runway holding time of a departure does not exceed its maximum allowed runway holding time.
+@max-runway-hold ensures that the runway holding time of a departure does not exceed its maximum allowed runway holding time.
 
-@certain-precedence[Constraints], @complete-order-separation[], and @overlapping-window-separation[] enforce precedence and minimum separation constraints on all pairs of distinct aircraft.
-These constraints are inferred from disjoint time windows, overlapping time windows, and separation-identical sets of aircraft, and are further discussed in @disjoint-windows and @complete-orders respectively.
+@certain-precedence, @complete-order-separation, and @overlapping-window-separation enforce precedence and minimum separation constraints on all pairs of distinct aircraft.
+These constraints are inferred from disjoint time windows, overlapping time windows, and separation-identical sets of aircraft.
 
-@schedule-binary[Constraints], @deice-binary[], and @precedence-binary[] restrict the decision variables for landings or take-offs, de-icing, and aircraft precedences to binary values.
-
-=== Time-Indexed Formulations
-
-#todo("Explain time-indexed formulations")
-
-=== Disjoint Time Windows <disjoint-windows>
-
-#todo("Explain disjoint time windows")
-
-=== Complete Orders <complete-orders>
-
-#todo("Explain complete orders in separation-identical aircraft")
+@schedule-binary, @deice-binary, and @precedence-binary restrict the decision variables for landings or take-offs, de-icing, and aircraft precedences to binary values.
 
 // TODO: Check if pruning rules such as complete orders and disjoint time windows should be mentioned here
 = Implementation
