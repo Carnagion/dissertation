@@ -26,14 +26,21 @@ pub fn from_heathrow(
     pushback_durs: &str,
     separation_configs: &str,
 ) -> Result<Vec<Instance>, FromHeathrowError> {
-    from_heathrow_with_limit(flights, pushback_durs, separation_configs, usize::MAX)
+    from_heathrow_with_limits(
+        flights,
+        pushback_durs,
+        separation_configs,
+        usize::MAX,
+        usize::MAX,
+    )
 }
 
-pub fn from_heathrow_with_limit(
+pub fn from_heathrow_with_limits(
     flights: &str,
     pushback_durs: &str,
     separation_configs: &str,
-    limit: usize,
+    instance_limit: usize,
+    flight_limit: usize,
 ) -> Result<Vec<Instance>, FromHeathrowError> {
     let pushback_durs = parse_pushback_durs(pushback_durs)?;
     let separation_configs = parse_separation_configs(separation_configs)?;
@@ -42,7 +49,13 @@ pub fn from_heathrow_with_limit(
         .lines()
         .map(FlightRow::parse)
         .process_results(|flights| {
-            group_flights(flights, &pushback_durs, &separation_configs, limit)
+            group_flights(
+                flights,
+                &pushback_durs,
+                &separation_configs,
+                instance_limit,
+                flight_limit,
+            )
         })?;
 
     Ok(instances)
@@ -52,7 +65,8 @@ fn group_flights<'a, 'f, F>(
     flights: F,
     pushback_durs: &'a HashMap<FlightId<'f>, Duration>,
     separation_configs: &'a SeparationConfigs<'f>,
-    limit: usize,
+    instance_limit: usize,
+    flight_limit: usize,
 ) -> Vec<Instance>
 where
     F: IntoIterator<Item = FlightRow<'f>>,
@@ -60,9 +74,9 @@ where
     let groups = flights.into_iter().group_by(|flight| flight.solved_at);
     groups
         .into_iter()
-        .take(limit)
+        .take(instance_limit)
         .map(|(_, group)| {
-            let flight_rows = group.collect::<Vec<_>>();
+            let flight_rows = group.take(flight_limit).collect::<Vec<_>>();
             let separations = create_separation_matrix(&flight_rows, separation_configs);
             let flights = flight_rows
                 .into_iter()
