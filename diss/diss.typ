@@ -253,8 +253,21 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
 
 == Constraints
 
-A feasible solution to the problem must satisfy runway separation requirements, hard time windows, CTOT slots, holdover times, and runway hold times.
+A feasible solution to the problem must satisfy runway precedence, separation requirements, base times, hard time windows, CTOT slots, holdover times, and runway hold times.
 A sequence that violates these hard constraints is considered to be infeasible, and can thus be eliminated from the solution space.
+
+=== Precedences
+
+Since this is a single runway formulation, no two aircraft can land or take off at the same time.
+Let $gamma_(i, j)$ be a boolean decision variable indicating whether aircraft $i$ lands or takes off before aircraft $j$.
+The following constraint can then be imposed on every pair of distinct aircraft $(i, j)$:
+
+$ gamma_(i, j) + gamma_(j, i) = 1 $
+
+That is, either $i$ must land or take off before $j$, or the other way around.
+Similar precedence constraints exist for de-icing -- given any two distinct departures $i$ and $j$, either $i$ must finish its de-icing before $j$ can start de-icing, or the other way around:
+
+$ z_j >= z_i + o_i or z_i >= z_j + o_j $
 
 === Runway Separations
 
@@ -275,25 +288,18 @@ The required separations between each ordered pair of distinct aircraft can ther
 However, runway separations do not necessarily obey the _triangle inequality_ -- i.e. for any three aircraft $i$, $j$, and $k$, the inequality $delta_(i, j) + delta_(j, k) >= delta_(i, k)$ is not necessarily true @demaere-pruning-rules.
 An aircraft's landing or take-off time can thus be influenced by not just the immediately preceding aircraft, but by multiple preceding aircraft.
 
-=== Runway and De-Icing Precedence
-
-Since this is a single runway formulation, no two aircraft can land or take off at the same time -- this would violate their separation requirement.
-Let $gamma_(i, j)$ be a boolean decision variable indicating whether aircraft $i$ lands or takes off before aircraft $j$.
-Then $gamma_(i, j) + gamma_(j, i) = 1$ for all pairs of distinct aircraft $(i, j)$ -- i.e. either $i$ must land or take off before $j$, or the other way around.
-
-Similarly, precedence constraints exist for de-icing -- given any two distinct departures $i$ and $j$, either $i$ must finish its de-icing before $j$ can start de-icing, or the other way around:
-
-$ z_j >= z_i + o_i or z_i >= z_j + o_j $
-
 === Base Times
 
 Every aircraft has an earliest possible landing or take-off time -- henceforth referred to as its _base time_ -- which is defined as the time the aircraft enters the runway queue and finishes lining up (for departures), or the local airspace (for arrivals).
-The base time $b_i$ of an aircraft $i$ is modeled as a hard constraint -- $i$ cannot be scheduled to land or take off before $b_i$.
+The base time $b_i$ of an aircraft $i$ is modeled as a hard constraint -- i.e. $i$ cannot be scheduled to land or take off before $b_i$:
+
+$ t_i >= b_i $
 
 === Time Windows
 
-If an aircraft $i$ is subject to a hard time window which is defined by its earliest (start) time $e_i$ and latest (end) time $l_i$, then its landing or take-off time $t_i$ must be within this window -- i.e. $e_i <= t_i <= l_i$.
-Note that the start of the time window is independent of the aircraft's base time $b_i$.
+If an aircraft $i$ is subject to a hard time window which is defined by its earliest (start) time $e_i$ and latest (end) time $l_i$, then its landing or take-off time $t_i$ must be within this window:
+
+$ e_i <= t_i <= l_i $
 
 In this model, each aircraft is assumed to be subject to a hard time window, although this is not always the case in the real world.
 However, this assumption can be made without loss of generality -- an aircraft $i$ that is not subject to a hard time window can instead be considered to be subject to a very large time window, such that its start time $e_i$ is early enough and its end time $l_i$ late enough so as to never affect solutions in practice @demaere-pruning-rules.
@@ -301,17 +307,21 @@ However, this assumption can be made without loss of generality -- an aircraft $
 === Calculated Take-Off Times
 
 In addition to a hard time window, a departure $i$ might be subject to a Calculated Take-Off Time (CTOT) slot, during which it should take off.
-Typically, a CTOT has a tolerance of -5 to +10 minutes (i.e. five minutes before and ten minutes after $c_i$) and its time window can thus be defined by its earliest (start) time $u_i$ and latest (end) time $v_i$; however, this model makes no such assumptions and allows for customizable CTOT tolerances per departure.
+Typically, a CTOT has a tolerance of -5 to +10 minutes (i.e. five minutes before and ten minutes after $c_i$) and its time window can thus be defined by its earliest (start) time $u_i$ and latest (end) time $v_i$; however, this model allows for customizable CTOT tolerances per departure.
 
 Much like a hard time window, a departure cannot take off before $u_i$, but it may be scheduled after $v_i$ -- although this is heavily penalized.
-The start time of a CTOT slot is thus modeled as a hard constraint, while its end time is modeled as a soft constraint.
+The start time of a CTOT slot is thus modeled as a hard constraint, while its end time is modeled as a soft constraint:
+
+$ t_i >= u_i $
 
 === Holdover Times
 
 Once a departure $i$ has been de-iced, the applied de-icing fluid will remain effective for a certain duration of time, called the Holdover Time (HOT) $h_i$.
 Departures must take off within this period of time -- if a departure's HOT expires before it takes off, it must be de-iced again, which could extend the de-icing queue and delay subsequent aircraft.
 
-The HOT of a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $z_i$ and take-off time $t_i$ must not be greater than $h_i$.
+The HOT of a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $z_i$ and take-off time $t_i$ must not be greater than $h_i$:
+
+$ t_i - z_i - o_i <= h_i $
 
 === Runway Hold Times
 
@@ -322,52 +332,9 @@ However, in some cases it may be better to absorb delays at the runway by _runwa
 A departure that pushes back earlier than absoltuely necessary would be able to de-ice earlier than necessary, freeing up the de-icing queue earlier.
 This could in turn enable the following departures to de-ice earlier and potentially reduce the total delay and CTOT violations in the remaining sequence.
 
-The maximum runway holding duration $w_i$ for a departure $i$ is thus modeled as a hard constraint -- the time between $z_i$ and $t_i$ must not be greater than the sum of its de-ice duration $o_i$, post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $w_i$.
-That is, $t_i - z_i <= o_i + n_i + q_i + w_i$.
+The maximum runway holding duration $w_i$ for a departure $i$ is thus modeled as a hard constraint -- the time between $z_i$ and $t_i$ must not be greater than the sum of its de-ice duration $o_i$, post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $w_i$:
 
-=== Complete Orders
-
-The earliest time an aircraft $i$ can be scheduled to land or take off, irrespective of any other aircraft -- its _release time_ $r_i$ -- can thus be calculated as the maximum of its base time $b_i$, start time $e_i$ of its hard time window, and start time $u_i$ of its CTOT slot (if applicable):
-
-$ r_i = max(b_i, e_i, u_i) $
-
-Meanwhile, the latest time an aircraft $i$ can be scheduled to land or take off -- its _due time_ $d_i$ -- is simply the end time $l_i$ of its hard time window.
-
-A feasible runway sequence will always schedule an aircraft $i$ at a time between $r_i$ and $d_i$.
-The set of possible landing or take-off times $T_i$ for an aircraft $i$ can thus be defined as the set of all times between $r_i$ and $d_i$:
-
-$ T_i = { r_i, ..., d_i } $
-
-#cite(<beasley-scheduling-aircraft>, form: "prose") show that it can be determined for certain pairs of distinct aircraft $(i, j)$ whether $i$ lands or takes off before $j$ does, based on their sets of possible landing or take-off times.
-For example, if two aircraft $i$ and $j$ have their release times and due times as $r_i = 10$, $d_i = 50$, $r_j = 70$, and $d_j = 110$ respectively, then it is clear that $i$ must land or take off first (i.e. before $j$) since $T_i$ and $T_j$ are disjoint.
-On the other hand, if $r_i = 10$, $d_i = 70$, $r_j = 50$, and $d_j = 110$, then it is not always the case that $i$ lands or takes off before $j$ does (or vice-versa).
-
-Additionally, even if the order of $i$ and $j$ can be inferred due to $T_i$ and $T_j$ being disjoint, their separation constraint may not automatically be satisfied @beasley-scheduling-aircraft.
-Continuing the former example above with $r_i = 10$, $d_i = 50$, $r_j = 70$, and $d_j = 110$, if the required separation $delta_(i, j) = 15$, then the separation constraint is automatically satisfied regardless of what times $i$ and $j$ are scheduled to land or take off at.
-However, if $delta_(i, j) = 25$, then there exist certain landing or take-off times for $i$ and $j$ such that their separation constraint is violated.
-
-From these observations, #cite(<beasley-scheduling-aircraft>, form: "prose") show that it is possible to define three disjoint sets:
-1. The set of pairs of distinct aircraft $(i, j)$ for which $i$ definitely lands or takes off before $j$ does, and for which the separation constraint is automatically satisfied
-2. The set of pairs of distinct aircraft $(i, j)$ for which $i$ definitely lands or takes off before $j$ does, but for which the separation constraint is not automatically satisfied
-3. The set of pairs of distinct aircraft $(i, j)$ for which $i$ may or may not land before $j$ and vice-versa
-
-Let $F_S$, $F_D$, and $F_O$ be the first, second, and third set respectively.
-They can then be defined as shown below:
-
-#multi-equation[
-    $ F_S = { (i, j) | &d_i < r_j and d_i + delta_(i, j) <= r_j, i in F, j in F, i != j } $ <separated-windows>
-    $ F_D = { (i, j) | &d_i < r_j and d_i + delta_(i, j) > r_j, i in F, j in F, i != j } $ <disjoint-windows>
-    $ F_O = { (i, j) | &r_j <= r_i <= d_j or r_j <= d_i <= d_j or r_i <= r_j <= d_i or r_i <= d_j <= d_i,\
-        &i in F, j in F, i != j } $ <overlapping-windows>
-]
-
-It is then possible to impose the following precedence and separation constraints on every pair of distinct aircraft using @separated-windows, @disjoint-windows, and @overlapping-windows:
-
-#multi-equation[
-    $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D $
-    $ &t_j >= t_i + delta_(i, j) &forall (i, j) in F_D $
-    $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (d_i - r_j) dot gamma_(j, i) &forall (i, j) in F_O $
-]
+$ t_i - z_i <= o_i + n_i + q_i + w_i $
 
 == Objectives
 
@@ -403,7 +370,34 @@ $ c_v (i) = cases(
 
 == Model
 
-Based on the constraints and objectives discussed above, a 0-1 integer linear model of the runway and de-icing sequencing problem for a single runway and single de-icing pad is presented below:
+A time-indexed formulation is employed in order to linearize the objective function and hence solve the integrated runway and de-icing sequencing problem using 0-1 integer linear programming.
+
+First, the landing or take-off time of an aircraft $i$ is constrained to lie between the earliest possible time $i$ can be scheduled to land or take off -- its _release time_ $r_i$ and the latest possible time $i$ can be scheduled to land or take off -- its _due time_ $d_i$.
+The release time of $i$ be calculated as the maximum of its base time $b_i$, start time $e_i$ of its hard time window, and start time $u_i$ of its CTOT slot (if applicable):
+
+$ r_i = max(b_i, e_i, u_i) $
+
+Meanwhile, the due time of $i$ is simply the end time $l_i$ of its hard time window.
+A feasible runway sequence will always schedule $i$ at a time between $r_i$ and $d_i$.
+The set of possible landing or take-off times $T_i$ for an aircraft $i$ can thus be defined as the set of all times between $r_i$ and $d_i$:
+
+$ T_i = { r_i, ..., d_i } $
+
+A binary decision variable $tau_(i, t)$ is then associated with every aircraft $i in F$ and every time $t in T_i$, which is $1$ if and only if $i$ lands or takes off at time $t$.
+Since every aircraft is assigned exactly one time to land or take off, the following constraint must hold for all $i in F$:
+
+$ sum_(t in T_i) tau_(i, t) = 1 $
+
+Similarly, the set of possible de-icing times $Z_i$ for a departure $i$ -- irrespective of when it takes off -- can be defined as the set of times between its earliest possible de-icing time and latest possible de-icing time:
+
+$ Z_i = { r_i - q_i - w_i - n_i - o_i, ..., d_i - q_i - n_i - o_i } $
+
+A binary decision variable $zeta_(i, z)$ can then be associated with every departure $i in D$ and every time $z in Z_i$, which is $1$ if and only if $i$ starts de-icing at time $z$.
+Much like the landing or take-off time, every departure $i$ is assigned exactly one time to de-ice:
+
+$ sum_(z in Z_i) zeta_(i, z) = 1 $
+
+Putting together these constraints, objectives, and time-indexed formulations, a 0-1 integer linear model for the integrated runway and de-icing sequencing problem is presented below:
 
 #multi-equation[
     $ "Minimize" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <objective-function>
@@ -428,7 +422,8 @@ Based on the constraints and objectives discussed above, a 0-1 integer linear mo
 
 // TODO: Improve wording of this section if necessary
 
-The objective function used in the model (@objective-function) minimises total delay and CTOT violations, whose individual costs are given by @delay-cost and @ctot-violation-cost respectively.
+The objective function -- @objective-function -- minimises total delay and CTOT violations, whose individual costs are given by @delay-cost and @ctot-violation-cost respectively.
+The individual cost functions $c_d (i)$ and $c_v (i)$ are linearized according to the time-indexed formulations described above.
 
 @scheduled-time and @deice-time define the scheduled landing or take-off time and the de-ice time (if applicable) for an aircraft.
 
@@ -444,10 +439,49 @@ The objective function used in the model (@objective-function) minimises total d
 
 @max-runway-hold ensures that the runway holding time of a departure does not exceed its maximum allowed runway holding time.
 
-@certain-precedence, @complete-order-separation, and @overlapping-window-separation enforce precedence and minimum separation constraints on all pairs of distinct aircraft.
-These constraints are inferred from disjoint time windows, overlapping time windows, and separation-identical sets of aircraft.
+@certain-precedence, @complete-order-separation, and @overlapping-window-separation enforce precedence and separation constraints on all pairs of distinct aircraft.
+These constraints are inferred from disjoint time windows as well as complete orders in separation-identical aircraft, which are discussed further in @disjoint-time-windows and @complete-orders respectively.
 
 @schedule-binary, @deice-binary, and @precedence-binary restrict the decision variables for landings or take-offs, de-icing, and aircraft precedences to binary values.
+
+// TODO: Check if this section looks better elsewhere, such as just after time windows or precedences, or just after the model
+=== Disjoint Time Windows <disjoint-time-windows>
+
+#cite(<beasley-scheduling-aircraft>, form: "prose") show that it can be determined for certain pairs of distinct aircraft $(i, j)$ whether $i$ lands or takes off before $j$ does, based on their sets of possible landing or take-off times.
+For example, if two aircraft $i$ and $j$ have their release times and due times as $r_i = 10$, $d_i = 50$, $r_j = 70$, and $d_j = 110$ respectively, then it is clear that $i$ must land or take off first (i.e. before $j$) since $T_i$ and $T_j$ are disjoint.
+On the other hand, if $r_i = 10$, $d_i = 70$, $r_j = 50$, and $d_j = 110$, then it is not always the case that $i$ lands or takes off before $j$ does (or vice-versa).
+
+Additionally, even if the order of $i$ and $j$ can be inferred due to $T_i$ and $T_j$ being disjoint, their separation constraint may not automatically be satisfied @beasley-scheduling-aircraft.
+Continuing the former example above with $r_i = 10$, $d_i = 50$, $r_j = 70$, and $d_j = 110$, if the required separation $delta_(i, j) = 15$, then the separation constraint is automatically satisfied regardless of what times $i$ and $j$ are scheduled to land or take off at.
+However, if $delta_(i, j) = 25$, then there exist certain landing or take-off times for $i$ and $j$ such that their separation constraint is violated.
+
+From these observations, #cite(<beasley-scheduling-aircraft>, form: "prose") show that it is possible to define three disjoint sets:
+1. The set of pairs of distinct aircraft $(i, j)$ for which $i$ definitely lands or takes off before $j$ does, and for which the separation constraint is automatically satisfied
+2. The set of pairs of distinct aircraft $(i, j)$ for which $i$ definitely lands or takes off before $j$ does, but for which the separation constraint is not automatically satisfied
+3. The set of pairs of distinct aircraft $(i, j)$ for which $i$ may or may not land before $j$ and vice-versa
+
+Let $F_S$, $F_D$, and $F_O$ be the first, second, and third set respectively.
+They can then be defined as shown below:
+
+#multi-equation[
+    $ F_S = { (i, j) | &d_i < r_j and d_i + delta_(i, j) <= r_j, i in F, j in F, i != j } $ <separated-windows>
+    $ F_D = { (i, j) | &d_i < r_j and d_i + delta_(i, j) > r_j, i in F, j in F, i != j } $ <disjoint-windows>
+    $ F_O = { (i, j) | &r_j <= r_i <= d_j or r_j <= d_i <= d_j or r_i <= r_j <= d_i or r_i <= d_j <= d_i,\
+        &i in F, j in F, i != j } $ <overlapping-windows>
+]
+
+It is then possible to impose the following precedence and separation constraints on every pair of distinct aircraft using @separated-windows, @disjoint-windows, and @overlapping-windows:
+
+#multi-equation[
+    $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D $
+    $ &t_j >= t_i + delta_(i, j) &forall (i, j) in F_D $
+    $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (d_i - r_j) dot gamma_(j, i) &forall (i, j) in F_O $
+]
+
+// TODO: Check if this section looks better elsewhere, such as just after time windows or precedences, or just after the model
+=== Complete Orders <complete-orders>
+
+A _complete order_ exists between any two aircraft $i$ and $j$ if the objective value and feasibility of a sequence $s$ containing both $i$ and $j$ cannot be improved by reversing the order of $i$ and $j$ in $s$ @demaere-pruning-rules.
 
 // TODO: Check if pruning rules such as complete orders and disjoint time windows should be mentioned here
 = Implementation
@@ -553,7 +587,8 @@ These constraints are inferred from disjoint time windows, overlapping time wind
 == Problem Instances
 
 // TODO: Check if Heathrow or University of Bologna should be cited
-The performance of both the branch-and-bound program and CPLEX model is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarized in @heathrow-instances -- as well as benchmark problem instances from Milan Airport. The latter were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
+The performance of both the branch-and-bound program and CPLEX model is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarized in @heathrow-instances -- as well as benchmark problem instances from Milan Airport.
+The latter were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
 
 #let heathrow-instances = results-table(
     group-headers: ([Small], [Medium], [Large]),
