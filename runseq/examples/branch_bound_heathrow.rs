@@ -8,10 +8,8 @@ use runseq::{
     vis::Visualiser,
 };
 
-const FMT: &str = "%F %T";
-
 fn main() {
-    let deice_strategy = DeiceStrategy::ByTobt;
+    let deice_strategy = DeiceStrategy::Integrated;
     let branch_bound = BranchBound {
         horizon: NonZeroUsize::new(10),
         deice_strategy,
@@ -19,7 +17,7 @@ fn main() {
 
     let vis = Visualiser::new();
 
-    let mut csv = Writer::from_path("../stats/heathrow/deice-tobt.csv").unwrap();
+    let mut csv = Writer::from_path("../stats/heathrow/branch-bound/deice-integrated.csv").unwrap();
     csv.write_record([
         "Instance",
         "Makespan (s)",
@@ -78,10 +76,10 @@ fn main() {
             id.to_string(),
             makespan.num_seconds().to_string(),
             deice_start
-                .map(|deice_start| deice_start.time().format(FMT).to_string())
+                .map(|deice_start| deice_start.time().to_string())
                 .unwrap_or_default(),
             deice_end
-                .map(|deice_end| deice_end.time().format(FMT).to_string())
+                .map(|deice_end| deice_end.time().to_string())
                 .unwrap_or_default(),
             cost.as_u64().to_string(),
         ])

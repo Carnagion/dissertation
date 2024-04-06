@@ -8,8 +8,6 @@ use runseq::{
     vis::Visualiser,
 };
 
-const FMT: &str = "%F %T";
-
 fn main() {
     let deice_strategy = DeiceStrategy::Integrated;
     let branch_bound = BranchBound {
@@ -19,7 +17,7 @@ fn main() {
 
     let vis = Visualiser::new();
 
-    let mut csv = Writer::from_path("../stats/furini/deice-integrated.csv").unwrap();
+    let mut csv = Writer::from_path("../stats/furini/branch-bound/deice-integrated.csv").unwrap();
     csv.write_record([
         "Instance",
         "Makespan (s)",
@@ -81,8 +79,8 @@ fn main() {
         csv.write_record([
             format!("FPT{:0>2}", id),
             makespan.num_seconds().to_string(),
-            deice_start.format(FMT).to_string(),
-            deice_end.format(FMT).to_string(),
+            deice_start.to_string(),
+            deice_end.to_string(),
             cost.as_u64().to_string(),
         ])
         .unwrap();
