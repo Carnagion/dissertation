@@ -693,7 +693,7 @@ It can also be seen from @branch-bound-furini that the makespans as well as earl
 However, the objective values obtained by the decomposed de-icing approach are far worse than its integrated counterpart's -- integrated de-icing achieves a #calc.round(decomposed-integrated-improvement, digits: 2)x improvement in objective values on average compared to decomposed de-icing.
 
 // TODO: Check the accuracy of the numbers here
-Furthermore, the decomposed de-icing approach failed to produce a feasible solution for instance FPT01 past 50 aircraft.
+Furthermore, the decomposed de-icing approach failed to produce a feasible solution for instance FPT01.
 A rolling horizon of 20 or higher is required to solve this instance using decomposed de-icing; however, the resulting objective value and mean runtime are still worse than those achieved by the integrated approach using a lower rolling horizon of 10.
 
 #todo("Write more about different de-icing approaches in branch-and-bound program if necessary")
