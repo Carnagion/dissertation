@@ -414,7 +414,7 @@ Putting together these constraints, objectives, and time-indexed formulations, a
     $ &t_i - z_i - o_i <= n_i + w_i + q_i &forall i in D $ <max-runway-hold>
     $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D union F_C $ <certain-precedence>
     $ &t_j >= t_i + delta_(i, j) &forall (i, j) in F_D union F_C $ <complete-order-separation>
-    $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (l_i - e_j) dot gamma_(j, i) &forall (i, j) in F_O $ <overlapping-window-separation>
+    $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (d_i - r_j) dot gamma_(j, i) &forall (i, j) in F_O $ <overlapping-window-separation>
     $ &tau_(i, t) in { 0, 1 } &forall i in F, t in T_i $ <schedule-binary>
     $ &zeta_(i, z) in { 0, 1 } &forall i in D, z in Z_i $ <deice-binary>
     $ &gamma_(i, j) in { 0, 1 } &forall i in F, j in F, i != j $ <precedence-binary>
@@ -429,7 +429,7 @@ The individual cost functions $c_d (i)$ and $c_v (i)$ are linearized according t
 
 @schedule-once ensures that every aircraft is assigned exactly one landing or take-off time within its time window, and @deice-once ensures that every departure that must de-ice is assigned a de-ice time within its de-ice time window.
 
-@schedule-precedence enforces precedence constraints for every aircraft -- either $i$ must land (or take off) before $j$, or the other way around.
+@schedule-precedence enforces precedence constraints for every aircraft -- either $i$ must land or take off before $j$, or the other way around.
 
 @deice-precedence enforces de-icing precedence constraints for every departure, and ensures that a departure can only begin de-icing after the current aircraft (if any) has finished being de-iced.
 
@@ -490,7 +490,7 @@ A _complete order_ exists between any two aircraft $i$ and $j$ if the objective 
 
 == Branch-and-Bound Program
 
-#todo("Write short introduction to branch-and-bound program and various de-icing strategies")
+#todo("Write short introduction to branch-and-bound program and various de-icing approaches")
 
 === Decomposed De-Icing
 
@@ -584,11 +584,30 @@ A _complete order_ exists between any two aircraft $i$ and $j$ if the objective 
     )
 }
 
+#let results = (
+    furini: (
+        branch-bound: (
+            decomposed: csv("results/furini/branch-bound/deice-decomposed.csv"),
+            integrated: csv("results/furini/branch-bound/deice-integrated.csv"),
+        )
+    ),
+    heathrow: (
+        branch-bound: (
+            tobt: csv("results/heathrow/branch-bound/deice-tobt.csv"),
+            ctot: csv("results/heathrow/branch-bound/deice-ctot.csv"),
+            integrated: csv("results/heathrow/branch-bound/deice-integrated.csv"),
+        ),
+        cplex: (
+            integrated: csv("results/heathrow/cplex/deice-integrated.csv"),
+        ),
+    ),
+)
+
 == Problem Instances
 
 // TODO: Check if Heathrow or University of Bologna should be cited
 The performance of both the branch-and-bound program and CPLEX model is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarized in @heathrow-instances -- as well as benchmark problem instances from Milan Airport.
-The latter were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
+The latter were first introduced by #cite(<furini-improved-horizon>, form: "prose"), and were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
 
 #let heathrow-instances = results-table(
     group-headers: ([Small], [Medium], [Large]),
@@ -604,75 +623,103 @@ The latter were obtained from the University of Bologna Operations Research Grou
     ],
 ) <heathrow-instances>
 
-#todo("Write more about problem instances if necessary")
+The terminal maneuvering area around London Heathrow is highly complex, with up to six different SID routes in use at any given time and up to five different weight classes to consider.
+This results in a complex separation matrix, in which triangle inequalities are often violated -- i.e. the runway separation for an aircraft is influenced by multiple preceding aircraft rather than just the immediately preceding aircraft.
+Additionally, a substantial number of aircraft are also subject to CTOTs, which further reduces the number of complete orders that can be inferred.
 
-== Comparison of De-Icing Strategies
+In contrast, the Milan benchmark instances are considerably simpler, having a relatively high number of separation-identical aircraft and a mix of both arrivals and departures.
 
-#todo("Write about comparison of CPLEX model as well as branch-and-bound, with different de-icing strategies")
+== Comparison of De-Icing Approaches
 
-@branch-bound-heathrow-small-medium lists the results for the branch-and-bound program using each de-icing approach on all small- and medium-sized problem Heathrow instances.
-The small problem instances were solved without a rolling horizon, while a rolling horizon of 12 was used for the medium-sized instances.
+@branch-bound-heathrow-small-medium lists the makespans, earliest and latest de-icing times, objective values, and mean runtimes for all small- and medium-sized problem Heathrow instances solved by the branch-and-bound program utilising the three different de-icing approaches.
+The small problem instances were solved without a rolling horizon, while a rolling horizon of 10 was used for the medium-sized instances.
 
 #let branch-bound-heathrow-small-medium = results-table(
     group-headers: ([Decomposed de-icing (by TOBT)], [Decomposed de-icing (by CTOT)], [Integrated de-icing]),
     side-headers: true,
-    csv("results/heathrow/branch-bound/deice-tobt.csv").slice(0, 20 + 1),
-    csv("results/heathrow/branch-bound/deice-ctot.csv").slice(0, 20 + 1),
-    csv("results/heathrow/branch-bound/deice-integrated.csv").slice(0, 20 + 1),
+    results.heathrow.branch-bound.tobt.slice(0, 20 + 1),
+    results.heathrow.branch-bound.ctot.slice(0, 20 + 1),
+    results.heathrow.branch-bound.integrated.slice(0, 20 + 1),
 )
 
 #align(
     center,
-    rotate(-90deg, reflow: true)[   
+    rotate(-90deg, reflow: true)[
         #figure(
             branch-bound-heathrow-small-medium,
             caption: [
-                Results for small and medium problem instances from London Heathrow solved by the branch-and-bound program utilising the different de-icing strategies
+                Results for small and medium problem instances from London Heathrow solved by the branch-and-bound program utilising the different de-icing approaches
             ],
         ) <branch-bound-heathrow-small-medium>
     ],
 )
 
-@branch-bound-furini lists the results for the branch-and-bound program using each de-icing approach on all benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose").
+#todo("Add boxplot for runtimes")
+
+@branch-bound-furini lists the results for all Milan benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the three different de-icing approaches.
 Since these instances do not contain de-icing data, the pushback duration $p_i$, taxi (to de-icing pads) duration $m_i$, de-icing duration $o_i$, taxi-out duration $n_i$, and lineup duration $q_i$ are assumed to be five minutes each for all departures.
-A rolling horizon of size 12 was used to solve each instance.
+A rolling horizon of size 10 was used to solve each instance.
 
 #let branch-bound-furini = results-table(
     group-headers: ([Decomposed de-icing], [Integrated de-icing]),
     side-headers: true,
-    csv("results/furini/branch-bound/deice-decomposed.csv"),
-    csv("results/furini/branch-bound/deice-integrated.csv"),
+    results.furini.branch-bound.decomposed,
+    results.furini.branch-bound.integrated,
 )
 
 #figure(
     branch-bound-furini,
     caption: [
-        Results for the benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the different de-icing strategies
+        Results for the benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the different de-icing approaches
     ],
 ) <branch-bound-furini>
 
-As evidenced by the runtimes in @branch-bound-furini, #cite(<furini-improved-horizon>, form: "prose") instances are considerably easier to solve than the Heathrow instances, despite having more aircraft per instance (including more departures to de-ice) and using a larger rolling horizon.
+As evidenced by the mean runtimes, these instances are considerably easier to solve than the Heathrow instances, despite having more departures to de-ice per instance.
 This is primarily due to the lack of CTOT slots as well as the presence of relatively simple separation matrices, which allows complete orders to be inferred between most aircraft in each instance.
 
+#todo("Add boxplot for runtimes")
+
+#let decomposed-integrated-improvement = {
+    let (sum, count) = results.furini.branch-bound.decomposed.map(row => row.at(-2))
+        .zip(results.furini.branch-bound.integrated.map(row => row.at(-2)))
+        .slice(1)
+        .filter(row => row.all(num => num.len() > 0))
+        .map(row => int(row.first()) / int(row.last()))
+        .fold((0, 0), ((sum, count), num) => (sum + num, count + 1))
+    sum / count
+}
+
+It can also be seen from @branch-bound-furini that the makespans as well as earliest and latest de-icing times produced by both approaches are nearly identical.
+However, the objective values obtained by the decomposed de-icing approach are far worse than its integrated counterpart's -- integrated de-icing achieves a #calc.round(decomposed-integrated-improvement, digits: 2)x improvement in objective values on average compared to decomposed de-icing.
+
 // TODO: Check the accuracy of the numbers here
-The decomposed de-icing strategy failed to produce feasible solutions for instances FPT01 and FPT06 past 35 aircraft.
-A rolling horizon of 20 or higher is required to solve these instances using decomposed de-icing; however, the resulting objective values are still worse than those obtained by the integrated strategy using a lower rolling horizon of 12.
+Furthermore, the decomposed de-icing approach failed to produce a feasible solution for instance FPT01 past 50 aircraft.
+A rolling horizon of 20 or higher is required to solve this instance using decomposed de-icing; however, the resulting objective value and mean runtime are still worse than those achieved by the integrated approach using a lower rolling horizon of 10.
+
+#todo("Write more about different de-icing approaches in branch-and-bound program if necessary")
 
 == Comparison of Programs
 
+@cplex-branch-bound-heathrow-small lists the makespans, earliest and latest de-icing times, and mean runtimes for all small instances from London Heathrow, solved using the mathematical program implemented in CPLEX as well as the branch-and-bound program -- both utilising an integrated de-icing approach.
+The results for the latter are the same as in @branch-bound-heathrow-small-medium, but are presented again here for convenience.
+Both implementations achieve the same (optimal) objective values across all instances.
+
+// TODO: Remove the objective values here
 #let cplex-branch-bound-heathrow-small = results-table(
     group-headers: ([CPLEX model], [Branch-and-bound program]),
     side-headers: true,
-    csv("results/heathrow/cplex/deice-integrated.csv"),
-    csv("results/heathrow/branch-bound/deice-integrated.csv").slice(0, 10 + 1),
+    results.heathrow.cplex.integrated,
+    results.heathrow.branch-bound.integrated.slice(0, 10 + 1),
 )
 
 #figure(
     cplex-branch-bound-heathrow-small,
     caption: [
-        Results for small problem instances from London Heathrow solved by CPLEX as well as a branch-and-bound program, both utilising integrated de-icing
+        Results for small problem instances from London Heathrow solved by CPLEX as well as the branch-and-bound program, both utilising an integrated de-icing approach
     ],
 ) <cplex-branch-bound-heathrow-small>
+
+#todo("Write about comparison of CPLEX model versus branch-and-bound program")
 
 == Impact
 
@@ -707,4 +754,4 @@ A rolling horizon of 20 or higher is required to solve these instances using dec
 
 // boxplot for runtimes
 
-// have separate subsections for de-icing strategies and CPLEX vs bnb
+// have separate subsections for de-icing approaches and CPLEX vs bnb
