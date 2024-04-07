@@ -11,16 +11,17 @@ fn main() {
     divan::main();
 }
 
-#[divan::bench_group(sample_count = 10, sample_size = 1)]
 mod furini {
     use super::*;
 
-    const FURINI_INSTANCES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    // NOTE: Decomposed de-icing fails on instance FPT01
+    const DECOMPOSED_FURINI_INSTANCES: &[usize] = &[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-    const HORIZON: Option<NonZeroUsize> = NonZeroUsize::new(12);
+    const INTEGRATED_FURINI_INSTANCES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-    // NOTE: Decomposed de-icing fails on instances FPT01 and FPT06
-    #[divan::bench(args = FURINI_INSTANCES)]
+    const HORIZON: Option<NonZeroUsize> = NonZeroUsize::new(10);
+
+    #[divan::bench(args = DECOMPOSED_FURINI_INSTANCES)]
     fn deice_decomposed(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("../instances/furini/toml/{}.toml", instance));
 
@@ -34,7 +35,7 @@ mod furini {
         });
     }
 
-    #[divan::bench(args = FURINI_INSTANCES)]
+    #[divan::bench(args = INTEGRATED_FURINI_INSTANCES)]
     fn deice_integrated(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("../instances/furini/toml/{}.toml", instance));
 
@@ -49,18 +50,27 @@ mod furini {
     }
 }
 
-#[divan::bench_group(sample_count = 10, sample_size = 1)]
 mod heathrow {
     use super::*;
 
-    const HEATHROW_INSTANCES: &[usize] = &[
+    // NOTE: De-icing by TOBT fails on instances 21-25
+    const TOBT_HEATHROW_INSTANCES: &[usize] = &[
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 26, 27, 28, 29, 30,
+    ];
+
+    // NOTE: De-icing by CTOT fails on instances 21-25
+    const CTOT_HEATHROW_INSTANCES: &[usize] = &[
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 26, 27, 28, 29, 30,
+    ];
+
+    const INTEGRATED_HEATHROW_INSTANCES: &[usize] = &[
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
         26, 27, 28, 29, 30,
     ];
 
     const HORIZON: Option<NonZeroUsize> = NonZeroUsize::new(10);
 
-    #[divan::bench(args = HEATHROW_INSTANCES)]
+    #[divan::bench(args = TOBT_HEATHROW_INSTANCES)]
     fn deice_by_tobt(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("../instances/heathrow/toml/{}.toml", instance));
 
@@ -74,7 +84,7 @@ mod heathrow {
         });
     }
 
-    #[divan::bench(args = HEATHROW_INSTANCES)]
+    #[divan::bench(args = CTOT_HEATHROW_INSTANCES)]
     fn deice_by_ctot(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("../instances/heathrow/toml/{}.toml", instance));
 
@@ -88,7 +98,7 @@ mod heathrow {
         });
     }
 
-    #[divan::bench(args = HEATHROW_INSTANCES)]
+    #[divan::bench(args = INTEGRATED_HEATHROW_INSTANCES)]
     fn deice_integrated(bencher: Bencher, instance: usize) {
         let instance = load_instance(format!("../instances/heathrow/toml/{}.toml", instance));
 
