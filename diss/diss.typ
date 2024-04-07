@@ -197,7 +197,7 @@
 
 = Problem Description
 
-Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequencing problem for a single runway and single de-icing pad consists of finding a sequence of landing and take-off times as well as a sequence of de-icing times such that an optimal value is achieved for a given objective function, subject to the satisfaction of all hard constraints.
+Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequencing problem for a single runway and single de-icing station consists of finding a sequence of landing and take-off times as well as a sequence of de-icing times such that an optimal value is achieved for a given objective function, subject to the satisfaction of all hard constraints.
 
 == Notation
 
@@ -217,7 +217,7 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
     $F$, [Set of aircraft, defined as $A union D$],
     $b_i$, [Base landing or take-off time for aircraft $i$],
     $p_i$, [Pushback duration for departure $i$],
-    $m_i$, [Duration to taxi from gates to de-icing pad for departure $i$],
+    $m_i$, [Duration to taxi from gates to de-icing station for departure $i$],
     $o_i$, [De-icing duration for departure $i$],
     $n_i$, [Taxi-out duration for departure $i$],
     $q_i$, [Lineup duration for departure $i$],
@@ -603,10 +603,19 @@ A _complete order_ exists between any two aircraft $i$ and $j$ if the objective 
     ),
 )
 
+#let objective-values(results) = results.slice(1).map(row => row.at(-2))
+
+#let runtimes(results) = results.slice(1).map(array.last)
+
+#let avg(..nums) = {
+    let (sum, count) = nums.pos().fold((0, 0), ((sum, count), num) => (sum + num, count + 1))
+    sum / count
+}
+
 == Problem Instances
 
 // TODO: Check if Heathrow or University of Bologna should be cited
-The performance of both the branch-and-bound program and CPLEX model is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarized in @heathrow-instances -- as well as benchmark problem instances from Milan Airport.
+The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarized in @heathrow-instances -- as well as benchmark problem instances from Milan Airport.
 The latter were first introduced by #cite(<furini-improved-horizon>, form: "prose"), and were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
 
 #let heathrow-instances = results-table(
@@ -654,10 +663,63 @@ The small problem instances were solved without a rolling horizon, while a rolli
     ],
 )
 
+#let heathrow-total-runtimes = (
+    tobt: runtimes(results.heathrow.branch-bound.tobt).filter(str => str.len() > 0).map(float).sum(),
+    ctot: runtimes(results.heathrow.branch-bound.ctot).filter(str => str.len() > 0).map(float).sum(),
+    integrated: runtimes(results.heathrow.branch-bound.integrated).filter(str => str.len() > 0).map(float).sum(),
+)
+
+#let heathrow-avg-runtimes = (
+    tobt: avg(..
+        runtimes(results.heathrow.branch-bound.tobt)
+        .filter(str => str.len() > 0)
+        .map(float),
+    ),
+    ctot: avg(..
+        runtimes(results.heathrow.branch-bound.ctot)
+        .filter(str => str.len() > 0)
+        .map(float),
+    ),
+    integrated: avg(..
+        runtimes(results.heathrow.branch-bound.integrated)
+        .filter(str => str.len() > 0)
+        .map(float),
+    ),
+)
+
+#todo("Include results table for large instances")
+
+The total runtime to solve all 30 problem instances was #calc.round(heathrow-total-runtimes.tobt / 1000, digits: 2) seconds for decomposed de-icing by TOBT, #calc.round(heathrow-total-runtimes.ctot / 1000, digits: 2) seconds for decomposed de-icing by CTOT, and #calc.round(heathrow-total-runtimes.integrated / 1000, digits: 2) seconds for the integrated approach, although it should be noted that the decomposed approaches failed to produce solutions for instances 21 through 25.
+The average runtimes were #calc.round(heathrow-avg-runtimes.tobt, digits: 2) milliseconds, #calc.round(heathrow-avg-runtimes.ctot, digits: 2) milliseconds, and #calc.round(heathrow-avg-runtimes.integrated, digits: 2) milliseconds respectively.
+
 #todo("Add boxplot for runtimes")
 
+#let heathrow-tobt-ctot-improvement = avg(
+    ..objective-values(results.heathrow.branch-bound.tobt)
+        .zip(objective-values(results.heathrow.branch-bound.ctot))
+        .filter(row => row.all(str => str.len() > 0))
+        .map(row => int(row.first()) / int(row.last())),
+)
+
+#let heathrow-tobt-integrated-improvement = avg(
+    ..objective-values(results.heathrow.branch-bound.tobt)
+        .zip(objective-values(results.heathrow.branch-bound.integrated))
+        .filter(row => row.all(str => str.len() > 0))
+        .map(row => int(row.first()) / int(row.last())),
+)
+
+#let heathrow-ctot-integrated-improvement = avg(
+    ..objective-values(results.heathrow.branch-bound.ctot)
+        .zip(objective-values(results.heathrow.branch-bound.integrated))
+        .filter(row => row.all(str => str.len() > 0))
+        .map(row => int(row.first()) / int(row.last())),
+)
+
+The two different decomposed de-icing approaches result in nearly identical makespans, earliest and latest de-icing times, and objective values for all 30 problem instances, with decomposed de-icing by CTOT attaining only a #calc.round((heathrow-tobt-ctot-improvement - 1.0) * 100, digits: 2)% improvement in objective values on average compared to decomposed de-icing by TOBT.
+Additionally, integrated de-icing achieves an improvement in objective values by a factor of #calc.round(heathrow-tobt-integrated-improvement, digits: 2) on average compared to decomposed de-icing by TOBT.
+
 @branch-bound-furini lists the results for all Milan benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the three different de-icing approaches.
-Since these instances do not contain de-icing data, the pushback duration $p_i$, taxi (to de-icing pads) duration $m_i$, de-icing duration $o_i$, taxi-out duration $n_i$, and lineup duration $q_i$ are assumed to be five minutes each for all departures.
+Since these instances do not contain de-icing data, the pushback duration $p_i$, pre-de-ice taxi duration $m_i$, de-icing duration $o_i$, taxi-out duration $n_i$, and lineup duration $q_i$ are assumed to be five minutes each for all departures.
 A rolling horizon of size 10 was used to solve each instance.
 
 #let branch-bound-furini = results-table(
@@ -674,23 +736,44 @@ A rolling horizon of size 10 was used to solve each instance.
     ],
 ) <branch-bound-furini>
 
-As evidenced by the mean runtimes, these instances are considerably easier to solve than the Heathrow instances, despite having more departures to de-ice per instance.
+#let furini-total-runtimes = (
+    decomposed: runtimes(results.furini.branch-bound.decomposed).filter(str => str.len() > 0).map(float).sum(),
+    integrated: runtimes(results.furini.branch-bound.integrated).filter(str => str.len() > 0).map(float).sum(),
+)
+
+#let furini-avg-runtimes = (
+    decomposed: avg(..
+        runtimes(results.furini.branch-bound.decomposed)
+        .filter(str => str.len() > 0)
+        .map(float),
+    ),
+    integrated: avg(..
+        runtimes(results.furini.branch-bound.integrated)
+        .filter(str => str.len() > 0)
+        .map(float),
+    ),
+)
+
+#let furini-integrated-slowdown = furini-avg-runtimes.integrated / furini-avg-runtimes.decomposed
+
+The total runtime to solve all twelve problem instances was #calc.round(furini-total-runtimes.decomposed / 1000, digits: 2) seconds for the decomposed de-icing approach and #calc.round(furini-total-runtimes.integrated / 1000, digits: 2) seconds for the integrated approach.
+This equates to an average runtime of #calc.round(furini-avg-runtimes.decomposed, digits: 2) milliseconds and #calc.round(furini-avg-runtimes.integrated, digits: 2) milliseconds respectively.
+
+As evidenced by the lower runtimes, these problem instances are considerably easier to solve than the large Heathrow instances with the same number of aircraft, despite having more departures to de-ice per instance.
 This is primarily due to the lack of CTOT slots as well as the presence of relatively simple separation matrices, which allows complete orders to be inferred between most aircraft in each instance.
 
 #todo("Add boxplot for runtimes")
 
-#let decomposed-integrated-improvement = {
-    let (sum, count) = results.furini.branch-bound.decomposed.map(row => row.at(-2))
-        .zip(results.furini.branch-bound.integrated.map(row => row.at(-2)))
-        .slice(1)
-        .filter(row => row.all(num => num.len() > 0))
+#let furini-integrated-improvement = {
+    let (sum, count) = objective-values(results.furini.branch-bound.decomposed)
+        .zip(objective-values(results.furini.branch-bound.integrated))
+        .filter(row => row.all(str => str.len() > 0))
         .map(row => int(row.first()) / int(row.last()))
         .fold((0, 0), ((sum, count), num) => (sum + num, count + 1))
     sum / count
 }
 
-It can also be seen from @branch-bound-furini that the makespans as well as earliest and latest de-icing times produced by both approaches are nearly identical.
-However, the objective values obtained by the decomposed de-icing approach are far worse than its integrated counterpart's -- integrated de-icing achieves a #calc.round(decomposed-integrated-improvement, digits: 2)x improvement in objective values on average compared to decomposed de-icing.
+However, the objective values obtained by the integrated de-icing approach are far better than its decomposed counterpart's -- integrated de-icing achieves an improvement in objective values by a factor of #calc.round(furini-integrated-improvement, digits: 2) on average compared to decomposed de-icing.
 
 // TODO: Check the accuracy of the numbers here
 Furthermore, the decomposed de-icing approach failed to produce a feasible solution for instance FPT01.
