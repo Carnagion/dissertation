@@ -11,7 +11,7 @@ use runseq::{
 fn main() {
     let deice_strategy = DeiceStrategy::Integrated;
     let branch_bound = BranchBound {
-        horizon: NonZeroUsize::new(12),
+        horizon: NonZeroUsize::new(10),
         deice_strategy,
     };
 
