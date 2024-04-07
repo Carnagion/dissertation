@@ -172,10 +172,10 @@ tuple FlightPair {
 };
 
 int haveOverlappingWindows[i in Flights, j in Flights] =
-	earliestWindowTime[j] <= earliestWindowTime[i] <= latestWindowTime[j]
-	|| earliestWindowTime[j] <= latestWindowTime[i] <= latestWindowTime[j]
-	|| earliestWindowTime[i] <= earliestWindowTime[j] <= latestWindowTime[i]
-	|| earliestWindowTime[i] <= latestWindowTime[j] <= latestWindowTime[i];
+	releaseTime[j] <= releaseTime[i] <= latestWindowTime[j]
+	|| releaseTime[j] <= dueTime[i] <= dueTime[j]
+	|| releaseTime[i] <= releaseTime[j] <= dueTime[i]
+	|| releaseTime[i] <= dueTime[j] <= dueTime[i];
 
 int areSeparationIdentical[i in Flights, j in Flights] = prod (k in Flights:
 	i != k && j != k)
@@ -194,12 +194,12 @@ int areCompleteOrdered[i in Flights, j in Flights] =
 setof(FlightPair) DistinctFlightPairs = { <i, j> | i, j in Flights: i != j };
 
 setof(FlightPair) DisjointSeparatedWindowFlightPairs = { <i, j> | <i, j> in DistinctFlightPairs:
-	latestWindowTime[i] < earliestWindowTime[j]
-	&& latestWindowTime[i] + sep[i, j] <= earliestWindowTime[j] };
+	dueTime[i] < releaseTime[j]
+	&& dueTime[i] + sep[i, j] <= releaseTime[j] };
 
 setof(FlightPair) DisjointWindowFlightPairs = { <i, j> | <i, j> in DistinctFlightPairs:
-	latestWindowTime[i] < earliestWindowTime[j]
-	&& latestWindowTime[i] + sep[i, j] > earliestWindowTime[j] };
+	dueTime[i] < releaseTime[j]
+	&& dueTime[i] + sep[i, j] > releaseTime[j] };
 
 setof(FlightPair) OverlappingWindowFlightPairs = { <i, j> | <i, j> in DistinctFlightPairs:
 	haveOverlappingWindows[i, j] == true };
@@ -229,12 +229,14 @@ dexpr int runwayHoldDuration[i in DeicedDepartures] = scheduledTime[i]
 	- deiceTime[i];
 
 dexpr int delayCost[i in Flights] = sum (t in FlightTimes[i])
-	isScheduledAt[<i, t>] * ftoi(pow(t - flights[i].baseTime, 2));
+	isScheduledAt[<i, t>]
+	* ftoi(pow(t - flights[i].baseTime, 2));
 
 dexpr int ctotViolationCost[i in Departures] = hasCtot[i] * sum (t in FlightTimes[i])
-	(t >= latestCtotTime[i] + 1)
+	isScheduledAt[<i, t>]
+	* (t >= latestCtotTime[i] + 1)
 	* ftoi(pow(t - latestCtotTime[i], 2));
-	
+
 minimize sum (i in Arrivals) delayCost[i]
   	+ sum (i in Departures) (delayCost[i] + ctotViolationCost[i]);
 
