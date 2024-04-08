@@ -471,7 +471,7 @@ They can then be defined as shown below:
         &i in F, j in F, i != j } $ <overlapping-windows>
 ]
 
-It is then possible to impose the following precedence and separation constraints on every pair of distinct aircraft using @separated-windows, @disjoint-windows, and @overlapping-windows:
+It is then possible to impose the following precedence and separation constraints on every pair of distinct aircraft in these sets, corresponding to @certain-precedence, @complete-order-separation, and @overlapping-window-separation in the model:
 
 #multi-equation[
     $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D $
@@ -482,7 +482,33 @@ It is then possible to impose the following precedence and separation constraint
 // TODO: Check if this section looks better elsewhere, such as just after time windows or precedences, or just after the model
 === Complete Orders <complete-orders>
 
-A _complete order_ exists between any two aircraft $i$ and $j$ if the objective value and feasibility of a sequence $s$ containing both $i$ and $j$ cannot be improved by reversing the order of $i$ and $j$ in $s$ @demaere-pruning-rules.
+A _complete order_ exists between any two aircraft $i$ and $j$ if the objective value and feasibility of a sequence $s$ containing both $i$ and $j$ cannot be improved by reversing the order of $i$ and $j$ in $s$.
+By exploiting complete orders, it is possible to simplify the problem of runway sequencing (or more generally, machine scheduling) to one of interleaving ordered sets of aircraft, always only sequencing the first available aircraft from each set @demaere-pruning-rules.
+This enables a reduction in the problem's worst-case computational complexity from $O(n!)$ to $O(m^2 (n + 1)^m)$, where $n$ denotes the number of aircraft, and $m$ denotes the number of distinct aircraft types @demaere-pruning-rules, @psaraftis-dynamic-programming.
+
+#cite(<psaraftis-dynamic-programming>, form: "prose") first showed the existence of such complete orders between _separation-identical_ aircraft.
+Two distinct aircraft $i$ and $j$ are separation-identical if their mutual separations with respect to every other aircraft $k in F$ are the same -- i.e. $i$ and $j$ are separation-identical if and only if:
+
+$ forall k in F, k != i and k != j and delta_(i, k) = delta_(j, k) and delta_(k, i) = delta_(k, j) $ <are-separation-identical>
+
+Additionally, a complete order may be inferred upon a set of separation-identical aircraft if the complete orders for each of the individual constraints and objectives are consistent within the set @demaere-pruning-rules.
+#cite(<demaere-pruning-rules>, form: "prose") show that this is the case for an objective that considers delay and makespan, even with hard time window constraints -- as long as there is a consistent order between every aircraft's base times, release times, and end times of hard time windows.
+A complete order can thus be inferred between two separation-identical aircraft $i$ and $j$ if and only if:
+
+$ b_i <= b_j and r_i <= r_j and l_i <= l_j $ <are-complete-ordered>
+
+However, complete orders cannot be inferred between two separation-identical aircraft if one or both aircraft are subject to a CTOT, due to the piecewise linear, discontinuous, and non-convex nature of the CTOT violation cost function $c_v (i)$ @demaere-pruning-rules.
+Thus, in addition to satisfying @are-complete-ordered, neither of the two aircraft must be subject to a CTOT slot.
+
+Following from @are-separation-identical and @are-complete-ordered, it is possible to define the set $F_C$ of pairs of distinct aircraft $(i, j)$ where $i$ and $j$ are separation-identical and have a complete order such that $i$ must land or take off before $j$:
+
+$ F_C = { (i, j) | &(forall k in F, k != i and k != j and delta_(i, k) = delta_(j, k) and delta_(k, i) = delta_(k, j))\
+    &and b_i <= b_j and r_i <= r_j and l_i <= l_j, i in F, j in F, i != j } $
+
+The following precedence and separation constraints can thus be imposed on every pair of aircraft $(i, j) in F_C$, corresponding to @certain-precedence and @complete-order-separation in the model:
+
+$ gamma_(i, j) = 1 $
+$ t_j >= t_i + delta_(i, j) $
 
 // TODO: Check if pruning rules such as complete orders and disjoint time windows should be mentioned here
 = Implementation
@@ -662,10 +688,10 @@ The latter were first introduced by #cite(<furini-improved-horizon>, form: "pros
 ) <heathrow-instances>
 
 The terminal maneuvering area around Heathrow is highly complex, with up to six different SID routes in use at any given time and up to five different weight classes to consider.
-This results in a complex separation matrix, in which triangle inequalities are often violated -- i.e. the runway separation for an aircraft is influenced by multiple preceding aircraft rather than just the immediately preceding aircraft.
+This results in a complex separation matrix, in which triangle inequalities are often violated -- i.e. the runway separation for an aircraft is influenced by multiple preceding aircraft rather than just the immediately preceding aircraft @demaere-pruning-rules.
 Additionally, a substantial number of aircraft are also subject to CTOTs, which further reduces the number of complete orders that can be inferred.
 
-In contrast, the Milan problem instances are significantly simpler, having a relatively high number of separation-identical aircraft and a mix of both arrivals and departures.
+In contrast, the Milan problem instances are significantly simpler due to having a relatively high number of separation-identical aircraft and a mix of both arrivals and departures, which allows complete orders to be inferred between a relatively large number of aircraft in each instance.
 
 == Comparison of De-Icing Approaches
 
