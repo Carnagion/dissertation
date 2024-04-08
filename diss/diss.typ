@@ -1,5 +1,6 @@
-#import "@preview/lovelace:0.2.0": *
-#import "@preview/timeliney:0.0.1": *
+#import "@preview/cetz:0.2.2": canvas, chart, draw, palette
+#import "@preview/lovelace:0.2.0": algorithm, pseudocode, pseudocode-list, setup-lovelace
+#import "@preview/timeliney:0.0.1": timeline
 
 // NOTE: Needs to be called at the top of the document to setup lovelace
 #show: setup-lovelace
@@ -605,12 +606,39 @@ A _complete order_ exists between any two aircraft $i$ and $j$ if the objective 
 )
 
 #let objective-values(results) = results.slice(1).map(row => row.at(-2))
-
 #let runtimes(results) = results.slice(1).map(array.last)
 
 #let avg(..nums) = {
     let (sum, count) = nums.pos().fold((0, 0), ((sum, count), num) => (sum + num, count + 1))
     sum / count
+}
+
+#let runtime-stats(..groups) = {
+    let individual = groups
+        .named()
+        .pairs()
+        .map(pair => {
+            let key = pair.first()
+            let vals = pair.last()
+            ((key): vals.filter(str => str.len() > 0).map(float))
+        })
+        .fold((:), (dict, pair) => dict + pair)
+
+    let total = individual
+        .pairs()
+        .map(pair => (pair.first(), pair.last().sum()))
+        .fold((:), (dict, (key, val)) => dict + ((key): val))
+    
+    let avg = individual
+        .pairs()
+        .map(pair => (pair.first(), avg(..pair.last())))
+        .fold((:), (dict, (key, val)) => dict + ((key): val))
+    
+    (
+        individual: individual,
+        total: total,
+        avg: avg,
+    )
 }
 
 == Problem Instances
@@ -666,32 +694,133 @@ Runs that fail to produce feasible solutions are left blank.
     ],
 )
 
-#let heathrow-total-runtimes = (
-    tobt: runtimes(results.heathrow.branch-bound.tobt).filter(str => str.len() > 0).map(float).sum(),
-    ctot: runtimes(results.heathrow.branch-bound.ctot).filter(str => str.len() > 0).map(float).sum(),
-    integrated: runtimes(results.heathrow.branch-bound.integrated).filter(str => str.len() > 0).map(float).sum(),
+#let heathrow-runtimes = runtime-stats(
+    tobt: runtimes(results.heathrow.branch-bound.tobt),
+    ctot: runtimes(results.heathrow.branch-bound.ctot),
+    integrated: runtimes(results.heathrow.branch-bound.integrated),
 )
 
-#let heathrow-avg-runtimes = (
-    tobt: avg(..
-        runtimes(results.heathrow.branch-bound.tobt)
-        .filter(str => str.len() > 0)
-        .map(float),
-    ),
-    ctot: avg(..
-        runtimes(results.heathrow.branch-bound.ctot)
-        .filter(str => str.len() > 0)
-        .map(float),
-    ),
-    integrated: avg(..
-        runtimes(results.heathrow.branch-bound.integrated)
-        .filter(str => str.len() > 0)
-        .map(float),
-    ),
-)
+The total runtime to solve all 30 problem instances is #calc.round(heathrow-runtimes.total.tobt / 1000, digits: 2) seconds for decomposed de-icing by TOBT, #calc.round(heathrow-runtimes.total.ctot / 1000, digits: 2) seconds for decomposed de-icing by CTOT, and #calc.round(heathrow-runtimes.total.integrated / 1000, digits: 2) seconds for the integrated approach.
+This equates to an average runtime of #calc.round(heathrow-runtimes.avg.tobt, digits: 2) milliseconds, #calc.round(heathrow-runtimes.avg.ctot, digits: 2) milliseconds, and #calc.round(heathrow-runtimes.avg.integrated, digits: 2) milliseconds respectively.
+@branch-bound-heathrow-runtimes displays the total and average runtime for each de-icing approach split across each problem instance size group.
 
-The total runtime to solve all 30 problem instances is #calc.round(heathrow-total-runtimes.tobt / 1000, digits: 2) seconds for decomposed de-icing by TOBT, #calc.round(heathrow-total-runtimes.ctot / 1000, digits: 2) seconds for decomposed de-icing by CTOT, and #calc.round(heathrow-total-runtimes.integrated / 1000, digits: 2) seconds for the integrated approach.
-This equates to an average runtime of #calc.round(heathrow-avg-runtimes.tobt, digits: 2) milliseconds, #calc.round(heathrow-avg-runtimes.ctot, digits: 2) milliseconds, and #calc.round(heathrow-avg-runtimes.integrated, digits: 2) milliseconds respectively.
+#let heathrow-avg-runtimes = {
+    let avgs = for (label, ..points) in (
+        ([Small], ..runtime-stats(
+            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(1, 11),
+            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(1, 11),
+            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(1, 11),
+        ).avg.values()),
+        ([Medium], ..runtime-stats(
+            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(11, 21),
+            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(11, 21),
+            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(11, 21),
+        ).avg.values()),
+        ([Large], ..runtime-stats(
+            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(21),
+            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(21),
+            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(21),
+        ).avg.values()),
+    ) {
+        ((label, ..points.map(pt => calc.log(pt * 1000, base: 10))),)
+    }
+
+    let totals = for (label, ..points) in (
+        ([Small], ..runtime-stats(
+            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(1, 11),
+            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(1, 11),
+            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(1, 11),
+        ).total.values()),
+        ([Medium], ..runtime-stats(
+            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(11, 21),
+            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(11, 21),
+            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(11, 21),
+        ).total.values()),
+        ([Large], ..runtime-stats(
+            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(21),
+            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(21),
+            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(21),
+        ).total.values()),
+    ) {
+        ((label, ..points.map(pt => calc.log(pt * 1000, base: 10))),)
+    }
+
+    set text(size: 10pt)
+
+    canvas({
+        draw.set-style(
+            axes: (
+                stroke: 0.5pt + black,
+                grid: (
+                    stroke: (
+                        thickness: 1pt,
+                        dash: "densely-dashed",
+                    ),
+                ),
+            ),
+            legend: (
+                fill: white,
+                stroke: 0.5pt + black,
+                padding: 0.2,
+                spacing: 0.2,
+                item: (spacing: 0.1),
+            ),
+            columnchart: (
+                bar-width: 0.8,
+            ),
+        )
+
+        let total-chart = chart.columnchart(
+            mode: "clustered",
+            size: (5, 5),
+            label-key: 0,
+            value-key: range(1, 4),
+            labels: ([Decomposed de-icing (by TOBT)], [Decomposed de-icing (by CTOT)], [Integrated de-icing]),
+            x-label: [*Instance group*],
+            y-label: [*Total runtime (μs)*],
+            y-tick-step: 1,
+            y-format: y => [10#super[#calc.round(y, digits: 2)]],
+            bar-style: idx => (
+                stroke: 0.5pt,
+                fill: palette.red(idx).fill,
+            ),
+            legend: "legend.north",
+            totals,
+        )
+
+        let avg-chart = chart.columnchart(
+            mode: "clustered",
+            size: (5, 5),
+            label-key: 0,
+            value-key: range(1, 4),
+            labels: ([Decomposed de-icing (by TOBT)], [Decomposed de-icing (by CTOT)], [Integrated de-icing]),
+            x-label: [*Instance group*],
+            y-label: [*Average runtime (μs)*],
+            y-tick-step: 1,
+            y-format: y => [10#super[#calc.round(y, digits: 2)]],
+            bar-style: idx => (
+                stroke: 0.5pt,
+                fill: palette.indigo(idx).fill,
+            ),
+            legend: "legend.north",
+            avgs,
+        )
+
+        draw.group(name: "total", total-chart)
+
+        draw.group(name: "avg", anchor: "south-west", {
+            draw.anchor("default", "total.south-east")
+            avg-chart
+        })
+    })
+}
+
+#figure(
+    heathrow-avg-runtimes,
+    caption: [
+        Total and average runtimes for each de-icing approach of the branch-and-bound program across each size group of problem instances from London Heathrow
+    ],
+) <branch-bound-heathrow-runtimes>
 
 #todo("Add boxplot for runtimes")
 
@@ -719,7 +848,7 @@ This equates to an average runtime of #calc.round(heathrow-avg-runtimes.tobt, di
 The two different decomposed de-icing approaches result in nearly identical makespans, earliest and latest de-icing times, and objective values across all problem instances, with decomposed de-icing by CTOT attaining only a #calc.round((heathrow-improvements.tobt-ctot - 1.0) * 100, digits: 2)% improvement in objective values on average compared to decomposed de-icing by TOBT.
 However, integrated de-icing achieves an improvement in objective values by factors of #calc.round(heathrow-improvements.tobt-integrated, digits: 2) and #calc.round(heathrow-improvements.ctot-integrated, digits: 2) on average compared to decomposed de-icing by TOBT and by CTOT respectively.
 
-Additionally, integrated de-icing is on average #calc.round(heathrow-avg-runtimes.tobt / heathrow-avg-runtimes.integrated, digits: 2) times faster than decompsed de-icing by TOBT, and #calc.round(heathrow-avg-runtimes.ctot / heathrow-avg-runtimes.integrated, digits: 2) times faster than decomposed de-icing by CTOT.
+Additionally, integrated de-icing is on average #calc.round(heathrow-runtimes.avg.tobt / heathrow-runtimes.avg.integrated, digits: 2) times faster than decompsed de-icing by TOBT, and #calc.round(heathrow-runtimes.avg.ctot / heathrow-runtimes.avg.integrated, digits: 2) times faster than decomposed de-icing by CTOT.
 
 @branch-bound-furini lists the results for all Milan benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the three different de-icing approaches.
 Since these instances do not contain de-icing data, the pushback duration $p_i$, pre-de-ice taxi duration $m_i$, de-icing duration $o_i$, taxi-out duration $n_i$, and lineup duration $q_i$ are assumed to be five minutes each for all departures.
@@ -736,30 +865,17 @@ Like in @branch-bound-heathrow, runs that fail to produce feasible solutions are
 #figure(
     branch-bound-furini,
     caption: [
-        Results for the benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the different de-icing approaches
+        Results for the Milan Airport benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the different de-icing approaches
     ],
 ) <branch-bound-furini>
 
-#let furini-total-runtimes = (
-    decomposed: runtimes(results.furini.branch-bound.decomposed).filter(str => str.len() > 0).map(float).sum(),
-    integrated: runtimes(results.furini.branch-bound.integrated).filter(str => str.len() > 0).map(float).sum(),
+#let furini-runtimes = runtime-stats(
+    decomposed: runtimes(results.furini.branch-bound.decomposed),
+    integrated: runtimes(results.furini.branch-bound.integrated),
 )
 
-#let furini-avg-runtimes = (
-    decomposed: avg(
-        ..runtimes(results.furini.branch-bound.decomposed)
-            .filter(str => str.len() > 0)
-            .map(float),
-    ),
-    integrated: avg(
-        ..runtimes(results.furini.branch-bound.integrated)
-            .filter(str => str.len() > 0)
-            .map(float),
-    ),
-)
-
-The total runtime to solve all twelve problem instances is #calc.round(furini-total-runtimes.decomposed / 1000, digits: 2) seconds for the decomposed de-icing approach and #calc.round(furini-total-runtimes.integrated / 1000, digits: 2) seconds for the integrated approach.
-This equates to an average runtime of #calc.round(furini-avg-runtimes.decomposed, digits: 2) milliseconds and #calc.round(furini-avg-runtimes.integrated, digits: 2) milliseconds respectively.
+The total runtime to solve all twelve problem instances is #calc.round(furini-runtimes.total.decomposed / 1000, digits: 2) seconds for the decomposed de-icing approach and #calc.round(furini-runtimes.total.integrated / 1000, digits: 2) seconds for the integrated approach.
+This equates to an average runtime of #calc.round(furini-runtimes.avg.decomposed, digits: 2) milliseconds and #calc.round(furini-runtimes.avg.integrated, digits: 2) milliseconds respectively.
 
 #let heathrow-large-avg-runtimes = (
     tobt: avg(
@@ -782,7 +898,7 @@ This equates to an average runtime of #calc.round(furini-avg-runtimes.decomposed
     ),
 )
 
-In comparison, the average runtime to solve all large Heathrow problem instances is #calc.round(heathrow-large-avg-runtimes.tobt, digits: 2) milliseconds, #calc.round(heathrow-large-avg-runtimes.ctot, digits: 2) milliseconds, and #calc.round(heathrow-large-avg-runtimes.integrated, digits: 2) milliseconds using the decomposed de-icing by TOBT, decomposed de-icing by TOBT, and integrated de-icing approaches respectively.
+In comparison, the average runtime to solve all large Heathrow problem instances -- which have the same number of aircraft as the Milan problem instances -- is #calc.round(heathrow-large-avg-runtimes.tobt, digits: 2) milliseconds, #calc.round(heathrow-large-avg-runtimes.ctot, digits: 2) milliseconds, and #calc.round(heathrow-large-avg-runtimes.integrated, digits: 2) milliseconds using the decomposed de-icing by TOBT, decomposed de-icing by TOBT, and integrated de-icing approaches respectively.
 
 As evidenced by their much lower runtimes, the Milan problem instances are considerably easier to solve than the large Heathrow instances with the same number of aircraft, despite having more departures to de-ice per instance.
 This is primarily due to the lack of CTOT slots as well as the presence of relatively simple separation matrices, which allows complete orders to be inferred between most aircraft in each instance.
