@@ -186,7 +186,15 @@
 
 === Constrained Position Shifts
 
-#todo("Write about CPS")
+A number of approaches in the past -- such as that of #cite(<psaraftis-dynamic-programming>, form: "prose") and #cite(<balakrishnan-runway-operations>) -- have employed Constrained Position Shifting (CPS), a technique that was first introduced by #cite(<dear-dynamic-scheduling>, form: "prose").
+CPS restricts an aircraft's maximum shift in position relative to its original position in some initial sequence, which is typically obtained using a FCFS approach.
+Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also enforces positional equity by preventing aircraft from being advanced or delayed disproportionately compared to other aircraft @dear-dynamic-scheduling @demaere-pruning-rules.
+
+Although CPS can be an effective and efficient approach in many cases of arrival sequencing, delays may differ widely between arrivals and departures in mixed-mode operations, making maximum position shift constraints impractical @demaere-pruning-rules.
+
+#cite(<atkin-tsat-allocation>, form: "prose") further show that when CTOT slots are considered, CTOT compliance and positional equity are heavily in conflict -- there is a tradeoff between the number of CTOT violations and positional equity.
+Even without considering CTOT slots, the differing delays that accumulate across different Standard Instrument Departure (SID) routes and hard time window constraints can require large maximum position shifts to obtain good runway sequences.
+This challenges the tractability and practicality of CPS-based approaches.
 
 === Pruning Rules
 
