@@ -193,8 +193,11 @@ Not only does this prune the search space by reducing the number of aircraft tha
 Although CPS can be an effective and efficient approach in many cases of arrival sequencing, delays may differ widely between arrivals and departures in mixed-mode operations, making maximum position shift constraints impractical @demaere-pruning-rules.
 
 #cite(<atkin-tsat-allocation>, form: "prose") further show that when CTOT slots are considered, CTOT compliance and positional equity are heavily in conflict -- there is a tradeoff between the number of CTOT violations and positional equity.
-Even without considering CTOT slots, the differing delays that accumulate across different Standard Instrument Departure (SID) routes and hard time window constraints can require large maximum position shifts to obtain good runway sequences.
-This challenges the tractability and practicality of CPS-based approaches.
+Moreover, having a hard constraint of or high penalty for positional equity may be highly counter-productive for take-offs even apart from its conflict with delay or CTOT compliance.
+
+For instance, there may be an aircraft that must wait for the start of its CTOT slot, during which other aircraft may be sequenced with no additional delay -- however, penalising positional inequity would (wrongfully) penalise such a sequence, forcing the other aircraft to take off after the one with the CTOT slot, increasing the overall delay in the process @atkin-tsat-allocation.
+
+The differing delays that accumulate across different Standard Instrument Departure (SID) routes, hard time window constraints, and CTOT constraints can thus require large maximum position shifts to obtain good runway sequences, thereby challenging the tractability and practicality of CPS-based approaches @demaere-pruning-rules.
 
 === Pruning Rules
 
