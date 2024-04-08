@@ -1,5 +1,19 @@
 # TODO: Review citations and check that all info (including issue numbers, journal names, and author orders) is provided and correct
 
+dear-dynamic-scheduling:
+  type: article
+  title: "The dynamic scheduling of aircraft in the near terminal area"
+  author:
+    - "Dear, Roger G."
+  date: 1976
+  doi: "10.1016/0041-1647(78)90073-4"
+  parent:
+    title: "Transportation Research"
+    publisher: "Elsevier"
+    volume: 12
+    issue: 4
+    page-range: 297-298
+
 psaraftis-dynamic-programming:
   type: article
   title: "A Dynamic Programming Approach for Sequencing Groups of Identical Jobs"
@@ -60,6 +74,22 @@ atkin-hybrid-metaheuristics:
     volume: 41
     issue: 1
     page-range: 90-106
+
+atkin-tsat-allocation:
+  type: article
+  title: "TSAT allocation at London Heathrow: the relationship between slot compliance, throughput and equity"
+  author:
+    - "Atkin, Jason A. D."
+    - "Burke, Edmund K."
+    - "Greenwood, John S."
+  date: 2010
+  doi: "10.1007/s12469-010-0029-2"
+  parent:
+    title: "Public Transport"
+    publisher: "Springer-Verlag"
+    volume: 2
+    issue: 3
+    page-range: 173-198
 
 balakrishnan-runway-operations:
   type: article
