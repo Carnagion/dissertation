@@ -1,5 +1,5 @@
 #import "@preview/cetz:0.2.2": canvas, chart, draw, palette
-#import "@preview/lovelace:0.2.0": algorithm, pseudocode, pseudocode-list, setup-lovelace
+#import "@preview/lovelace:0.2.0": algorithm, pseudocode-list, setup-lovelace
 #import "@preview/timeliney:0.0.1": timeline
 
 // NOTE: Needs to be called at the top of the document to setup lovelace
@@ -50,7 +50,7 @@
 // NOTE: Workaround to get non-math text to use EB Garamond in math equations until Typst ships a native function for doing so
 #let mathtext = math.text.with(font: "EB Garamond", weight: "regular")
 
-#let pseudocode = pseudocode.with(indentation-guide-stroke: 0.1pt)
+#let pseudocode-list = pseudocode-list.with(indentation-guide-stroke: 0.2pt)
 
 #set figure(gap: 1em)
 #show figure.caption: caption => {
@@ -62,14 +62,15 @@
     caption.body
 }
 
+#show figure: set block(spacing: 2em)
 #show figure.where(kind: table): set block(breakable: true)
 #show figure.where(kind: table): set par(justify: false)
 
 // TODO: Pick a good table style
 #set table(align: center + horizon, stroke: none)
+#set table.header(repeat: false)
 #show table.cell.where(y: 0, rowspan: 1): strong
 #show table.cell: set text(size: 10pt)
-#set table.header(repeat: false)
 
 // NOTE: Workaround to make prose citations use "et al" with a lower author count threshold
 // TODO: Check if there is a way to already do this in Typst without using a CSL file
@@ -195,6 +196,10 @@ When implemented as a pre-processing step, this DP algorithm has a time complexi
 #cite(<balakrishnan-runway-operations>, form: "prose") introduce an alternative DP approach wherein the runway sequencing problem is formulated as a modified shortest path problem in a network, considering positional equity (via maximum shift constraints), minimum separation requirements, precedence constraints, and time window constraints.
 Their proposed algorithm has a complexity of $O(n (2k + 1)^(2k + 2))$, where $n$ is the number of aircraft and $k$ is the maximum shift parameter @balakrishnan-runway-operations.
 
+=== Branch-and-Bound
+
+#todo("Write about branch-and-bound approaches")
+
 == Paradigms
 
 #todo("Write short introduction to paradigms to improve tractability")
@@ -229,8 +234,6 @@ Their pruning rules enable significant reductions of the problem's computational
 
 Furthermore, they show that many of the pruning rules considered transfer to other objective functions commonly considered in the literature, and can thus be used outside of the specific DP approach developed by them @demaere-pruning-rules.
 A subset of these pruning rules is thus incorporated into the model presented in this paper to improve its tractability.
-
-#todo("Write more about pruning rules")
 
 === Rolling Horizons
 
@@ -409,7 +412,7 @@ $ c_v (i) = cases(
     &(t_i - v_i)^2 &"if" &t_i > v_i,
 ) $
 
-== Model
+== Model <model>
 
 A time-indexed formulation is employed in order to linearize the objective function and hence solve the integrated runway and de-icing sequencing problem using 0-1 integer linear programming.
 
@@ -557,7 +560,73 @@ $ t_j >= t_i + delta_(i, j) $
 
 == Branch-and-Bound Program
 
-#todo("Write short introduction to branch-and-bound program and various de-icing approaches")
+Branch-and-bound is an exact search method for solving optimisation problems by breaking them down into smaller sub-problems and eliminating those sub-problems that cannot possibly contain a solution better than the best known solution so far.
+The use of a bounding function to eliminate sub-problems allows the algorithm to prune nodes from the search space and perform better than a brute-force (exhaustive) search, while still exploring every node in the search space.
+
+Branch-and-bound algorithms for minimisation problems typically comprise of four main procedures -- separation, bounding, branching, and fathoming @luo-branch-bound.
+
+The algorithm begins with no known best sequence, and a best cost $c_"best"$ of infinity.
+It maintains a queue of nodes to visit along with their depths -- the search space, which is initialised with partial sequences containing solely the first aircraft to be sequenced from each ordered set of separation-identical aircraft.
+A node at depth $k$ in the search space corresponds to a partial sequence $s$ with $k$ aircraft.
+
+At each step, the most recently added node (sequence) is removed from the back of the queue, and its _lower bound_ is evaluated.
+The lower bound for a partial sequence $s$ at depth $k$ consists of two components -- its actual objective value $f(s)$, and a lower bound on the cost of the remaining $(|F| - k)$ aircraft to be sequenced.
+The latter can be calculated by sequencing the remaining aircraft from each ordered set of separation-identical aircraft in a FCFS manner, assuming a minimum separation of one minute between each aircraft.
+Although using a small separation and an FCFS approach seldom yields an accurate cost, it avoids overshooting the actual objective value and subsequently pruning a potentially optimal sub-sequence.
+
+If the lower bound of the current node is better (smaller) than the objective value of the best known full sequence $s_"best"$, or if no full sequences have been produced yet, the node is _separated_, producing sub-nodes with depth $k + 1$ -- i.e. new partial sequences with a single aircraft appended to the current partial sequence $s$.
+Sub-nodes are added to the front of the queue in decreasing order of their objective value $f(s)$.
+Since nodes are removed from the front of the queue, this branching procedure is best-first -- i.e. the partial sequence with the best (lowest) objective value is explored first, as it gets added last.
+
+The algorithm terminates when all nodes are _fathomed_ -- i.e. all nodes have either been separated or ignored (due to having worse lower bounds than the best known sequence).
+The full branch-and-bound algorithm as described above is shown in @branch-bound:
+
+#let branch-bound-code = pseudocode-list[
+    + $c <- 0$
+    + $c_"best" = infinity$
+    + $s <- $ empty sequence
+    + $s_"best" <- s$
+    + $q <- $ empty stack
+    + *for* each $X$ *in* ordered sets of separation-identical aircraft *do*
+        + $i <- $ first aircraft in $X$
+        + schedule $t_i$ and $z_i$
+        + push $(i, 0)$ to $q$
+    + *end*
+    + *while* $q$ is not empty *do*
+        + $(i, k) <- $ pop from $q$
+        + *for* each $j$ *in* $s$ from index $k$ onwards *do*
+            + $c <- c - c_d (j) - c_v (j)$
+            + reset $t_i$ and $z_i$
+        + *end*
+        + truncate $s$ to length $k$
+        + schedule $t_i$ and $z_i$
+        + $c' <- c + c_d (i) + c_v (i)$
+        + *if* $c' < c_"best"$ *then*
+            + $c <- c'$
+            + push $i$ to $s$
+            + *if* length of $s = $ total number of aircraft *then*
+                + $c_"best" <- c$
+                + $s_"best" <- s$
+            + *else*
+                + *for* each $X$ *in* ordered sets of separation-identical aircraft *do*
+                    + *if* $X$ has any aircraft that are not in $s$ *do*
+                        + $j <- $ first aircraft in $X$ that is not in $s$
+                        + push $(j, k + 1)$ to $q$
+                    + *end*
+                + *end*
+            + *end*
+        + *else*
+            + reset $t_i$ and $z_i$
+        + *end*
+    + *end*
+]
+
+#algorithm(
+    branch-bound-code,
+    caption: [
+        Branch-and-bound algorithm for runway and de-icing sequencing
+    ],
+) <branch-bound>
 
 === Decomposed De-Icing
 
@@ -573,7 +642,9 @@ $ t_j >= t_i + delta_(i, j) $
 
 == Mathematical Program
 
-#todo("Write about CPLEX model")
+The model proposed in @model has been implemented in #link("https://www.ibm.com/docs/en/icos/22.1.1?topic=opl-optimization-programming-language")[Optimisation Programming Language] (OPL), which is packaged with IBM's #link("https://www.ibm.com/products/ilog-cplex-optimization-studio")[ILOG CPLEX Optimisation Studio].
+
+#todo("Write more about CPLEX implementation if necessary")
 
 // TODO: Check if this belongs here or is better off somewhere else
 == Sequence Visualiser
@@ -710,7 +781,7 @@ $ t_j >= t_i + delta_(i, j) $
 == Problem Instances
 
 // TODO: Check if Heathrow or University of Bologna should be cited
-The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarized in @heathrow-instances -- as well as benchmark problem instances from Milan Airport.
+The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarised in @heathrow-instances -- as well as benchmark problem instances from Milan Airport.
 The latter were first introduced by #cite(<furini-improved-horizon>, form: "prose"), and were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
 
 #let heathrow-instances = results-table(
@@ -888,7 +959,7 @@ This equates to an average runtime of #calc.round(heathrow-runtimes.avg.tobt, di
     ],
 ) <branch-bound-heathrow-runtimes>
 
-#todo("Add boxplot for runtimes")
+#todo("Add boxplot for runtimes if possible")
 
 #let heathrow-improvements = (
     tobt-ctot: avg(
@@ -969,7 +1040,7 @@ In comparison, the average runtime to solve all large Heathrow problem instances
 As evidenced by their much lower runtimes, the Milan problem instances are considerably easier to solve than the large Heathrow instances with the same number of aircraft, despite having more departures to de-ice per instance.
 This is primarily due to the lack of CTOT slots as well as the presence of relatively simple separation matrices, which allows complete orders to be inferred between most aircraft in each instance.
 
-#todo("Add boxplot for runtimes")
+#todo("Add boxplot for runtimes if possible")
 
 #let furini-integrated-improvement = {
     let (sum, count) = objective-values(results.furini.branch-bound.decomposed)
