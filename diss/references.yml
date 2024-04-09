@@ -75,6 +75,23 @@ atkin-hybrid-metaheuristics:
     issue: 1
     page-range: 90-106
 
+allahverdi-survey-scheduling:
+  type: article
+  title: "A survey of scheduling problems with setup times or costs"
+  author:
+    - "Allahverdi, Ali"
+    - "Ng, C. T."
+    - "Cheng, T. C. E."
+    - "Kovyalov, Mikhail Y."
+  date: 2008
+  doi: "10.1016/j.ejor.2006.06.060"
+  parent:
+    title: "European Journal of Operational Research"
+    publisher: "Elsevier"
+    volume: 187
+    issue: 3
+    page-range: 985-1032
+
 atkin-tsat-allocation:
   type: article
   title: "TSAT allocation at London Heathrow: the relationship between slot compliance, throughput and equity"
@@ -105,6 +122,22 @@ balakrishnan-runway-operations:
     volume: 58
     issue: 6
     page-range: 1650-1665
+
+bennell-runway-scheduling:
+  type: article
+  title: "Airport runway scheduling"
+  author:
+    - "Bennell, Julia A."
+    - "Mesgarpour, Mohammad"
+    - "Potts, Chris N."
+  date: 2011
+  doi: "10.1007/s10288-011-0172-x"
+  parent:
+    title: "4OR"
+    publisher: "Springer-Verlag"
+    volume: 9
+    issue: 2
+    page-range: 115-138
 
 briskorn-aircraft-landing:
   type: article
