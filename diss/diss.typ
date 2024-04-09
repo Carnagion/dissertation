@@ -168,6 +168,10 @@
 
 #todo("Write about heuristic-based approaches")
 
+#cite(<bianco-minimizing-time>, form: "prose") propose two heuristic approaches -- Cheapest Addition Heuristic (CAH) and Cheapest Insertion Heuristic (CIH) -- that each generate sequences by either appending remaining aircraft to partial sequences, or inserting them.
+They note that the latter almost always performed better than the former, as it searches for the best partial sequences obtained by inserting new aircraft anywhere within the sequence as opposed to just at the end.
+However, it is also much more computationally expensive -- these heuristics are shown to have computational complexities of $O(n^2 log(n))$ and $O(n^4)$ respectively @bianco-minimizing-time @bennell-runway-scheduling.
+
 == Exact Methods
 
 #todo("Write short introduction to exact methods")
@@ -178,7 +182,18 @@
 
 === Dynamic Programming
 
-#todo("Write about dynamic programs used in the past")
+Dynamic programming (DP) is a general optimisation technique for making sequential decisions.
+There have been several attempts to develop efficient DP algorithms for runway sequencing, since it is known to work well for runway sequencing -- almost all runway sequencing problems can be modelled as DP problems as DP algorithms can evaluate partial sequences independently of the exact sequencing decisions taken to generate them @bennell-runway-scheduling.
+DP can also yield optimal solutions significantly faster than MIP solvers @lieder-dynamic-programming.
+
+#cite(<psaraftis-dynamic-programming>, form: "prose") proposes a DP algorithm for the single runway scheduling problem, considering runway utilisation and total delay as an objective function.
+He utilises an approach that groups aircraft into multiple classes or sets, essentially merging lists of aircraft from these sets and allowing the exploitation of known precedence relations within them.
+When implemented as a pre-processing step, this DP algorithm has a time complexity to $O(m^2 (n + 1)^m)$, where $n$ denotes the number of aircraft, and $m$ denotes the number of distinct aircraft types @psaraftis-dynamic-programming @demaere-pruning-rules.
+
+#cite(<bianco-minimizing-time>, form: "prose") view the runway sequencing problem for a single runway as an application of the single machine scheduling problem with release dates and sequence-dependent processing times, and propose a DP formulation for the same.
+
+#cite(<balakrishnan-runway-operations>, form: "prose") introduce an alternative DP approach wherein the runway sequencing problem is formulated as a modified shortest path problem in a network, considering positional equity (via maximum shift constraints), minimum separation requirements, precedence constraints, and time window constraints.
+Their proposed algorithm has a complexity of $O(n (2k + 1)^(2k + 2))$, where $n$ is the number of aircraft and $k$ is the maximum shift parameter @balakrishnan-runway-operations.
 
 == Paradigms
 
@@ -188,20 +203,34 @@
 
 A number of approaches in the past -- such as that of #cite(<psaraftis-dynamic-programming>, form: "prose") and #cite(<balakrishnan-runway-operations>) -- have employed Constrained Position Shifting (CPS), a technique that was first introduced by #cite(<dear-dynamic-scheduling>, form: "prose").
 CPS restricts an aircraft's maximum shift in position relative to its original position in some initial sequence, which is typically obtained using a FCFS approach.
-Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also enforces positional equity by preventing aircraft from being advanced or delayed disproportionately compared to other aircraft @dear-dynamic-scheduling @demaere-pruning-rules.
+Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also enforces positional equity by preventing aircraft from being advanced or delayed disproportionately compared to other aircraft @demaere-pruning-rules @dear-dynamic-scheduling.
 
 Although CPS can be an effective and efficient approach in many cases of arrival sequencing, delays may differ widely between arrivals and departures in mixed-mode operations, making maximum position shift constraints impractical @demaere-pruning-rules.
 
 #cite(<atkin-tsat-allocation>, form: "prose") further show that when CTOT slots are considered, CTOT compliance and positional equity are heavily in conflict -- there is a tradeoff between the number of CTOT violations and positional equity.
-Moreover, having a hard constraint of or high penalty for positional equity may be highly counter-productive for take-offs even apart from its conflict with delay or CTOT compliance.
+Moreover, having a hard constraint of or high penalty for positional equity may be highly counter-productive for take-offs even apart from its conflict with delay or CTOT compliance @atkin-tsat-allocation.
 
-For instance, there may be an aircraft that must wait for the start of its CTOT slot, during which other aircraft may be sequenced with no additional delay -- however, penalising positional inequity would (wrongfully) penalise such a sequence, forcing the other aircraft to take off after the one with the CTOT slot, increasing the overall delay in the process @atkin-tsat-allocation.
+For instance, there may be an aircraft that must wait for the start of its CTOT slot, during which other aircraft may be sequenced with no additional delay -- however, penalising positional inequity would (wrongfully) penalise such a sequence, forcing the other aircraft to take off after the one with the CTOT slot and increasing the overall delay in the process @atkin-tsat-allocation.
 
-The differing delays that accumulate across different Standard Instrument Departure (SID) routes, hard time window constraints, and CTOT constraints can thus require large maximum position shifts to obtain good runway sequences, thereby challenging the tractability and practicality of CPS-based approaches @demaere-pruning-rules.
+The differing delays that accumulate across different Standard Instrument Departure (SID) routes, hard time window constraints, and CTOT constraints can thus require large maximum position shifts to obtain good runway sequences, thereby challenging the tractability of CPS-based approaches @demaere-pruning-rules.
+The model and branch-and-bound program presented in this paper therefore do not employ CPS, making them more practical and viable for real-world scenarios considering departures with complex separation requirements and CTOT compliance.
 
 === Pruning Rules
 
-#todo("Write about pruning rules")
+In contrast to approaches like CPS that reduce the search space of the problem by limiting the positional shifting of aircraft within the sequence, pruning rules exploit the characteristics of the problem or objective function to infer that a current sequence (or any future sequences based on it) is sub-optimal.
+This has the advantage of being able to prune partial subsequences that show known poor characteristics much earlier, even before dominating partial sequences have been generated @demaere-pruning-rules.
+
+Pruning rules have been extensively studied in literature involving machine scheduling @demaere-pruning-rules @allahverdi-survey-scheduling.
+However, #cite(<allahverdi-survey-scheduling>, form: "prose") show that a majority of these approaches do not consider sequence-dependent setup times, despite them being prevalent in runway sequencing problems and in many other applications of machine scheduling.
+Nor do they consider complex non-linear, non-convex, or discontinuous objective functions @demaere-pruning-rules.
+
+#cite(<demaere-pruning-rules>, form: "prose") introduce a set of pruning principles that exploit the inherent characteristics of the runway sequencing problem including complete orders, conditional orders, insertion dominance, and dominance with lower bounding.
+Their pruning rules enable significant reductions of the problem's computational complexity without compromising the optimality of the generated solutions, and are usually much more computationally efficient compared to pruning rules based on local improvements @demaere-pruning-rules.
+
+Furthermore, they show that many of the pruning rules considered transfer to other objective functions commonly considered in the literature, and can thus be used outside of the specific DP approach developed by them @demaere-pruning-rules.
+A subset of these pruning rules is thus incorporated into the model presented in this paper to improve its tractability.
+
+#todo("Write more about pruning rules")
 
 === Rolling Horizons
 
@@ -303,7 +332,7 @@ An aircraft's landing or take-off time can thus be influenced by not just the im
 === Base Times
 
 Every aircraft has an earliest possible landing or take-off time -- henceforth referred to as its _base time_ -- which is defined as the time the aircraft enters the runway queue and finishes lining up (for departures), or the local airspace (for arrivals).
-The base time $b_i$ of an aircraft $i$ is modeled as a hard constraint -- i.e. $i$ cannot be scheduled to land or take off before $b_i$:
+The base time $b_i$ of an aircraft $i$ is modelled as a hard constraint -- i.e. $i$ cannot be scheduled to land or take off before $b_i$:
 
 $ t_i >= b_i $
 
@@ -322,7 +351,7 @@ In addition to a hard time window, a departure $i$ might be subject to a Calcula
 Typically, a CTOT has a tolerance of -5 to +10 minutes (i.e. five minutes before and ten minutes after $c_i$) and its time window can thus be defined by its earliest (start) time $u_i$ and latest (end) time $v_i$; however, this model allows for customizable CTOT tolerances per departure.
 
 Much like a hard time window, a departure cannot take off before $u_i$, but it may be scheduled after $v_i$ -- although this is heavily penalized.
-The start time of a CTOT slot is thus modeled as a hard constraint, while its end time is modeled as a soft constraint:
+The start time of a CTOT slot is thus modelled as a hard constraint, while its end time is modelled as a soft constraint:
 
 $ t_i >= u_i $
 
@@ -331,7 +360,7 @@ $ t_i >= u_i $
 Once a departure $i$ has been de-iced, the applied de-icing fluid will remain effective for a certain duration of time, called the Holdover Time (HOT) $h_i$.
 Departures must take off within this period of time -- if a departure's HOT expires before it takes off, it must be de-iced again, which could extend the de-icing queue and delay subsequent aircraft.
 
-The HOT of a departure $i$ is thus modeled as a hard constraint -- the time between its de-ice time $z_i$ and take-off time $t_i$ must not be greater than $h_i$:
+The HOT of a departure $i$ is thus modelled as a hard constraint -- the time between its de-ice time $z_i$ and take-off time $t_i$ must not be greater than $h_i$:
 
 $ t_i - z_i - o_i <= h_i $
 
@@ -344,7 +373,7 @@ However, in some cases it may be better to absorb delays at the runway by _runwa
 A departure that pushes back earlier than absoltuely necessary would be able to de-ice earlier than necessary, freeing up the de-icing queue earlier.
 This could in turn enable the following departures to de-ice earlier and potentially reduce the total delay and CTOT violations in the remaining sequence.
 
-The maximum runway holding duration $w_i$ for a departure $i$ is thus modeled as a hard constraint -- the time between $z_i$ and $t_i$ must not be greater than the sum of its de-ice duration $o_i$, post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $w_i$:
+The maximum runway holding duration $w_i$ for a departure $i$ is thus modelled as a hard constraint -- the time between $z_i$ and $t_i$ must not be greater than the sum of its de-ice duration $o_i$, post de-ice taxi duration $n_i$, lineup duration $q_i$, and maximum runway holding duration $w_i$:
 
 $ t_i - z_i <= o_i + n_i + q_i + w_i $
 
@@ -354,10 +383,10 @@ The objective function $f(s)$ for a partial or final sequence $s$ is defined in 
 It considers total delay and CTOT compliance, and is based on the function described by #cite(<demaere-pruning-rules>, form: "prose").
 
 // TODO: Check if this looks better when mentioned elsewhere, like in the branch-and-bound section
-=== Runway Utilization
+=== Runway Utilisation
 
-The runway utilization of a partial or final sequence $s$ is modeled as the _makespan_ of $s$, i.e. $max_(i in s) t_i$.
-Although not directly included as an objective, it is utilized for the evaluation of partial sequences generated by the branch-and-bound program and their subsequent pruning according to the pruning rules introduced by #cite(<demaere-pruning-rules>, form: "prose").
+The runway utilisation of a partial or final sequence $s$ is modelled as the _makespan_ of $s$, i.e. $max_(i in s) t_i$.
+Although not directly included as an objective, it is utilised for the evaluation of partial sequences generated by the branch-and-bound program and their subsequent pruning according to the pruning rules introduced by #cite(<demaere-pruning-rules>, form: "prose").
 
 === Delay
 
@@ -412,7 +441,7 @@ $ sum_(z in Z_i) zeta_(i, z) = 1 $
 Putting together these constraints, objectives, and time-indexed formulations, a 0-1 integer linear model for the integrated runway and de-icing sequencing problem is presented below:
 
 #multi-equation[
-    $ "Minimize" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <objective-function>
+    $ "Minimise" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <objective-function>
     $ &c_d (i) = sum_(t in T_i) tau_(i, t) dot (t - b_i)^2 &forall i in F $ <delay-cost>
     $ &c_v (i) = sum_(t in T_i) tau_(i, t) dot (t > v_i) dot (t - v_i)^2 &forall i in D $ <ctot-violation-cost>
     $ &t_i = sum_(t in T_i) tau_(i, t) dot t &forall i in F $ <scheduled-time>
