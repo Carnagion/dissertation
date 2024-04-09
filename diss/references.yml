@@ -75,6 +75,21 @@ atkin-hybrid-metaheuristics:
     issue: 1
     page-range: 90-106
 
+luo-branch-bound:
+  type: article
+  title: "A branch-and-bound algorithm of the single machine schedule with sequence-dependent setup times for minimizing maximum tardiness"
+  author:
+    - "Luo, Xiaochuan"
+    - "Chu, Chengbin"
+  date: 2007
+  doi: "10.1016/j.ejor.2005.06.069"
+  parent:
+    title: "European Journal of Operational Research"
+    publisher: "Elsevier"
+    volume: 180
+    issue: 1
+    page-range: 69-81
+
 allahverdi-survey-scheduling:
   type: article
   title: "A survey of scheduling problems with setup times or costs"
