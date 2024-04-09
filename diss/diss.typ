@@ -628,13 +628,43 @@ The full branch-and-bound algorithm as described above is shown in @branch-bound
     ],
 ) <branch-bound>
 
+The algorithm outlined in @branch-bound is de-icing approach-agnostic, i.e. it only describes the branch-and-bound procedure itself, not how an individual aircraft is assigned a landing or take-off time or a de-icing time.
+The benefit of this is twofold -- first, it allows for generic and easily extendable implementations of de-icing approaches, and second, it allows each de-icing approach to be compared as fairly as possible since the only difference in code comes from scheduling individual aircraft.
+
 === Decomposed De-Icing
 
-#todo("Include explanation and pseudocode for decomposed de-icing by TOBT as well as by CTOT")
+Under decomposed de-icing, a de-icing queue is first generated before performing the main branch-and-bound procedure.
+This queue is then used to fix the de-icing times of departures before scheduling their take-off times.
 
-=== Integrated De-Icing
+To generate the de-icing queue, a list of all departures to be de-iced is first created and then sorted by either their TOBTs or their CTOT slots, depending on which decomposed de-icing approach is to be used.
+In the latter case, additional sorting may be necessary to prioritise aircraft with CTOT slots over those without and ensure maximal CTOT compliance.
+Aircraft in this list may then be assigned de-icing times in a FCFS manner, taking into account their release times and the time that the previous aircraft finishes de-icing.
+The de-icing time $z_i$ of a departure $i$ within the de-icing queue $Q$ is thus given by the following expression, where $Q_i$ is the set of departures that have been scheduled to de-ice before $i$:
 
-#todo("Include explanation and pseudocode for integrated de-icing")
+$ z_i = max(r_i - q_i - n_i - o_i, r_i - h_i - o_i, max_(j in Q_i) z_j + o_j) $ <deice-queue>
+
+Following from @deice-queue, the take-off time $t_i$ of a departure $i$ that has already been scheduled to de-ice can be calculated as the maximum of its release time $r_i$, de-icing time $z_i$ plus the time taken to taxi to the runway after de-icing, and $t_j + delta_(j, i)$ for every $j in s_i$, where $s_i$ is the partial sequence of all aircraft that have been sequenced before $i$:
+
+$ t_i = max(r_i, z_i + o_i + n_i + q_i, max_(j in s_i) t_j + delta_(j, i)) $
+
+On the other hand, if $i$ is an aircraft which is either an arrival or a departure that is not required to de-ice, its landing or take-off time does not need to consider the second component, and can simply be given by:
+
+$ t_i = max(r_i, max_(j in s_i) t_j + delta_(j, i)) $ <earliest-landing>
+
+=== Integrated De-icing
+
+Integrated de-icing differs from its decomposed counterpart by virtue of not previously calculating a de-icing queue, but instead calculating the de-icing times for aircraft while also calculating their landing or take-off times.
+
+If an aircraft $i$ is an arrival or a departure that is not required to de-ice, then its landing or take-off time $t_i$ can be calculated as given by @earliest-landing.
+However, if $i$ is a departure and is required to de-ice before taking off, then its earliest de-icing time must also be taken into consideration.
+This can be calculated as the time that the preceding aircraft in the de-icing queue finishes de-icing, plus the departure $i$'s de-icing duration $o_i$, taxi-out duration $n_i$, and lineup duration $q_i$.
+Thus, the take-off time $t_i$ for a departure $i$ that must de-ice is given by:
+
+$ t_i = max(r_i, max_(j in s_i) t_j + delta_(j, i), max_(k in s_i) z_k + o_i + n_i + q_i) $ <earliest-takeoff>
+
+Once its take-off time is known, its de-icing time $z_i$ can be calculated as the maximum of its earliest de-icing time (given above in @earliest-takeoff), $t_i$ minus the sum of its HOT $h_i$ and de-icing duration $o_i$, and $t_i$ minus the sum of its maximum allowed runway hold duration $r_i$, lineup duration $q_i$, taxi-out duration $n_i$, and de-icing duration $o_i$:
+
+$ z_i = max(t_i - q_i - r_i - n_i - o_i, t_i - h_i - o_i, max_(j in s_i) z_j + o_i + n_i + q_i) $
 
 === Rolling Horizon Extension
 
