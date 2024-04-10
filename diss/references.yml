@@ -11,7 +11,7 @@ dear-dynamic-scheduling:
     publisher: "Elsevier"
     volume: 12
     issue: 4
-    page-range: 297-298
+  page-range: 297-298
   serial-number:
     doi: "10.1016/0041-1647(78)90073-4"
 
@@ -41,7 +41,7 @@ bianco-minimizing-time:
     title: "Annals of Operations Research"
     publisher: "Springer"
     volume: 86
-    page-range: 393-415
+  page-range: 393-415
   serial-number:
     doi: "10.1023/a:1018975323093"
 
@@ -58,7 +58,7 @@ beasley-scheduling-aircraft:
     title: "Transportation Science"
     publisher: "INFORMS"
     volume: 34
-    page-range: 180-197
+  page-range: 180-197
   serial-number:
     doi: "10.1287/trsc.34.2.180.12302"
 
@@ -76,7 +76,7 @@ atkin-hybrid-metaheuristics:
     publisher: "INFORMS"
     volume: 41
     issue: 1
-    page-range: 90-106
+  page-range: 90-106
   serial-number:
     doi: "10.1287/trsc.1060.0163"
 
@@ -92,7 +92,7 @@ luo-branch-bound:
     publisher: "Elsevier"
     volume: 180
     issue: 1
-    page-range: 69-81
+  page-range: 69-81
   serial-number:
     doi: "10.1016/j.ejor.2005.06.069"
 
@@ -110,7 +110,7 @@ allahverdi-survey-scheduling:
     publisher: "Elsevier"
     volume: 187
     issue: 3
-    page-range: 985-1032
+  page-range: 985-1032
   serial-number:
     doi: "10.1016/j.ejor.2006.06.060"
 
@@ -127,7 +127,7 @@ atkin-tsat-allocation:
     publisher: "Springer-Verlag"
     volume: 2
     issue: 3
-    page-range: 173-198
+  page-range: 173-198
   serial-number:
     doi: "10.1007/s12469-010-0029-2"
 
@@ -143,7 +143,7 @@ balakrishnan-runway-operations:
     publisher: "INFORMS"
     volume: 58
     issue: 6
-    page-range: 1650-1665
+  page-range: 1650-1665
   serial-number:
     doi: "10.1287/opre.1100.0869"
 
@@ -160,7 +160,7 @@ bennell-runway-scheduling:
     publisher: "Springer-Verlag"
     volume: 9
     issue: 2
-    page-range: 115-138
+  page-range: 115-138
   serial-number:
     doi: "10.1007/s10288-011-0172-x"
 
@@ -176,7 +176,7 @@ briskorn-aircraft-landing:
     publisher: "Springer"
     volume: 17
     issue: 1
-    page-range: 31-45
+  page-range: 31-45
   serial-number:
     doi: "10.1007/s10951-013-0337-x"
 
@@ -193,7 +193,7 @@ furini-improved-horizon:
     title: "Journal of Scheduling"
     publisher: "Springer"
     volume: 18
-    page-range: 435-447
+  page-range: 435-447
   serial-number:
     doi: "10.1007/s10951-014-0415-8"
 
@@ -209,7 +209,7 @@ lieder-dynamic-programming:
     title: "European Journal of Operational Research"
     publisher: "Elsevier"
     volume: 88
-    page-range: 61-69
+  page-range: 61-69
   serial-number:
     doi: "10.1016/j.ejor.2014.11.027"
 
@@ -224,7 +224,7 @@ lieder-scheduling-aircraft:
     title: "Transportation Research Part E: Logistics and Transportation Review"
     publisher: "Elsevier"
     volume: 88
-    page-range: 167-188
+  page-range: 167-188
   serial-number:
     doi: "10.1016/j.tre.2016.01.015"
 
@@ -241,7 +241,7 @@ avella-time-indexed:
     title: "Transportation Science"
     publisher: "INFORMS"
     volume: 51
-    page-range: 1196-1209
+  page-range: 1196-1209
   serial-number:
     doi: "10.1287/trsc.2017.0750"
 
@@ -257,6 +257,6 @@ demaere-pruning-rules:
     title: "Transportation Science"
     publisher: "INFORMS"
     volume: 52
-    page-range: 898-916
+  page-range: 898-916
   serial-number:
     doi: "10.1287/trsc.2016.0733"
