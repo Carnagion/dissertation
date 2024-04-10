@@ -29,6 +29,22 @@ psaraftis-dynamic-programming:
   serial-number:
     doi: "10.1287/opre.28.6.1347"
 
+abela-optimal-schedules:
+  type: article
+  title: "Computing Optimal Schedules for Landing Aircraft"
+  author:
+    - "Abela, J."
+    - "Abramson, D."
+    - "Krishnamoorthy, Mohan"
+    - "De Silva, A."
+    - "Mills, G."
+  date: 1993
+  parent:
+    type: proceedings
+    title: "Proceedings of the 12th National ASOR Conference"
+    location: Adelaide, Australia
+  page-range: 71-90
+
 bianco-minimizing-time:
   type: article
   title: "Minimizing total completion time subject to release dates and sequence-dependent processing times"
@@ -44,6 +60,23 @@ bianco-minimizing-time:
   page-range: 393-415
   serial-number:
     doi: "10.1023/a:1018975323093"
+
+ernst-heuristic-exact:
+  type: article
+  title: "Heuristic and exact algorithms for scheduling aircraft landings"
+  author:
+    - "Ernst, Andreas T."
+    - "Krishnamoorthy, Mohan"
+    - "Storer, Robert H."
+  date: 1999
+  parent:
+    title: "Networks"
+    publisher: "John Wiley & Sons, Inc."
+    volume: 34
+    issue: 3
+  page-range: 229-241
+  serial-number:
+    doi: "10.1002/(SICI)1097-0037(199910)34:3<229::AID-NET8>3.0.CO;2-W"
 
 beasley-scheduling-aircraft:
   type: article

@@ -124,10 +124,6 @@
 
 #todo("Write abstract")
 
-#lorem(100)
-
-#lorem(50)
-
 #v(1fr)
 
 #pagebreak()
@@ -167,11 +163,14 @@
 
 === Heuristics
 
-#todo("Write about heuristic-based approaches")
-
 #cite(<bianco-minimizing-time>, form: "prose") propose two heuristic approaches -- Cheapest Addition Heuristic (CAH) and Cheapest Insertion Heuristic (CIH) -- that each generate sequences by either appending remaining aircraft to partial sequences, or inserting them.
 They note that the latter almost always performed better than the former, as it searches for the best partial sequences obtained by inserting new aircraft anywhere within the sequence as opposed to just at the end.
 However, it is also much more computationally expensive -- these heuristics are shown to have computational complexities of $O(n^2 log(n))$ and $O(n^4)$ respectively @bianco-minimizing-time @bennell-runway-scheduling.
+The heuristics are evaluated on mainly randomly generated test instances.
+
+#cite(<atkin-hybrid-metaheuristics>, form: "prose") introduce a hybridised approach using different search methods and metaheuristics to solve the integrated runway scheduling and ground movement problem at London Heathrow.
+They consider total delay, CTOT compliance, positional delay, and throughput as part of their objective function.
+Their results show that the availability of more information about aircraft taxiing from the integration of the problem can reduce delays and CTOT violations.
 
 == Exact Methods
 
@@ -179,7 +178,13 @@ However, it is also much more computationally expensive -- these heuristics are 
 
 === Mathematical Programming
 
-#todo("Write about linear and mixed-integer programming approaches used in the past")
+#cite(<beasley-scheduling-aircraft>, form: "prose") introduce a linear programming (LP)-based tree search approach for the problem of sequencing arrivals on a single runway, and later extend their formulation to handle multiple runways as well.
+They consider hard time window constraints and use an objective function that penalises landing before or after a given target time for each arrival.
+Unlike many previous approaches that assumed an indefinite latest time limit for landing, their approach employs more realistic latest landing times based on fuel considerations.
+This allows for simplifying the problem by exploiting the presence of increased disjoint intervals, caused by relatively narrow hard time windows.
+
+#cite(<beasley-scheduling-aircraft>, form: "prose") also present a simpler alternative 0-1 mixed integer formulation that can be derived by discretising time.
+This approach has the advantage of not requiring the cost function to be linear, although they note that this formulation produces to a relatively large number of variables and constraints, and do not explore it further.
 
 === Dynamic Programming
 
@@ -191,14 +196,22 @@ DP can also yield optimal solutions significantly faster than MIP solvers @liede
 He utilises an approach that groups aircraft into multiple classes or sets, essentially merging lists of aircraft from these sets and allowing the exploitation of known precedence relations within them.
 When implemented as a pre-processing step, this DP algorithm has a time complexity to $O(m^2 (n + 1)^m)$, where $n$ denotes the number of aircraft, and $m$ denotes the number of distinct aircraft types @psaraftis-dynamic-programming @demaere-pruning-rules.
 
-#cite(<bianco-minimizing-time>, form: "prose") view the runway sequencing problem for a single runway as an application of the single machine scheduling problem with release dates and sequence-dependent processing times, and propose a DP formulation for the same.
-
 #cite(<balakrishnan-runway-operations>, form: "prose") introduce an alternative DP approach wherein the runway sequencing problem is formulated as a modified shortest path problem in a network, considering positional equity (via maximum shift constraints), minimum separation requirements, precedence constraints, and time window constraints.
-Their proposed algorithm has a complexity of $O(n (2k + 1)^(2k + 2))$, where $n$ is the number of aircraft and $k$ is the maximum shift parameter @balakrishnan-runway-operations.
+Their proposed algorithm has a complexity of $O(n (2k + 1)^(2k + 2))$, where $n$ is the number of aircraft and $k$ is the maximum shift parameter.
 
 === Branch-and-Bound
 
-#todo("Write about branch-and-bound approaches")
+Branch-and-bound is an exact search method for solving optimisation problems by breaking them down into smaller sub-problems and eliminating those sub-problems that cannot possibly contain a solution better than the best known solution so far.
+Branch-and-bound algorithms for minimisation problems typically comprise of four main procedures -- separation, bounding, branching, and fathoming @luo-branch-bound.
+The use of a bounding function to eliminate sub-problems allows the algorithm to prune nodes from the search space and perform better than a brute-force (exhaustive) search, while still exploring every node in the search space.
+
+#cite(<abela-optimal-schedules>, form: "prose") propose a branch-and-bound algorithm based on a 0-1 mixed integer programming (MIP) formulation of the runway sequencing problem for arrivals on a single runway, considering separation and precedence constraints and using an objective function that penalises speeding up or holding the arrivals.
+They compare the branch-and-bound algorithm against a genetic algorithm based on the same formulation, evaluating both on randomly generated test data with up to 20 aircraft.
+Results show that their branch-and-bound implementation solves smaller problem instances relatively quickly, but requires considerably longer time as instances grow larger.
+
+#cite(<ernst-heuristic-exact>, form: "prose") present a branch-and-bound algorithm for the problem of sequencing arrivals with single as well as multiple runways, using an objective function that penalises landing before or after target times.
+They develop a specialised simplex algorithm capable of determining landing times rapidly and a heuristic algorithm to obtain the upper and lower bounds for the branch-and-bound algorithm.
+Furthermore, they utilise a variety of pre-processing methods to improve the efficiency of the algorithm, and evaluate both their heuristic and their branch-and-bound approaches on instances involving up to 50 aircraft.
 
 == Paradigms
 
@@ -218,14 +231,14 @@ Moreover, having a hard constraint of or high penalty for positional equity may 
 For instance, there may be an aircraft that must wait for the start of its CTOT slot, during which other aircraft may be sequenced with no additional delay -- however, penalising positional inequity would (wrongfully) penalise such a sequence, forcing the other aircraft to take off after the one with the CTOT slot and increasing the overall delay in the process @atkin-tsat-allocation.
 
 The differing delays that accumulate across different Standard Instrument Departure (SID) routes, hard time window constraints, and CTOT constraints can thus require large maximum position shifts to obtain good runway sequences, thereby challenging the tractability of CPS-based approaches @demaere-pruning-rules.
-The model and branch-and-bound program presented in this paper therefore do not employ CPS, making them more practical and viable for real-world scenarios considering departures with complex separation requirements and CTOT compliance.
+The model and branch-and-bound program presented in @section:model and @section:branch-bound of this paper therefore do not employ CPS, making them more practical and viable for real-world scenarios considering departures with complex separation requirements and CTOT compliance.
 
 === Pruning Rules
 
 In contrast to approaches like CPS that reduce the search space of the problem by limiting the positional shifting of aircraft within the sequence, pruning rules exploit the characteristics of the problem or objective function to infer that a current sequence (or any future sequences based on it) is sub-optimal.
 This has the advantage of being able to prune partial subsequences that show known poor characteristics much earlier, even before dominating partial sequences have been generated @demaere-pruning-rules.
 
-Pruning rules have been extensively studied in literature involving machine scheduling @demaere-pruning-rules @allahverdi-survey-scheduling.
+Pruning rules have been extensively studied in the literature involving machine scheduling @demaere-pruning-rules @allahverdi-survey-scheduling.
 However, #cite(<allahverdi-survey-scheduling>, form: "prose") show that a majority of these approaches do not consider sequence-dependent setup times, despite them being prevalent in runway sequencing problems and in many other applications of machine scheduling.
 Nor do they consider complex non-linear, non-convex, or discontinuous objective functions @demaere-pruning-rules.
 
@@ -245,7 +258,7 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
 
 == Notation
 
-@notation provides an overview of the symbols used in the following sections along with their definitions.
+@table:notation provides an overview of the symbols used in the following sections along with their definitions.
 
 // TODO: Complete notation table
 #let notation = table(
@@ -293,7 +306,7 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
 #figure(
     notation,
     caption: [Overview of notation and definitions used in model],
-) <notation>
+) <table:notation>
 
 == Constraints
 
@@ -382,7 +395,7 @@ $ t_i - z_i <= o_i + n_i + q_i + w_i $
 
 == Objectives
 
-The objective function $f(s)$ for a partial or final sequence $s$ is defined in @objective-function.
+The objective function $f(s)$ for a partial or final sequence $s$ is defined in @eq:objective-function.
 It considers total delay and CTOT compliance, and is based on the function described by #cite(<demaere-pruning-rules>, form: "prose").
 
 // TODO: Check if this looks better when mentioned elsewhere, like in the branch-and-bound section
@@ -395,7 +408,7 @@ Although not directly included as an objective, it is utilised for the evaluatio
 
 // TODO: Maybe word this better
 The delay for an aircraft $i$ is defined as the difference between its landing or take-off time $t_i$ and its base time $b_i$.
-Its delay cost $c_d (i)$, defined in @delay-cost, is then calculated as the delay squared, and is equivalent to the following function:
+Its delay cost $c_d (i)$, defined in @eq:delay-cost, is then calculated as the delay squared, and is equivalent to the following function:
 
 $ c_d (i) = (t_i - b_i)^2 $
 
@@ -405,14 +418,14 @@ For instance, two aircraft with delays of one and three minutes each would have 
 === Calculated Take-Off Time Compliance
 
 // TODO: Maybe word this better
-The CTOT violation cost $c_v (i)$ for a departure $i$ is defined in @ctot-violation-cost, and is equivalent to the following piecewise discontinuous non-linear function given by 0 if it takes off within its CTOT slot and the squared difference between its take-off time $t_i$ and its CTOT slot end time $v_i$ if it misses its CTOT slot:
+The CTOT violation cost $c_v (i)$ for a departure $i$ is defined in @eq:ctot-violation-cost, and is equivalent to the following piecewise discontinuous non-linear function given by 0 if it takes off within its CTOT slot and the squared difference between its take-off time $t_i$ and its CTOT slot end time $v_i$ if it misses its CTOT slot:
 
 $ c_v (i) = cases(
     &0 &"if" &u_i <= t_i <= v_i,
     &(t_i - v_i)^2 &"if" &t_i > v_i,
 ) $
 
-== Model <model>
+== Model <section:model>
 
 A time-indexed formulation is employed in order to linearise the objective function and hence solve the integrated runway and de-icing sequencing problem using 0-1 integer linear programming.
 
@@ -444,52 +457,52 @@ $ sum_(z in Z_i) zeta_(i, z) = 1 $
 Putting together these constraints, objectives, and time-indexed formulations, a 0-1 integer linear model for the integrated runway and de-icing sequencing problem is presented below:
 
 #multi-equation[
-    $ "Minimise" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <objective-function>
-    $ &c_d (i) = sum_(t in T_i) tau_(i, t) dot (t - b_i)^2 &forall i in F $ <delay-cost>
-    $ &c_v (i) = sum_(t in T_i) tau_(i, t) dot (t > v_i) dot (t - v_i)^2 &forall i in D $ <ctot-violation-cost>
-    $ &t_i = sum_(t in T_i) tau_(i, t) dot t &forall i in F $ <scheduled-time>
-    $ &z_i = sum_(z in Z_i) zeta_(i, z) dot z &forall i in D $ <deice-time>
-    $ "Subject to" space &sum_(t in T_i) tau_(i, t) = 1 &forall i in F $ <schedule-once>
-    $ &sum_(z in Z_i) zeta_(i, z) = 1 &forall i in D $ <deice-once>
-    $ &gamma_(i, j) + gamma_(j, i) = 1 &forall i in F, j in F, i != j $ <schedule-precedence>
-    $ &z_j >= z_i + o_i or z_i >= z_j + o_j &forall i in D, j in D, i != j $ <deice-precedence>
-    $ &t_i >= z_i + o_i + n_i + q_i &forall i in D $ <min-taxi>
-    $ &t_i - z_i - o_i <= h_i &forall i in D $ <max-holdover>
-    $ &t_i - z_i - o_i <= n_i + w_i + q_i &forall i in D $ <max-runway-hold>
-    $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D union F_C $ <certain-precedence>
-    $ &t_j >= t_i + delta_(i, j) &forall (i, j) in F_D union F_C $ <complete-order-separation>
-    $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (d_i - r_j) dot gamma_(j, i) &forall (i, j) in F_O $ <overlapping-window-separation>
-    $ &tau_(i, t) in { 0, 1 } &forall i in F, t in T_i $ <schedule-binary>
-    $ &zeta_(i, z) in { 0, 1 } &forall i in D, z in Z_i $ <deice-binary>
-    $ &gamma_(i, j) in { 0, 1 } &forall i in F, j in F, i != j $ <precedence-binary>
+    $ "Minimise" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <eq:objective-function>
+    $ &c_d (i) = sum_(t in T_i) tau_(i, t) dot (t - b_i)^2 &forall i in F $ <eq:delay-cost>
+    $ &c_v (i) = sum_(t in T_i) tau_(i, t) dot (t > v_i) dot (t - v_i)^2 &forall i in D $ <eq:ctot-violation-cost>
+    $ &t_i = sum_(t in T_i) tau_(i, t) dot t &forall i in F $ <eq:scheduled-time>
+    $ &z_i = sum_(z in Z_i) zeta_(i, z) dot z &forall i in D $ <eq:deice-time>
+    $ "Subject to" space &sum_(t in T_i) tau_(i, t) = 1 &forall i in F $ <constraint:schedule-once>
+    $ &sum_(z in Z_i) zeta_(i, z) = 1 &forall i in D $ <constraint:deice-once>
+    $ &gamma_(i, j) + gamma_(j, i) = 1 &forall i in F, j in F, i != j $ <constraint:schedule-precedence>
+    $ &z_j >= z_i + o_i or z_i >= z_j + o_j &forall i in D, j in D, i != j $ <constraint:deice-precedence>
+    $ &t_i >= z_i + o_i + n_i + q_i &forall i in D $ <constraint:min-taxi>
+    $ &t_i - z_i - o_i <= h_i &forall i in D $ <constraint:max-holdover>
+    $ &t_i - z_i - o_i <= n_i + w_i + q_i &forall i in D $ <constraint:max-runway-hold>
+    $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D union F_C $ <constraint:certain-precedence>
+    $ &t_j >= t_i + delta_(i, j) &forall (i, j) in F_D union F_C $ <constraint:certain-separation>
+    $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (d_i - r_j) dot gamma_(j, i) &forall (i, j) in F_O $ <constraint:overlapping-window-separation>
+    $ &tau_(i, t) in { 0, 1 } &forall i in F, t in T_i $ <constraint:schedule-binary>
+    $ &zeta_(i, z) in { 0, 1 } &forall i in D, z in Z_i $ <constraint:deice-binary>
+    $ &gamma_(i, j) in { 0, 1 } &forall i in F, j in F, i != j $ <constraint:precedence-binary>
 ]
 
 // TODO: Improve wording of this section if necessary
 
-The objective function -- @objective-function -- minimises total delay and CTOT violations, whose individual costs are given by @delay-cost and @ctot-violation-cost respectively.
+The objective function -- @eq:objective-function -- minimises total delay and CTOT violations, whose individual costs are given by @eq:delay-cost and @eq:ctot-violation-cost respectively.
 The individual cost functions $c_d (i)$ and $c_v (i)$ are linearised according to the time-indexed formulations described above.
 
-@scheduled-time and @deice-time define the scheduled landing or take-off time and the de-ice time (if applicable) for an aircraft.
+@eq:scheduled-time and @eq:deice-time define the scheduled landing or take-off time and the de-ice time (if applicable) for an aircraft.
 
-@schedule-once ensures that every aircraft is assigned exactly one landing or take-off time within its time window, and @deice-once ensures that every departure that must de-ice is assigned a de-ice time within its de-ice time window.
+@constraint:schedule-once ensures that every aircraft is assigned exactly one landing or take-off time within its time window, and @constraint:deice-once ensures that every departure that must de-ice is assigned a de-ice time within its de-ice time window.
 
-@schedule-precedence enforces precedence constraints for every aircraft -- either $i$ must land or take off before $j$, or the other way around.
+@constraint:schedule-precedence enforces precedence constraints for every aircraft -- either $i$ must land or take off before $j$, or the other way around.
 
-@deice-precedence enforces de-icing precedence constraints for every departure, and ensures that a departure can only begin de-icing after the current aircraft (if any) has finished being de-iced.
+@constraint:deice-precedence enforces de-icing precedence constraints for every departure, and ensures that a departure can only begin de-icing after the current aircraft (if any) has finished being de-iced.
 
-@min-taxi ensures that a departure has enough time to taxi out after it finishes de-icing and lineup at the runway to meet its scheduled take-off time.
+@constraint:min-taxi ensures that a departure has enough time to taxi out after it finishes de-icing and lineup at the runway to meet its scheduled take-off time.
 
-@max-holdover ensures that the time between a departure's scheduled take-off time and de-ice time does not exceed its allowed HOT -- i.e. once de-iced, departures take off before their HOT expires.
+@constraint:max-holdover ensures that the time between a departure's scheduled take-off time and de-ice time does not exceed its allowed HOT -- i.e. once de-iced, departures take off before their HOT expires.
 
-@max-runway-hold ensures that the runway holding time of a departure does not exceed its maximum allowed runway holding time.
+@constraint:max-runway-hold ensures that the runway holding time of a departure does not exceed its maximum allowed runway holding time.
 
-@certain-precedence, @complete-order-separation, and @overlapping-window-separation enforce precedence and separation constraints on all pairs of distinct aircraft.
-These constraints are inferred from disjoint time windows as well as complete orders in separation-identical aircraft, which are discussed further in @disjoint-time-windows and @complete-orders respectively.
+@constraint:certain-precedence, @constraint:certain-separation, and @constraint:overlapping-window-separation enforce precedence and separation constraints on all pairs of distinct aircraft.
+These constraints are inferred from disjoint time windows as well as complete orders in separation-identical aircraft, which are discussed further in @section:disjoint-time-windows and @section:complete-orders respectively.
 
-@schedule-binary, @deice-binary, and @precedence-binary restrict the decision variables for landings or take-offs, de-icing, and aircraft precedences to binary values.
+@constraint:schedule-binary, @constraint:deice-binary, and @constraint:precedence-binary restrict the decision variables for landings or take-offs, de-icing, and aircraft precedences to binary values.
 
 // TODO: Check if this section looks better elsewhere, such as just after time windows or precedences, or just after the model
-=== Disjoint Time Windows <disjoint-time-windows>
+=== Disjoint Time Windows <section:disjoint-time-windows>
 
 #cite(<beasley-scheduling-aircraft>, form: "prose") show that it can be determined for certain pairs of distinct aircraft $(i, j)$ whether $i$ lands or takes off before $j$ does, based on their sets of possible landing or take-off times.
 For example, if two aircraft $i$ and $j$ have their release times and due times as $r_i = 10$, $d_i = 50$, $r_j = 70$, and $d_j = 110$ respectively, then it is clear that $i$ must land or take off first (i.e. before $j$) since $T_i$ and $T_j$ are disjoint.
@@ -508,13 +521,13 @@ Let $F_S$, $F_D$, and $F_O$ be the first, second, and third set respectively.
 They can then be defined as shown below:
 
 #multi-equation[
-    $ F_S = { (i, j) | &d_i < r_j and d_i + delta_(i, j) <= r_j, i in F, j in F, i != j } $ <separated-windows>
-    $ F_D = { (i, j) | &d_i < r_j and d_i + delta_(i, j) > r_j, i in F, j in F, i != j } $ <disjoint-windows>
+    $ F_S = { (i, j) | &d_i < r_j and d_i + delta_(i, j) <= r_j, i in F, j in F, i != j } $ <eq:separated-windows>
+    $ F_D = { (i, j) | &d_i < r_j and d_i + delta_(i, j) > r_j, i in F, j in F, i != j } $ <eq:disjoint-windows>
     $ F_O = { (i, j) | &r_j <= r_i <= d_j or r_j <= d_i <= d_j or r_i <= r_j <= d_i or r_i <= d_j <= d_i,\
-        &i in F, j in F, i != j } $ <overlapping-windows>
+        &i in F, j in F, i != j } $ <eq:overlapping-windows>
 ]
 
-It is then possible to impose the following precedence and separation constraints on every pair of distinct aircraft in these sets, corresponding to @certain-precedence, @complete-order-separation, and @overlapping-window-separation in the model:
+It is then possible to impose the following precedence and separation constraints on every pair of distinct aircraft in these sets, corresponding to @constraint:certain-precedence, @constraint:certain-separation, and @constraint:overlapping-window-separation in the model:
 
 #multi-equation[
     $ &gamma_(i, j) = 1 &forall (i, j) in F_S union F_D $
@@ -523,7 +536,7 @@ It is then possible to impose the following precedence and separation constraint
 ]
 
 // TODO: Check if this section looks better elsewhere, such as just after time windows or precedences, or just after the model
-=== Complete Orders <complete-orders>
+=== Complete Orders <section:complete-orders>
 
 A _complete order_ exists between any two aircraft $i$ and $j$ if the objective value and feasibility of a sequence $s$ containing both $i$ and $j$ cannot be improved by reversing the order of $i$ and $j$ in $s$.
 By exploiting complete orders, it is possible to simplify the problem of runway sequencing (or more generally, machine scheduling) to one of interleaving ordered sets of aircraft, always only sequencing the first available aircraft from each set @demaere-pruning-rules.
@@ -532,23 +545,23 @@ This enables a reduction in the problem's worst-case computational complexity fr
 #cite(<psaraftis-dynamic-programming>, form: "prose") first showed the existence of such complete orders between _separation-identical_ aircraft.
 Two distinct aircraft $i$ and $j$ are separation-identical if their mutual separations with respect to every other aircraft $k in F$ are the same -- i.e. $i$ and $j$ are separation-identical if and only if:
 
-$ forall k in F, k != i and k != j and delta_(i, k) = delta_(j, k) and delta_(k, i) = delta_(k, j) $ <are-separation-identical>
+$ forall k in F, k != i and k != j and delta_(i, k) = delta_(j, k) and delta_(k, i) = delta_(k, j) $ <eq:are-separation-identical>
 
 Additionally, a complete order may be inferred upon a set of separation-identical aircraft if the complete orders for each of the individual constraints and objectives are consistent within the set @demaere-pruning-rules.
 #cite(<demaere-pruning-rules>, form: "prose") show that this is the case for an objective that considers delay and makespan, even with hard time window constraints -- as long as there is a consistent order between every aircraft's base times, release times, and end times of hard time windows.
 A complete order can thus be inferred between two separation-identical aircraft $i$ and $j$ if and only if:
 
-$ b_i <= b_j and r_i <= r_j and l_i <= l_j $ <are-complete-ordered>
+$ b_i <= b_j and r_i <= r_j and l_i <= l_j $ <eq:are-complete-ordered>
 
 However, complete orders cannot be inferred between two separation-identical aircraft if one or both aircraft are subject to a CTOT, due to the piecewise linear, discontinuous, and non-convex nature of the CTOT violation cost function $c_v (i)$ @demaere-pruning-rules.
-Thus, in addition to satisfying @are-complete-ordered, neither of the two aircraft must be subject to a CTOT slot.
+Thus, in addition to satisfying @eq:are-complete-ordered, neither of the two aircraft must be subject to a CTOT slot.
 
-Following from @are-separation-identical and @are-complete-ordered, it is possible to define the set $F_C$ of pairs of distinct aircraft $(i, j)$ where $i$ and $j$ are separation-identical and have a complete order such that $i$ must land or take off before $j$:
+Following from @eq:are-separation-identical and @eq:are-complete-ordered, it is possible to define the set $F_C$ of pairs of distinct aircraft $(i, j)$ where $i$ and $j$ are separation-identical and have a complete order such that $i$ must land or take off before $j$:
 
 $ F_C = { (i, j) | &(forall k in F, k != i and k != j and delta_(i, k) = delta_(j, k) and delta_(k, i) = delta_(k, j))\
     &and b_i <= b_j and r_i <= r_j and l_i <= l_j, i in F, j in F, i != j } $
 
-The following precedence and separation constraints can thus be imposed on every pair of aircraft $(i, j) in F_C$, corresponding to @certain-precedence and @complete-order-separation in the model:
+The following precedence and separation constraints can thus be imposed on every pair of aircraft $(i, j) in F_C$, corresponding to @constraint:certain-precedence and @constraint:certain-separation in the model:
 
 $ gamma_(i, j) = 1 $
 $ t_j >= t_i + delta_(i, j) $
@@ -558,16 +571,21 @@ $ t_j >= t_i + delta_(i, j) $
 
 #todo("Write short introduction to different approaches used")
 
-== Branch-and-Bound Program
+== Mathematical Program
 
-Branch-and-bound is an exact search method for solving optimisation problems by breaking them down into smaller sub-problems and eliminating those sub-problems that cannot possibly contain a solution better than the best known solution so far.
-The use of a bounding function to eliminate sub-problems allows the algorithm to prune nodes from the search space and perform better than a brute-force (exhaustive) search, while still exploring every node in the search space.
+// TODO: Write more about CPLEX implementation if necessary
+The model presented in in @section:model has been implemented as a mathematical program in #link("https://www.ibm.com/docs/en/icos/22.1.1?topic=opl-optimization-programming-language")[Optimisation Programming Language] (OPL), which is packaged with IBM's #link("https://www.ibm.com/products/ilog-cplex-optimization-studio")[ILOG CPLEX Optimisation Studio].
 
-Branch-and-bound algorithms for minimisation problems typically comprise of four main procedures -- separation, bounding, branching, and fathoming @luo-branch-bound.
+== Branch-and-Bound Program <section:branch-bound>
+
+// TODO: Explain why Rust is used if necessary
+A branch-and-bound algorithm to optimally solve the integrated runway and de-icing sequencing problem as described in @section:model (as well as its decomposed version) is also developed, using a depth-first-search that incrementally builds up sequences by adding one aircraft to the current partial sequence at every step.
+The algorithm is implemented in the #link("https://www.rust-lang.org/")[Rust programming language].
 
 The algorithm begins with no known best sequence, and a best cost $c_"best"$ of infinity.
-It maintains a last-in-first-out (LIFO) queue of nodes to visit along with their depths -- the search space, which is initialised with partial sequences containing solely the first aircraft to be sequenced from each ordered set of separation-identical aircraft.
+It maintains a last-in-first-out (LIFO) queue of nodes to visit along with their depths -- the search space.
 A node at depth $k$ in the search space corresponds to a partial sequence $s$ with $k$ aircraft.
+The queue is initialised with partial sequences containing solely the first aircraft to be sequenced from each ordered set of separation-identical aircraft.
 
 At each step, the most recently added node (sequence) is removed from the back of the queue, and its _lower bound_ is evaluated.
 The lower bound for a partial sequence $s$ at depth $k$ consists of two components -- its actual objective value $f(s)$, and a lower bound on the cost of the remaining $(|F| - k)$ aircraft to be sequenced.
@@ -579,7 +597,7 @@ Sub-nodes are added to the front of the queue in decreasing order of their objec
 Since nodes are removed from the front of the queue, this branching procedure is best-first -- i.e. the partial sequence with the best (lowest) objective value is explored first, as it gets added last.
 
 The algorithm terminates when all nodes are _fathomed_ -- i.e. all nodes have either been separated or ignored (due to having worse lower bounds than the best known sequence).
-The full branch-and-bound algorithm as described above is shown in @branch-bound:
+The full branch-and-bound algorithm as described above is shown in @code:branch-bound:
 
 #let branch-bound-code = pseudocode-list[
     + $c <- 0$
@@ -626,10 +644,12 @@ The full branch-and-bound algorithm as described above is shown in @branch-bound
     caption: [
         Branch-and-bound algorithm for runway and de-icing sequencing
     ],
-) <branch-bound>
+) <code:branch-bound>
 
-The algorithm outlined in @branch-bound is de-icing approach-agnostic, i.e. it only describes the branch-and-bound procedure itself, not how an individual aircraft is assigned a landing or take-off time or a de-icing time.
+This algorithm is de-icing approach-agnostic, i.e. it only describes the branch-and-bound procedure itself, not how an individual aircraft is assigned a landing or take-off time or a de-icing time.
 The benefit of this is twofold -- first, it allows for generic and easily extendable implementations of de-icing approaches, and second, it allows each de-icing approach to be compared as fairly as possible since the only difference in code comes from scheduling individual aircraft.
+
+The two different de-icing approaches -- decomposed and integrated, wherein the former is further split into decomposed by TOBT and decomposed by CTOT -- are discussed further in the sections below.
 
 === Decomposed De-Icing
 
@@ -641,40 +661,34 @@ In the latter case, additional sorting may be necessary to prioritise aircraft w
 Aircraft in this list may then be assigned de-icing times in a FCFS manner, taking into account their release times and the time that the previous aircraft finishes de-icing.
 The de-icing time $z_i$ of a departure $i$ within the de-icing queue $Q$ is thus given by the following expression, where $Q_i$ is the set of departures that have been scheduled to de-ice before $i$:
 
-$ z_i = max(r_i - q_i - n_i - o_i, r_i - h_i - o_i, max_(j in Q_i) z_j + o_j) $ <deice-queue>
+$ z_i = max(r_i - q_i - n_i - o_i, r_i - h_i - o_i, max_(j in Q_i) z_j + o_j) $ <eq:deice-queue>
 
-Following from @deice-queue, the take-off time $t_i$ of a departure $i$ that has already been scheduled to de-ice can be calculated as the maximum of its release time $r_i$, de-icing time $z_i$ plus the time taken to taxi to the runway after de-icing, and $t_j + delta_(j, i)$ for every $j in s_i$, where $s_i$ is the partial sequence of all aircraft that have been sequenced before $i$:
+Following from @eq:deice-queue, the take-off time $t_i$ of a departure $i$ that has already been scheduled to de-ice can be calculated as the maximum of its release time $r_i$, de-icing time $z_i$ plus the time taken to taxi to the runway after de-icing, and $t_j + delta_(j, i)$ for every $j in s_i$, where $s_i$ is the partial sequence of all aircraft that have been sequenced before $i$:
 
 $ t_i = max(r_i, z_i + o_i + n_i + q_i, max_(j in s_i) t_j + delta_(j, i)) $
 
 On the other hand, if $i$ is an aircraft which is either an arrival or a departure that is not required to de-ice, its landing or take-off time does not need to consider the second component, and can simply be given by:
 
-$ t_i = max(r_i, max_(j in s_i) t_j + delta_(j, i)) $ <earliest-landing>
+$ t_i = max(r_i, max_(j in s_i) t_j + delta_(j, i)) $ <eq:earliest-landing>
 
 === Integrated De-icing
 
 Unlike its decomposed counterpart, integrated de-icing does not calculate a de-icing queue beforehand, but instead calculates the de-icing times for aircraft along with their landing or take-off times.
 
-If an aircraft $i$ is an arrival or a departure that is not required to de-ice, then its landing or take-off time $t_i$ can be calculated as given by @earliest-landing.
+If an aircraft $i$ is an arrival or a departure that is not required to de-ice, then its landing or take-off time $t_i$ can be calculated as given by @eq:earliest-landing.
 However, if $i$ is a departure and is required to de-ice before taking off, then its earliest de-icing time must also be taken into consideration.
 This can be calculated as the time that the preceding aircraft in the de-icing queue finishes de-icing, plus the departure $i$'s de-icing duration $o_i$, taxi-out duration $n_i$, and lineup duration $q_i$.
 Thus, the take-off time $t_i$ for a departure $i$ that must de-ice is given by:
 
-$ t_i = max(r_i, max_(j in s_i) t_j + delta_(j, i), max_(k in s_i) z_k + o_i + n_i + q_i) $ <earliest-takeoff>
+$ t_i = max(r_i, max_(j in s_i) t_j + delta_(j, i), max_(k in s_i) z_k + o_i + n_i + q_i) $ <eq:earliest-takeoff>
 
-Once its take-off time is known, its de-icing time $z_i$ can be calculated as the maximum of its earliest de-icing time (given above in @earliest-takeoff), $t_i$ minus the sum of its HOT $h_i$ and de-icing duration $o_i$, and $t_i$ minus the sum of its maximum allowed runway hold duration $r_i$, lineup duration $q_i$, taxi-out duration $n_i$, and de-icing duration $o_i$:
+Once its take-off time is known, its de-icing time $z_i$ can be calculated as the maximum of its earliest de-icing time (given above in @eq:earliest-takeoff), $t_i$ minus the sum of its HOT $h_i$ and de-icing duration $o_i$, and $t_i$ minus the sum of its maximum allowed runway hold duration $r_i$, lineup duration $q_i$, taxi-out duration $n_i$, and de-icing duration $o_i$:
 
 $ z_i = max(t_i - q_i - r_i - n_i - o_i, t_i - h_i - o_i, max_(j in s_i) z_j + o_i + n_i + q_i) $
 
 === Rolling Horizon Extension
 
 #todo("Include explanation and pseudocode for rolling horizon")
-
-== Mathematical Program
-
-The model proposed in @model has been implemented in #link("https://www.ibm.com/docs/en/icos/22.1.1?topic=opl-optimization-programming-language")[Optimisation Programming Language] (OPL), which is packaged with IBM's #link("https://www.ibm.com/products/ilog-cplex-optimization-studio")[ILOG CPLEX Optimisation Studio].
-
-#todo("Write more about CPLEX implementation if necessary")
 
 // TODO: Check if this belongs here or is better off somewhere else
 == Sequence Visualiser
@@ -811,7 +825,7 @@ The model proposed in @model has been implemented in #link("https://www.ibm.com/
 == Problem Instances
 
 // TODO: Check if Heathrow or University of Bologna should be cited
-The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarised in @heathrow-instances -- as well as benchmark problem instances from Milan Airport.
+The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarised in @table:heathrow-instances -- as well as benchmark problem instances from Milan Airport.
 The latter were first introduced by #cite(<furini-improved-horizon>, form: "prose"), and were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
 
 #let heathrow-instances = results-table(
@@ -826,7 +840,7 @@ The latter were first introduced by #cite(<furini-improved-horizon>, form: "pros
     caption: [
         Overview of problem instances from London Heathrow
     ],
-) <heathrow-instances>
+) <table:heathrow-instances>
 
 The terminal maneuvering area around Heathrow is highly complex, with up to six different SID routes in use at any given time and up to five different weight classes to consider.
 This results in a complex separation matrix, in which triangle inequalities are often violated -- i.e. the runway separation for an aircraft is influenced by multiple preceding aircraft rather than just the immediately preceding aircraft @demaere-pruning-rules.
@@ -836,7 +850,7 @@ In contrast, the Milan problem instances are significantly simpler due to having
 
 == Comparison of De-Icing Approaches
 
-@branch-bound-heathrow lists the makespans, earliest and latest de-icing times, objective values, and mean runtimes for all Heathrow problem instances solved by the branch-and-bound program utilising the three different de-icing approaches.
+@table:branch-bound-heathrow-results lists the makespans, earliest and latest de-icing times, objective values, and mean runtimes for all Heathrow problem instances solved by the branch-and-bound program utilising the three different de-icing approaches.
 The small problem instances were solved without a rolling horizon, while a rolling horizon of 10 was used for the medium and large instances.
 Runs that fail to produce feasible solutions are left blank.
 
@@ -857,7 +871,7 @@ Runs that fail to produce feasible solutions are left blank.
             caption: [
                 Results for all problem instances from London Heathrow solved by the branch-and-bound program utilising the different de-icing approaches
             ],
-        ) <branch-bound-heathrow>
+        ) <table:branch-bound-heathrow-results>
     ],
 )
 
@@ -869,7 +883,7 @@ Runs that fail to produce feasible solutions are left blank.
 
 The total runtime to solve all 30 problem instances is #calc.round(heathrow-runtimes.total.tobt / 1000, digits: 2) seconds for decomposed de-icing by TOBT, #calc.round(heathrow-runtimes.total.ctot / 1000, digits: 2) seconds for decomposed de-icing by CTOT, and #calc.round(heathrow-runtimes.total.integrated / 1000, digits: 2) seconds for the integrated approach.
 This equates to an average runtime of #calc.round(heathrow-runtimes.avg.tobt, digits: 2) milliseconds, #calc.round(heathrow-runtimes.avg.ctot, digits: 2) milliseconds, and #calc.round(heathrow-runtimes.avg.integrated, digits: 2) milliseconds respectively.
-@branch-bound-heathrow-runtimes displays the total and average runtime for each de-icing approach split across each problem instance size group.
+@chart:branch-bound-heathrow-runtimes displays the total and average runtime for each de-icing approach split across each problem instance size group.
 
 #let heathrow-avg-runtimes = {
     let avgs = for (label, ..points) in (
@@ -987,7 +1001,7 @@ This equates to an average runtime of #calc.round(heathrow-runtimes.avg.tobt, di
     caption: [
         Total and average runtimes for each de-icing approach of the branch-and-bound program across each size group of problem instances from London Heathrow
     ],
-) <branch-bound-heathrow-runtimes>
+) <chart:branch-bound-heathrow-runtimes>
 
 #todo("Add boxplot for runtimes if possible")
 
@@ -1017,10 +1031,10 @@ However, integrated de-icing achieves an improvement in objective values by fact
 
 Additionally, integrated de-icing is on average #calc.round(heathrow-runtimes.avg.tobt / heathrow-runtimes.avg.integrated, digits: 2) times faster than decompsed de-icing by TOBT, and #calc.round(heathrow-runtimes.avg.ctot / heathrow-runtimes.avg.integrated, digits: 2) times faster than decomposed de-icing by CTOT.
 
-@branch-bound-furini lists the results for all Milan benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the three different de-icing approaches.
+@table:branch-bound-furini-results lists the results for all Milan benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the three different de-icing approaches.
 Since these instances do not contain de-icing data, the pushback duration $p_i$, pre-de-ice taxi duration $m_i$, de-icing duration $o_i$, taxi-out duration $n_i$, and lineup duration $q_i$ are assumed to be five minutes each for all departures.
 A rolling horizon of size 10 was used to solve each instance.
-Like in @branch-bound-heathrow, runs that fail to produce feasible solutions are left blank.
+Like in @table:branch-bound-heathrow-results, runs that fail to produce feasible solutions are left blank.
 
 #let branch-bound-furini = results-table(
     group-headers: ([Decomposed de-icing], [Integrated de-icing]),
@@ -1034,7 +1048,7 @@ Like in @branch-bound-heathrow, runs that fail to produce feasible solutions are
     caption: [
         Results for the Milan Airport benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the different de-icing approaches
     ],
-) <branch-bound-furini>
+) <table:branch-bound-furini-results>
 
 #let furini-runtimes = runtime-stats(
     decomposed: runtimes(results.furini.branch-bound.decomposed),
@@ -1091,12 +1105,12 @@ A rolling horizon of 20 or higher is required to solve this instance using decom
 
 == Comparison of Programs
 
-@cplex-branch-bound-heathrow-small lists the makespans, earliest and latest de-icing times, and mean runtimes for all small instances from London Heathrow, solved using the mathematical program implemented in CPLEX as well as the branch-and-bound program -- both utilising an integrated de-icing approach.
-The results for the latter are the same as in @branch-bound-heathrow, but are presented again here for convenience.
+@table:cplex-branch-bound-heathrow lists the makespans, earliest and latest de-icing times, and mean runtimes for all small instances from London Heathrow, solved using the mathematical program implemented in CPLEX as well as the branch-and-bound program -- both utilising an integrated de-icing approach.
+The results for the latter are the same as in @table:branch-bound-heathrow-results, but are presented again here for convenience.
 Both implementations achieve the same (optimal) objective values across all instances.
 
 // TODO: Remove the objective values here
-#let cplex-branch-bound-heathrow-small = results-table(
+#let cplex-branch-bound-heathrow = results-table(
     group-headers: ([CPLEX model], [Branch-and-bound program]),
     side-headers: true,
     results.heathrow.cplex.integrated,
@@ -1104,11 +1118,11 @@ Both implementations achieve the same (optimal) objective values across all inst
 )
 
 #figure(
-    cplex-branch-bound-heathrow-small,
+    cplex-branch-bound-heathrow,
     caption: [
         Results for small problem instances from London Heathrow solved by CPLEX as well as the branch-and-bound program, both utilising an integrated de-icing approach
     ],
-) <cplex-branch-bound-heathrow-small>
+) <table:cplex-branch-bound-heathrow>
 
 #todo("Write about comparison of CPLEX model versus branch-and-bound program")
 
@@ -1134,15 +1148,3 @@ Both implementations achieve the same (optimal) objective values across all inst
 // NOTE: Title disabled since we want to use a custom title and passing in a heading as the title makes
 //       it too big and messes up the table of contents
 #bibliography("references.yml", title: none, style: "ieee")
-
-// TODO
-
-// sort by earliest de-icing time
-// then sort such that the ones with CTOTs jump in front of the others
-// in this second pass build up the deicing time
-// if you meet a CTOT airrcraft that when deiced in its current position would miss its CTOT then move it before
-// almost like a bubble sort
-
-// boxplot for runtimes
-
-// have separate subsections for de-icing approaches and CPLEX vs bnb
