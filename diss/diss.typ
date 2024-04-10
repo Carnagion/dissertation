@@ -353,7 +353,7 @@ However, this assumption can be made without loss of generality -- an aircraft $
 In addition to a hard time window, a departure $i$ might be subject to a Calculated Take-Off Time (CTOT) slot, during which it should take off.
 Typically, a CTOT has a tolerance of -5 to +10 minutes (i.e. five minutes before and ten minutes after $c_i$) and its time window can thus be defined by its earliest (start) time $u_i$ and latest (end) time $v_i$; however, this model allows for customizable CTOT tolerances per departure.
 
-Much like a hard time window, a departure cannot take off before $u_i$, but it may be scheduled after $v_i$ -- although this is heavily penalized.
+Much like a hard time window, a departure cannot take off before $u_i$, but it may be scheduled after $v_i$ -- although this is heavily penalised.
 The start time of a CTOT slot is thus modelled as a hard constraint, while its end time is modelled as a soft constraint:
 
 $ t_i >= u_i $
@@ -399,7 +399,7 @@ Its delay cost $c_d (i)$, defined in @delay-cost, is then calculated as the dela
 
 $ c_d (i) = (t_i - b_i)^2 $
 
-Raising the delay cost to a power greater than one penalizes disproportionately large delays more severely and encourages a more equitable distribution of delay across all aircraft @demaere-pruning-rules.
+Raising the delay cost to a power greater than one penalises disproportionately large delays more severely and encourages a more equitable distribution of delay across all aircraft @demaere-pruning-rules.
 For instance, two aircraft with delays of one and three minutes each would have a total delay cost of $1^2 + 3^2 = 10$, whereas the same two aircraft with delays of two minutes each would have a total delay cost of only $2^2 + 2^2 = 8$, making the latter more preferable.
 
 === Calculated Take-Off Time Compliance
@@ -414,7 +414,7 @@ $ c_v (i) = cases(
 
 == Model <model>
 
-A time-indexed formulation is employed in order to linearize the objective function and hence solve the integrated runway and de-icing sequencing problem using 0-1 integer linear programming.
+A time-indexed formulation is employed in order to linearise the objective function and hence solve the integrated runway and de-icing sequencing problem using 0-1 integer linear programming.
 
 First, the landing or take-off time of an aircraft $i$ is constrained to lie between the earliest possible time $i$ can be scheduled to land or take off -- its _release time_ $r_i$ and the latest possible time $i$ can be scheduled to land or take off -- its _due time_ $d_i$.
 The release time of $i$ be calculated as the maximum of its base time $b_i$, start time $e_i$ of its hard time window, and start time $u_i$ of its CTOT slot (if applicable):
@@ -467,7 +467,7 @@ Putting together these constraints, objectives, and time-indexed formulations, a
 // TODO: Improve wording of this section if necessary
 
 The objective function -- @objective-function -- minimises total delay and CTOT violations, whose individual costs are given by @delay-cost and @ctot-violation-cost respectively.
-The individual cost functions $c_d (i)$ and $c_v (i)$ are linearized according to the time-indexed formulations described above.
+The individual cost functions $c_d (i)$ and $c_v (i)$ are linearised according to the time-indexed formulations described above.
 
 @scheduled-time and @deice-time define the scheduled landing or take-off time and the de-ice time (if applicable) for an aircraft.
 
@@ -566,7 +566,7 @@ The use of a bounding function to eliminate sub-problems allows the algorithm to
 Branch-and-bound algorithms for minimisation problems typically comprise of four main procedures -- separation, bounding, branching, and fathoming @luo-branch-bound.
 
 The algorithm begins with no known best sequence, and a best cost $c_"best"$ of infinity.
-It maintains a queue of nodes to visit along with their depths -- the search space, which is initialised with partial sequences containing solely the first aircraft to be sequenced from each ordered set of separation-identical aircraft.
+It maintains a last-in-first-out (LIFO) queue of nodes to visit along with their depths -- the search space, which is initialised with partial sequences containing solely the first aircraft to be sequenced from each ordered set of separation-identical aircraft.
 A node at depth $k$ in the search space corresponds to a partial sequence $s$ with $k$ aircraft.
 
 At each step, the most recently added node (sequence) is removed from the back of the queue, and its _lower bound_ is evaluated.
@@ -653,7 +653,7 @@ $ t_i = max(r_i, max_(j in s_i) t_j + delta_(j, i)) $ <earliest-landing>
 
 === Integrated De-icing
 
-Integrated de-icing differs from its decomposed counterpart by virtue of not previously calculating a de-icing queue, but instead calculating the de-icing times for aircraft while also calculating their landing or take-off times.
+Unlike its decomposed counterpart, integrated de-icing does not calculate a de-icing queue beforehand, but instead calculates the de-icing times for aircraft along with their landing or take-off times.
 
 If an aircraft $i$ is an arrival or a departure that is not required to de-ice, then its landing or take-off time $t_i$ can be calculated as given by @earliest-landing.
 However, if $i$ is a departure and is required to de-ice before taking off, then its earliest de-icing time must also be taken into consideration.
