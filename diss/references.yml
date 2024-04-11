@@ -213,6 +213,22 @@ briskorn-aircraft-landing:
   serial-number:
     doi: "10.1007/s10951-013-0337-x"
 
+nogueira-mixed-integer:
+  type: article
+  title: "Analysis of mixed integer programming formulations for single machine scheduling problems with sequence dependent setup times and release dates"
+  author:
+    - "Nogueira, Thiago H."
+    - "de Carvalho, Carlos R. V."
+    - "Ravetti, Martin G."
+    - "de Souza, Mauricio C."
+  date: 2014
+  parent:
+    title: "Pesquisa Operacional"
+    volume: 39
+  page-range: 109-154
+  serial-number:
+    doi: "10.1590/0101-7438.2019.039.01.0109"
+
 furini-improved-horizon:
   type: article
   title: "Improved rolling horizon approaches to the aircraft sequencing problem"
@@ -293,3 +309,23 @@ demaere-pruning-rules:
   page-range: 898-916
   serial-number:
     doi: "10.1287/trsc.2016.0733"
+
+unibo-codes-instances:
+  type: web
+  title: "Library of Codes and Instances"
+  url: "https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1"
+
+rust:
+  type: web
+  title: "Rust Programming Language"
+  url: "https://www.rust-lang.org/"
+
+opl:
+  type: web
+  title: "Optimisation Programming Language"
+  url: "https://www.ibm.com/docs/en/icos/22.1.1?topic=opl-optimization-programming-language"
+
+cplex:
+  type: web
+  title: "IBM ILOG CPLEX Optimisation Studio"
+  url: "https://www.ibm.com/products/ilog-cplex-optimization-studio"

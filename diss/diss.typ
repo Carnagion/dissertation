@@ -175,13 +175,27 @@ Their results show that the availability of more information about aircraft taxi
 
 === Mathematical Programming
 
+Many existing mixed-integer programming (MIP) approaches to runway sequencing view the problem as a variant of classical machine scheduling problem with sequence-dependent setup times -- the runways are the machines, flights correspond to jobs, and runway separations to setup times @avella-time-indexed.
+The literature on machine scheduling has traditionally comrpised of two main kinds of formulations -- big-$M$ and time-indexed @avella-time-indexed.
+
+Big-$M$ formulations represent the landing or take-off time of an aircraft as a single continuous variable.
+However, such formulations typically need to apply a heuristic decomposition of the problem in order to meet computation time limits for instances of practical interest @avella-time-indexed.
+
 #cite(<beasley-scheduling-aircraft>, form: "prose") introduce a linear programming (LP)-based tree search approach for the problem of sequencing arrivals on a single runway, and later extend their formulation to handle multiple runways as well.
 They consider hard time window constraints and use an objective function that penalises landing before or after a given target time for each arrival.
 Unlike many previous approaches that assumed an indefinite latest time limit for landing, their approach employs more realistic latest landing times based on fuel considerations.
 This allows for simplifying the problem by exploiting the presence of increased disjoint intervals, caused by relatively narrow hard time windows.
 
-#cite(<beasley-scheduling-aircraft>, form: "prose") also present a simpler alternative 0-1 mixed integer formulation that can be derived by discretising time.
-This approach has the advantage of not requiring the cost function to be linear, although they note that this formulation produces to a relatively large number of variables and constraints, and do not explore it further.
+In contrast to big-$M$ formulations, time-indexed formulations discretise the overall time horizon in small time periods.
+The schedule of an aircraft is modelled by a set of binary decision variables, only one of which will be 1 -- identifying the aircraft's landing or take-off time -- in any feasible solution.
+In general, time-indexed formulations return much stronger bounds than big-$M$ formulations, but at the cost of increasing the number of variables and constants, and consequently computation times @avella-time-indexed.
+This makes them often unattractive for real-time applications of runway sequencing, where there are stringent limits on the computation times @bennell-runway-scheduling.
+
+#cite(<avella-time-indexed>, form: "prose") counter this claim by presenting a time-indexed MIP formulation based on a novel class of valid clique inequalities for the single machine scheduling problem with sequence-dependent setup times.
+They generalise a family of inequalities introduced by #cite(<nogueira-mixed-integer>, form: "prose").
+Their formulation significantly improve the quality of the lower bounds, reduces the number of constraints, and is capable of solving difficult instances from large airports in Europe, namely Stockholm Arlanda, Hamburg, and Milano Linate.
+
+#cite(<beasley-scheduling-aircraft>, form: "prose") also present an alternative time-indexed 0-1 MIP formulation that can be derived by discretising time, although they note that this formulation produces a relatively large number of variables and constraints, and do not explore it further.
 
 === Dynamic Programming
 
@@ -194,7 +208,7 @@ He utilises an approach that groups aircraft into multiple classes or sets, esse
 When implemented as a pre-processing step, this DP algorithm has a time complexity to $O(m^2 (n + 1)^m)$, where $n$ denotes the number of aircraft, and $m$ denotes the number of distinct aircraft types @psaraftis-dynamic-programming @demaere-pruning-rules.
 
 #cite(<balakrishnan-runway-operations>, form: "prose") introduce an alternative DP approach wherein the runway sequencing problem is formulated as a modified shortest path problem in a network, considering positional equity (via maximum shift constraints), minimum separation requirements, precedence constraints, and time window constraints.
-Their proposed algorithm has a complexity of $O(n (2k + 1)^(2k + 2))$, where $n$ is the number of aircraft and $k$ is the maximum shift parameter.
+Their proposed algorithm has a complexity of $O(n (2k + 1)^(2k + 2))$, where $n$ is the number of aircraft and $k$ is the maximum shift parameter. 
 
 === Branch-and-Bound
 
@@ -202,7 +216,7 @@ Branch-and-bound is an exact search method for solving optimisation problems by 
 Branch-and-bound algorithms for minimisation problems typically comprise of four main procedures -- separation, bounding, branching, and fathoming @luo-branch-bound.
 The use of a bounding function to eliminate sub-problems allows the algorithm to prune nodes from the search space and perform better than a brute-force (exhaustive) search, while still exploring every node in the search space.
 
-#cite(<abela-optimal-schedules>, form: "prose") propose a branch-and-bound algorithm based on a 0-1 mixed integer programming (MIP) formulation of the runway sequencing problem for arrivals on a single runway, considering separation and precedence constraints and using an objective function that penalises speeding up or holding the arrivals.
+#cite(<abela-optimal-schedules>, form: "prose") propose a branch-and-bound algorithm based on a 0-1 MIP formulation of the runway sequencing problem for arrivals on a single runway, considering separation and precedence constraints and using an objective function that penalises speeding up or holding the arrivals.
 They compare the branch-and-bound algorithm against a genetic algorithm based on the same formulation, evaluating both on randomly generated test data with up to 20 aircraft.
 Results show that their branch-and-bound implementation solves smaller problem instances relatively quickly, but requires considerably longer time as instances grow larger.
 
@@ -562,13 +576,13 @@ $ t_j >= t_i + delta_(i, j) $
 == Mathematical Program
 
 // TODO: Write more about CPLEX implementation if necessary
-The model presented in in @section:model has been implemented as a mathematical program in #link("https://www.ibm.com/docs/en/icos/22.1.1?topic=opl-optimization-programming-language")[Optimisation Programming Language] (OPL), which is packaged with IBM's #link("https://www.ibm.com/products/ilog-cplex-optimization-studio")[ILOG CPLEX Optimisation Studio].
+The model presented in in @section:model has been implemented as a mathematical program in Optimisation Programming Language (OPL) @opl, which is packaged with IBM's ILOG CPLEX Optimisation Studio @cplex.
 
 == Branch-and-Bound Program <section:branch-bound>
 
 // TODO: Explain why Rust is used if necessary
 A branch-and-bound algorithm to optimally solve the integrated runway and de-icing sequencing problem as described in @section:model (as well as its decomposed version) is also developed, using a depth-first-search that incrementally builds up sequences by adding one aircraft to the current partial sequence at every step.
-The algorithm is implemented in the #link("https://www.rust-lang.org/")[Rust programming language].
+The algorithm is implemented in the Rust programming language @rust.
 
 The algorithm begins with no known best sequence, and a best cost $c_"best"$ of infinity.
 It maintains a last-in-first-out (LIFO) queue of nodes to visit along with their depths -- the search space.
@@ -814,7 +828,7 @@ $ z_i = max(t_i - q_i - r_i - n_i - o_i, t_i - h_i - o_i, max_(j in s_i) z_j + o
 
 // TODO: Check if Heathrow or University of Bologna should be cited
 The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarised in @table:heathrow-instances -- as well as benchmark problem instances from Milan Airport.
-The latter were first introduced by #cite(<furini-improved-horizon>, form: "prose"), and were obtained from the University of Bologna Operations Research Group's freely accessible #link("https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1")[online library of instances].
+The latter were first introduced by #cite(<furini-improved-horizon>, form: "prose"), and were obtained from the University of Bologna Operations Research Group's freely accessible online library of instances @unibo-codes-instances.
 
 #let heathrow-instances = results-table(
     group-headers: ([Small], [Medium], [Large]),
@@ -834,7 +848,7 @@ The terminal maneuvering area around Heathrow is highly complex, with up to six 
 This results in a complex separation matrix, in which triangle inequalities are often violated -- i.e. the runway separation for an aircraft is influenced by multiple preceding aircraft rather than just the immediately preceding aircraft @demaere-pruning-rules.
 Additionally, a substantial number of aircraft are also subject to CTOTs, which further reduces the number of complete orders that can be inferred.
 
-In contrast, the Milan problem instances are significantly simpler due to having a relatively high number of separation-identical aircraft and a mix of both arrivals and departures, which allows complete orders to be inferred between a relatively large number of aircraft in each instance.
+By contrast, the Milan problem instances are significantly simpler due to having a relatively high number of separation-identical aircraft and a mix of both arrivals and departures, which allows complete orders to be inferred between a relatively large number of aircraft in each instance.
 
 == Comparison of De-Icing Approaches
 
