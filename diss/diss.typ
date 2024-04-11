@@ -66,14 +66,13 @@
 #show figure.where(kind: table): set block(breakable: true)
 #show figure.where(kind: table): set par(justify: false)
 
-// TODO: Pick a good table style
 #set table(align: center + horizon, stroke: none)
 #set table.header(repeat: false)
 #show table.cell.where(y: 0, rowspan: 1): strong
 #show table.cell: set text(size: 10pt)
 
-// NOTE: Workaround to make prose citations use "et al" with a lower author count threshold
-// TODO: Check if there is a way to already do this in Typst without using a CSL file
+// NOTE: Workaround to make prose citations use "et al" with a lower author count threshold until Typst either fixes
+//       the default IEEE style or provides a better way of customising this
 #show cite.where(form: "prose"): set cite(style: "ieee-et-al-min.csl")
 
 // TODO: Remove when all todos are removed
@@ -92,7 +91,7 @@
 
     #let email(email) = link("mailto:" + email, raw(email))
 
-    // TODO: Check if name and supervisor details should be included
+    // TODO: Remove name before submitting
     #stack(dir: ltr, spacing: 1fr)[
         _By_\
         Indraneel Mahendrakumar\
@@ -132,11 +131,9 @@
 #pagebreak()
 
 // NOTE: Done after cover page, abstract, and table of contents since we don't want page numbers to show up on them
-// TODO: Decide if previous pages should have numbering as well and if they should have a different style of numbering
 #set page(numbering: "1")
 
 // NOTE: Forces the page numbering to begin from here rather than from the cover page or abstract page
-// TODO: Decide if numbering should begin from previous pages but should not be shown
 #counter(page).update(1)
 
 // TODO: Revise all headings as necessary
@@ -260,7 +257,6 @@ Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequenci
 
 @table:notation provides an overview of the symbols used in the following sections along with their definitions.
 
-// TODO: Complete notation table
 #let notation = table(
     columns: 2,
     stroke: (x, y) => (
@@ -333,12 +329,10 @@ An aircraft's weight class influences the severity of wake turbulence it causes,
 Larger or heavier aircraft typically generate greater turbulence, to which smaller or lighter aircraft are more sensitive.
 Consequently, a larger separation may be required when a large aircraft is followed by a small one, than when a small aircraft is followed by a large one @demaere-pruning-rules.
 
-// TODO: Check if we actually need to mention this or can leave it out or shorten it
 Similarly, a larger separation may be required when a slow aircraft is followed by a faster one on the same route, to prevent the latter from catching up to the former before their routes diverge.
 Separations for SID routes are also influenced by the climb and relative bearing of the route, as well as congestion in downstream airspace sectors.
 The latter factor may require an increased separation upon take-off to space out traffic and prevent the overloading of en-route sectors and controllers @demaere-pruning-rules.
 
-// TODO: Check if successive vs complete separations and the triangle inequality should be mentioned
 The minimum separation that must be maintained between two aircraft is thus the maximum of the separations due to their weight classes, speed groups, and SID routes.
 The required separations between each ordered pair of distinct aircraft can therefore be expressed as a separation matrix @demaere-pruning-rules.
 
@@ -398,7 +392,6 @@ $ t_i - z_i <= o_i + n_i + q_i + w_i $
 The objective function $f(s)$ for a partial or final sequence $s$ is defined in @eq:objective-function.
 It considers total delay and CTOT compliance, and is based on the function described by #cite(<demaere-pruning-rules>, form: "prose").
 
-// TODO: Check if this looks better when mentioned elsewhere, like in the branch-and-bound section
 === Runway Utilisation
 
 The runway utilisation of a partial or final sequence $s$ is modelled as the _makespan_ of $s$, i.e. $max_(i in s) t_i$.
@@ -406,7 +399,6 @@ Although not directly included as an objective, it is utilised for the evaluatio
 
 === Delay
 
-// TODO: Maybe word this better
 The delay for an aircraft $i$ is defined as the difference between its landing or take-off time $t_i$ and its base time $b_i$.
 Its delay cost $c_d (i)$, defined in @eq:delay-cost, is then calculated as the delay squared, and is equivalent to the following function:
 
@@ -417,7 +409,6 @@ For instance, two aircraft with delays of one and three minutes each would have 
 
 === Calculated Take-Off Time Compliance
 
-// TODO: Maybe word this better
 The CTOT violation cost $c_v (i)$ for a departure $i$ is defined in @eq:ctot-violation-cost, and is equivalent to the following piecewise discontinuous non-linear function given by 0 if it takes off within its CTOT slot and the squared difference between its take-off time $t_i$ and its CTOT slot end time $v_i$ if it misses its CTOT slot:
 
 $ c_v (i) = cases(
@@ -476,8 +467,6 @@ Putting together these constraints, objectives, and time-indexed formulations, a
     $ &zeta_(i, z) in { 0, 1 } &forall i in D, z in Z_i $ <constraint:deice-binary>
     $ &gamma_(i, j) in { 0, 1 } &forall i in F, j in F, i != j $ <constraint:precedence-binary>
 ]
-
-// TODO: Improve wording of this section if necessary
 
 The objective function -- @eq:objective-function -- minimises total delay and CTOT violations, whose individual costs are given by @eq:delay-cost and @eq:ctot-violation-cost respectively.
 The individual cost functions $c_d (i)$ and $c_v (i)$ are linearised according to the time-indexed formulations described above.
@@ -540,14 +529,14 @@ It is then possible to impose the following precedence and separation constraint
 
 A _complete order_ exists between any two aircraft $i$ and $j$ if the objective value and feasibility of a sequence $s$ containing both $i$ and $j$ cannot be improved by reversing the order of $i$ and $j$ in $s$.
 By exploiting complete orders, it is possible to simplify the problem of runway sequencing (or more generally, machine scheduling) to one of interleaving ordered sets of aircraft, always only sequencing the first available aircraft from each set @demaere-pruning-rules.
-This enables a reduction in the problem's worst-case computational complexity from $O(n!)$ to $O(m^2 (n + 1)^m)$, where $n$ denotes the number of aircraft, and $m$ denotes the number of distinct aircraft types @demaere-pruning-rules @psaraftis-dynamic-programming.
+This enables a reduction in the problem's worst-case computational complexity from $O(n!)$ to $O(m^2 (n + 1)^m)$, where $n$ denotes the number of aircraft, and $m$ denotes the number of distinct aircraft types @psaraftis-dynamic-programming @demaere-pruning-rules.
 
 #cite(<psaraftis-dynamic-programming>, form: "prose") first showed the existence of such complete orders between _separation-identical_ aircraft.
 Two distinct aircraft $i$ and $j$ are separation-identical if their mutual separations with respect to every other aircraft $k in F$ are the same -- i.e. $i$ and $j$ are separation-identical if and only if:
 
 $ forall k in F, k != i and k != j and delta_(i, k) = delta_(j, k) and delta_(k, i) = delta_(k, j) $ <eq:are-separation-identical>
 
-Additionally, a complete order may be inferred upon a set of separation-identical aircraft if the complete orders for each of the individual constraints and objectives are consistent within the set @demaere-pruning-rules.
+Additionally, a complete order may be inferred upon a set of separation-identical aircraft if the complete orders for each of the individual constraints and objectives are consistent within the set.
 #cite(<demaere-pruning-rules>, form: "prose") show that this is the case for an objective that considers delay and makespan, even with hard time window constraints -- as long as there is a consistent order between every aircraft's base times, release times, and end times of hard time windows.
 A complete order can thus be inferred between two separation-identical aircraft $i$ and $j$ if and only if:
 
@@ -566,7 +555,6 @@ The following precedence and separation constraints can thus be imposed on every
 $ gamma_(i, j) = 1 $
 $ t_j >= t_i + delta_(i, j) $
 
-// TODO: Check if pruning rules such as complete orders and disjoint time windows should be mentioned here
 = Implementation
 
 #todo("Write short introduction to different approaches used")
@@ -1101,7 +1089,7 @@ However, the objective values obtained by the integrated de-icing approach are f
 Furthermore, the decomposed de-icing approach failed to produce a feasible solution for instance FPT01.
 A rolling horizon of 20 or higher is required to solve this instance using decomposed de-icing; however, the resulting objective value and mean runtime are still worse than those achieved by the integrated approach using a lower rolling horizon of 10.
 
-#todo("Write more about different de-icing approaches in branch-and-bound program if necessary")
+// TODO: Write more about different de-icing approaches in branch-and-bound program if necessary
 
 == Comparison of Programs
 
@@ -1124,7 +1112,7 @@ Both implementations achieve the same (optimal) objective values across all inst
     ],
 ) <table:cplex-branch-bound-heathrow>
 
-#todo("Write about comparison of CPLEX model versus branch-and-bound program")
+// TODO: Write about comparison of CPLEX model versus branch-and-bound program
 
 == Impact
 
