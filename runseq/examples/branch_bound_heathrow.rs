@@ -9,7 +9,7 @@ use runseq::{
 };
 
 fn main() {
-    let deice_strategy = DeiceStrategy::Integrated;
+    let deice_strategy = DeiceStrategy::ByCtot;
     let branch_bound = BranchBound {
         horizon: NonZeroUsize::new(10),
         deice_strategy,
@@ -17,13 +17,14 @@ fn main() {
 
     let vis = Visualiser::new();
 
-    let mut csv = Writer::from_path("../stats/heathrow/branch-bound/deice-integrated.csv").unwrap();
+    let mut csv = Writer::from_path("../stats/heathrow/branch-bound/deice-ctot.csv").unwrap();
     csv.write_record([
         "Instance",
         "Makespan (s)",
         "De-ice start",
         "De-ice end",
         "Obj. value",
+        "Runway hold (s)",
     ])
     .unwrap();
 
@@ -36,14 +37,8 @@ fn main() {
 
         let Some(solution) = instance.solve_with(&branch_bound) else {
             println!("unable to solve instance {}", id);
-            csv.write_record([
-                id.to_string(),
-                "".to_owned(),
-                "".to_owned(),
-                "".to_owned(),
-                "".to_owned(),
-            ])
-            .unwrap();
+            csv.write_record([&id.to_string(), "", "", "", "", ""])
+                .unwrap();
             continue;
         };
 
@@ -72,6 +67,25 @@ fn main() {
 
         let cost = branch_bound::solution_cost(&solution, &instance);
 
+        let runway_hold = solution
+            .iter()
+            .filter_map(|sched| {
+                let sched = sched.as_departure()?;
+                let dep = instance.flights()[sched.flight_index].as_departure()?;
+
+                let deice_time = sched.deice.as_ref().copied()?;
+                let deice_dur = dep.deice.as_ref()?.duration;
+
+                let runway_hold = sched.takeoff
+                    - dep.lineup_duration
+                    - dep.taxi_duration
+                    - deice_dur
+                    - deice_time;
+
+                Some(runway_hold.num_seconds().unsigned_abs())
+            })
+            .sum::<u64>();
+
         csv.write_record([
             id.to_string(),
             makespan.num_seconds().to_string(),
@@ -82,6 +96,7 @@ fn main() {
                 .map(|deice_end| deice_end.time().to_string())
                 .unwrap_or_default(),
             cost.as_u64().to_string(),
+            runway_hold.to_string(),
         ])
         .unwrap();
 
