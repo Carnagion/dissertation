@@ -8,6 +8,13 @@
 #set text(font: "EB Garamond", size: 11pt)
 #set par(justify: true)
 
+#show outline.entry.where(level: 1): entry => {
+    v(0.8em)
+    strong(link(entry.element.location(), entry.body))
+    h(1fr)
+    strong(link(entry.element.location(), entry.page))
+}
+
 #set heading(numbering: "1.1")
 #show heading: set block(above: 2em, below: 1.3em)
 
@@ -1064,19 +1071,21 @@ Entries for runs that fail to produce feasible solutions are left blank.
     )
 }
 
-It can be observed from @table:branch-bound-heathrow-results that the two different decomposed de-icing approaches -- by TOBT and by CTOT -- result in nearly identical makespans, earliest and latest de-icing times, and objective values across all problem instances, with decomposed de-icing by CTOT attaining only a #calc.round((heathrow-improvements.tobt-ctot - 1.0) * 100, digits: 2)% improvement in objective values on average compared to decomposed de-icing by TOBT.
+It can be observed from @table:branch-bound-heathrow-results that the two different decomposed de-icing approaches -- by TOBT and by CTOT -- result in nearly identical makespans, earliest and latest de-icing times, objective values, and runway hold times across all problem instances, with the latter attaining only a #calc.round((heathrow-improvements.tobt-ctot - 1.0) * 100, digits: 2)% improvement in objective values on average compared to the former.
 
 However, integrated de-icing achieves #calc.round((heathrow-improvements.tobt-integrated - 1.0) * 100, digits: 2)% and #calc.round((heathrow-improvements.ctot-integrated - 1.0) * 100, digits: 2)% better objective values on average compared to decomposed de-icing by TOBT and by CTOT respectively.
-It also produces consdierably shorter makespans in the larger problem instances, indicating better runway utilisation over time compared to its decomposed counterparts -- even when using a rolling horizon.
+It also produces shorter makespans in the larger problem instances, indicating better runway utilisation over time compared to its decomposed counterparts -- even when using a rolling horizon.
+
+Additionally, integrated de-icing results in considerably lower runway hold times (and thus higher stand holding times) for every single instance, although it should be noted that neither decomposed approach specifically optimises for stand holding.
+
+@chart:branch-bound-heathrow-avg-runtimes further shows the mean runtime for each individual problem instance solved using each de-icing approach.
+It can be seen that decomposed de-icing is faster than integrated de-icing for small- and medium-sized problem instances, but slower for large instances.
 
 #let branch-bound-heathrow-benches = (
     tobt: benches("benches/heathrow/deice-tobt/", range(1, 20 + 1) + range(26, 30 + 1)),
     ctot: benches("benches/heathrow/deice-ctot/", range(1, 20 + 1) + range(26, 30 + 1)),
     integrated: benches("benches/heathrow/deice-integrated/", range(1, 30 + 1)),
 )
-
-@chart:branch-bound-heathrow-avg-runtimes further shows the mean runtime for each individual problem instance solved using each de-icing approach.
-It can be seen that decomposed de-icing is faster than integrated de-icing for small- and medium-sized problem instances, but slower for large instances.
 
 #let branch-bound-heathrow-avg-runtimes = avg-runtime-graph(
     size: (12, 8),
@@ -1154,12 +1163,12 @@ It can be seen that decomposed de-icing is faster than integrated de-icing for s
 Even so, integrated de-icing is in fact _faster_ than its decomposed counterparts on average -- the total time taken to solve all 30 problem instances is #heathrow-total-runtimes-all.tobt seconds and #heathrow-total-runtimes-all.ctot seconds for decomposed de-icing by TOBT and by CTOT respectively, and #heathrow-total-runtimes-all.integrated seconds for integrated de-icing.
 This equates to an average runtime of #heathrow-avg-runtimes-all.tobt, #heathrow-avg-runtimes-all.ctot, and #heathrow-avg-runtimes-all.integrated milliseconds respectively across all instances.
 In other words, integrated de-icing is #calc.round((heathrow-avg-runtimes-all.tobt / heathrow-avg-runtimes-all.integrated - 1.0) * 100, digits: 2)% and #calc.round((heathrow-avg-runtimes-all.ctot / heathrow-avg-runtimes-all.integrated - 1.0) * 100, digits: 2)% faster on average than decomposed de-icing by TOBT and by CTOT respectively.
-A breakdown of the total and average runtimes across each instance size group (small, medium, and large) is shown in @chart:heathrow-total-avg-runtimes.
 
 // TODO: Recheck the accuracy of these numbers
-Moreover, it should be noted that both decomposed approaches failed to produce feasible solutions for instances 21 through 25.
+Moreover, both decomposed approaches failed to produce feasible solutions for instances 21 through 25, whereas the integrated approach was able to do so.
 Further testing reveals that a rolling horizon of 20 or higher is required to solve these instances using decomposed de-icing; however, the resulting objective values and mean runtimes are still worse than those achieved by the integrated approach using a lower rolling horizon of 10.
 As such, despite having solved less instances, both decomposed de-icing approaches have higher total (and average) runtimes than that of the integrated approach.
+A breakdown of the total and average runtimes across each instance size group (small, medium, and large) is shown in @chart:heathrow-total-avg-runtimes.
 
 #let heathrow-total-avg-runtimes = {
     let totals = for (label, ..runtimes) in (
@@ -1386,7 +1395,7 @@ In comparison, the average runtime to solve all large Heathrow problem instances
 As evidenced by their much lower mean runtimes, the Milan problem instances are considerably easier to solve than the large Heathrow instances with the same number of aircraft, despite having more departures to de-ice per instance.
 This is primarily due to the lack of CTOT slots as well as the presence of relatively simple separation matrices, which allows complete orders to be inferred between most aircraft in each instance.
 
-@table:branch-bound-furini-runtime-stats provides a more detailed overview of the runtimes of each de-icing approach for each Milan airport problem instance, including the mean runtime, standard deviation $sigma$, median runtime, and median absolute deviation.
+@table:branch-bound-furini-runtime-stats provides a more detailed overview of the runtimes of each de-icing approach for each Milan Airport problem instance, including the mean runtime, standard deviation $sigma$, median runtime, and median absolute deviation.
 
 #let branch-bound-furini-runtimes = {
     let pad-instance-id(instance-id) = if instance-id == "Instance" {
@@ -1448,10 +1457,22 @@ Both implementations achieve the same (optimal) objective values across all inst
 
 == Impact
 
-The results discussed in @section:compare-deice clearly show that the objective values achieved by integrated de-icing are no worse than those achieved by decomposed de-icing, and are often significantly better, even when a rolling horizon is involved.
-@table:cplex-branch-bound-heathrow-results confirms that integrated de-icing indeed achieves optimal values for the objective function considered here when used without a rolling horizon. 
+The results discussed in @section:compare-deice clearly show that for the objective values achieved by integrated de-icing are no worse than those achieved by decomposed de-icing for all problem instances considered, and are often significantly better.
+@table:cplex-branch-bound-heathrow-results confirms that integrated de-icing indeed achieves optimal values for the objective function considered here, when applied without a rolling horizon.
 
-#todo("Write more about impact of results")
+The results reported in @table:branch-bound-heathrow-results for real-world problem instances from London Heathrow show that significant improvements in total delay and CTOT compliance can be obtained when using integrated de-icing as opposed to decomposed de-icing, while also not compromising on runway utilisation and stand holding times.
+
+By contrast, integrated de-icing sometimes results in slightly worse runway utilisation and higher runway holding times for the problem instances from Milan Airport, as seen in @table:branch-bound-furini-results.
+Nevertheless, the improvement in objective values obtained from using integrated de-icing is nearly #calc.round(furini-integrated-improvement / heathrow-improvements.tobt-integrated) times as much as the improvements reported for the Heathrow instances, and outweighs the increase in makespan and runway holding times.
+
+The branch-and-bound implementation using de-icing is slower than decomposed de-icing for most problem instances considered in @section:compare-deice -- namely the Milan problem instances and the small- and medium-sized Heathrow instances.
+However, the mean runtime for each de-icing approach -- presented in @table:branch-bound-heathrow-runtime-stats and @table:branch-bound-furini-runtime-stats -- is still under one second for all problem instances.
+In some cases, such as for the large Heathrow problem instances, integrated de-icing yields solutions substantially quicker than decomposed de-icing.
+
+It should also be noted that the branch-and-bound implementation outlined in @code:branch-bound does not utilise any parallelisation.
+However, it is possible to parallelise this algorithm, which may yield further reductions in runtime for all de-icing approaches.
+
+These computational results thus indicate that using an integrated de-icing approach does not affect the tractability of runway sequencing, and that it is viable for real-time applications with strict limits on computation time.
 
 = Reflections
 
@@ -1465,6 +1486,8 @@ The results discussed in @section:compare-deice clearly show that the objective 
 == Contributions
 
 #todo("Write about LSEPI and contributions")
+
+= Conclusions
 
 = References
 
