@@ -850,7 +850,7 @@ Additionally, a substantial number of aircraft are also subject to CTOTs, which 
 
 By contrast, the Milan problem instances are significantly simpler due to having a relatively high number of separation-identical aircraft and a mix of both arrivals and departures, which allows complete orders to be inferred between a relatively large number of aircraft in each instance.
 
-== Comparison of De-Icing Approaches
+== Comparison of De-Icing Approaches <section:compare-deice>
 
 #let convert-stat-case(stat) = (
     confidence-interval: (
@@ -1068,9 +1068,9 @@ However, integrated de-icing achieves #calc.round((heathrow-improvements.tobt-in
 It also produces consdierably shorter makespans in the larger problem instances, indicating better runway utilisation over time compared to its decomposed counterparts -- even when using a rolling horizon.
 
 #let branch-bound-heathrow-benches = (
-    tobt: benches("benches/heathrow/decomposed de-icing by tobt/", range(1, 20 + 1) + range(26, 30 + 1)),
-    ctot: benches("benches/heathrow/decomposed de-icing by ctot/", range(1, 20 + 1) + range(26, 30 + 1)),
-    integrated: benches("benches/heathrow/integrated de-icing/", range(1, 30 + 1)),
+    tobt: benches("benches/heathrow/deice-tobt/", range(1, 20 + 1) + range(26, 30 + 1)),
+    ctot: benches("benches/heathrow/deice-ctot/", range(1, 20 + 1) + range(26, 30 + 1)),
+    integrated: benches("benches/heathrow/deice-integrated/", range(1, 30 + 1)),
 )
 
 @chart:branch-bound-heathrow-avg-runtimes further shows the mean runtime for each individual problem instance solved using each de-icing approach.
@@ -1253,7 +1253,7 @@ As such, despite having solved less instances, both decomposed de-icing approach
     ],
 ) <chart:heathrow-total-avg-runtimes>
 
-@chart:branch-bound-heathrow-runtime-stats provides a more detailed overview of the runtimes of each de-icing approach for each Heathrow problem instance, including the mean runtime, standard deviation $sigma$, median runtime, and median absolute deviation (MAD).
+@table:branch-bound-heathrow-runtime-stats provides a more detailed overview of the runtimes of each de-icing approach for each Heathrow problem instance, including the mean runtime, standard deviation $sigma$, median runtime, and median absolute deviation (MAD).
 Values that are smaller than a microsecond are displayed as zeros.
 
 #let branch-bound-heathrow-runtimes = {
@@ -1283,7 +1283,7 @@ Values that are smaller than a microsecond are displayed as zeros.
 #figure(
     branch-bound-heathrow-runtimes,
     caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each problem instance from London Heathrow solved by the branch-and-bound program using each de-icing approach],
-) <chart:branch-bound-heathrow-runtime-stats>
+) <table:branch-bound-heathrow-runtime-stats>
 
 @table:branch-bound-furini-results lists the results for all Milan benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the three different de-icing approaches.
 Since these instances do not contain de-icing data, the pushback duration $p_i$, pre-de-ice taxi duration $m_i$, de-icing duration $o_i$, taxi-out duration $n_i$, and lineup duration $q_i$ are assumed to be five minutes each for all departures.
@@ -1319,8 +1319,8 @@ Much like the Heathrow instances, it can be seen from @table:branch-bound-furini
 However, the objective values achieved by the integrated de-icing approach are far better than its decomposed counterpart's -- integrated de-icing achieves a #calc.round((furini-integrated-improvement - 1.0) * 100, digits: 2)% improvement in objective values on average compared to decomposed de-icing.
 
 #let branch-bound-furini-benches = (
-    decomposed: benches("benches/furini/decomposed de-icing/", range(2, 12 + 1)),
-    integrated: benches("benches/furini/integrated de-icing/", range(1, 12 + 1)),
+    decomposed: benches("benches/furini/deice-decomposed/", range(2, 12 + 1)),
+    integrated: benches("benches/furini/deice-integrated/", range(1, 12 + 1)),
 )
 
 @chart:branch-bound-furini-avg-runtimes further shows the mean runtime for each individual problem instance solved using each de-icing approach.
@@ -1384,7 +1384,7 @@ In comparison, the average runtime to solve all large Heathrow problem instances
 As evidenced by their much lower mean runtimes, the Milan problem instances are considerably easier to solve than the large Heathrow instances with the same number of aircraft, despite having more departures to de-ice per instance.
 This is primarily due to the lack of CTOT slots as well as the presence of relatively simple separation matrices, which allows complete orders to be inferred between most aircraft in each instance.
 
-@chart:branch-bound-furini-runtime-stats provides a more detailed overview of the runtimes of each de-icing approach for each Milan airport problem instance, including the mean runtime, standard deviation $sigma$, median runtime, and median absolute deviation.
+@table:branch-bound-furini-runtime-stats provides a more detailed overview of the runtimes of each de-icing approach for each Milan airport problem instance, including the mean runtime, standard deviation $sigma$, median runtime, and median absolute deviation.
 
 #let branch-bound-furini-runtimes = {
     let pad-instance-id(instance-id) = if instance-id == "Instance" {
@@ -1417,11 +1417,11 @@ This is primarily due to the lack of CTOT slots as well as the presence of relat
 #figure(
     branch-bound-furini-runtimes,
     caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each problem instance introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program using each de-icing approach],
-) <chart:branch-bound-furini-runtime-stats>
+) <table:branch-bound-furini-runtime-stats>
 
 // TODO: Write more about different de-icing approaches in branch-and-bound program if necessary
 
-== Comparison of Programs
+== Comparison of Programs <section:compare-programs>
 
 @table:cplex-branch-bound-heathrow-results lists the makespans, earliest and latest de-icing times, and mean runtimes for all small instances from London Heathrow, solved using the mathematical program implemented in CPLEX as well as the branch-and-bound program -- both utilising an integrated de-icing approach.
 The results for the latter are the same as in @table:branch-bound-heathrow-results, but are presented again here for convenience.
@@ -1442,11 +1442,13 @@ Both implementations achieve the same (optimal) objective values across all inst
     ],
 ) <table:cplex-branch-bound-heathrow-results>
 
-// TODO: Write about comparison of CPLEX model versus branch-and-bound program
+#todo("Write about comparison of CPLEX model versus branch-and-bound program")
 
 == Impact
 
-#todo("Write about impact of results")
+The results discussed in @section:compare-deice clearly show that the objective values achieved by integrated de-icing are _no worse_ than those achieved by decomposed de-icing, and are often significantly better, even when a rolling horizon is involved.
+
+#todo("Write more about impact of results")
 
 = Reflections
 
