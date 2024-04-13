@@ -1015,7 +1015,7 @@ By contrast, the Milan problem instances are significantly simpler due to having
 //     })
 // }
 
-@table:branch-bound-heathrow-results lists the makespans, earliest and latest de-icing times, objective values, and mean runtimes for all Heathrow problem instances solved by the branch-and-bound program utilising the three different de-icing approaches.
+@table:branch-bound-heathrow-results lists the makespans, earliest and latest de-icing times, objective values, and total runway hold times for all Heathrow problem instances solved by the branch-and-bound program utilising the three different de-icing approaches.
 The small problem instances were solved without a rolling horizon, while a rolling horizon of 10 was used for the medium and large instances.
 Entries for runs that fail to produce feasible solutions are left blank.
 
@@ -1425,7 +1425,7 @@ This is primarily due to the lack of CTOT slots as well as the presence of relat
 
 == Comparison of Programs <section:compare-programs>
 
-@table:cplex-branch-bound-heathrow-results lists the makespans, earliest and latest de-icing times, and mean runtimes for all small instances from London Heathrow, solved using the mathematical program implemented in CPLEX as well as the branch-and-bound program -- both utilising an integrated de-icing approach.
+@table:cplex-branch-bound-heathrow-results lists the makespans, earliest and latest de-icing times, and total runway hold times for all small instances from London Heathrow, solved using the mathematical program implemented in CPLEX as well as the branch-and-bound program -- both utilising an integrated de-icing approach.
 The results for the latter are the same as in @table:branch-bound-heathrow-results, but are presented again here for convenience.
 Both implementations achieve the same (optimal) objective values across all instances.
 
