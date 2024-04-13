@@ -152,7 +152,9 @@
 
 = Existing Literature
 
-#todo("Write short introduction to existing literature and past approaches")
+Early approaches to runway sequencing used by many airports around the world include simple first-come, first-serve (FCFS) algorithms optimising for a single objective @bianco-minimizing-time.
+Although very simple to implement and computationally inexpensive, FCFS strategies are well-known to produce excessive delays @bianco-minimizing-time.
+Therefore, a number of approaches that optimise certain aspects -- such as delay, runway utilisation, and CTOT compliance -- without violating safety constraints or compromising the tractability of the problem have been proposed in the past.
 
 == Approximate Methods
 
@@ -1064,7 +1066,7 @@ Entries for runs that fail to produce feasible solutions are left blank.
 
 It can be observed from @table:branch-bound-heathrow-results that the two different decomposed de-icing approaches -- by TOBT and by CTOT -- result in nearly identical makespans, earliest and latest de-icing times, and objective values across all problem instances, with decomposed de-icing by CTOT attaining only a #calc.round((heathrow-improvements.tobt-ctot - 1.0) * 100, digits: 2)% improvement in objective values on average compared to decomposed de-icing by TOBT.
 
-However, integrated de-icing achieves #calc.round((heathrow-improvements.tobt-integrated - 1.0) * 100, digits: 2)% and #calc.round((heathrow-improvements.ctot-integrated - 1.0) * 100, digits: 2)% better objective values on average compared to decomposed de-icing by TOBT and by CTOT respoectively.
+However, integrated de-icing achieves #calc.round((heathrow-improvements.tobt-integrated - 1.0) * 100, digits: 2)% and #calc.round((heathrow-improvements.ctot-integrated - 1.0) * 100, digits: 2)% better objective values on average compared to decomposed de-icing by TOBT and by CTOT respectively.
 It also produces consdierably shorter makespans in the larger problem instances, indicating better runway utilisation over time compared to its decomposed counterparts -- even when using a rolling horizon.
 
 #let branch-bound-heathrow-benches = (
@@ -1446,7 +1448,8 @@ Both implementations achieve the same (optimal) objective values across all inst
 
 == Impact
 
-The results discussed in @section:compare-deice clearly show that the objective values achieved by integrated de-icing are _no worse_ than those achieved by decomposed de-icing, and are often significantly better, even when a rolling horizon is involved.
+The results discussed in @section:compare-deice clearly show that the objective values achieved by integrated de-icing are no worse than those achieved by decomposed de-icing, and are often significantly better, even when a rolling horizon is involved.
+@table:cplex-branch-bound-heathrow-results confirms that integrated de-icing indeed achieves optimal values for the objective function considered here when used without a rolling horizon. 
 
 #todo("Write more about impact of results")
 
