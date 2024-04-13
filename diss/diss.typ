@@ -1,4 +1,4 @@
-#import "@preview/cetz:0.2.2": canvas, chart, draw, palette
+#import "@preview/cetz:0.2.2": canvas, chart, draw, palette, plot
 #import "@preview/lovelace:0.2.0": algorithm, pseudocode-list, setup-lovelace
 #import "@preview/timeliney:0.0.1": timeline
 
@@ -852,11 +852,173 @@ By contrast, the Milan problem instances are significantly simpler due to having
 
 == Comparison of De-Icing Approaches
 
+#let convert-stat-case(stat) = (
+    confidence-interval: (
+        confidence-level: stat.at("confidence_interval").at("confidence_level"),
+        lower-bound: stat.at("confidence_interval").at("lower_bound"),
+        upper-bound: stat.at("confidence_interval").at("upper_bound"),
+    ),
+    point-estimate: stat.at("point_estimate"),
+    standard-error: stat.at("standard_error"),
+)
+
+#let convert-stats-case(stats) = (
+    mean: convert-stat-case(stats.at("mean")),
+    std-dev: convert-stat-case(stats.at("std_dev")),
+    median: convert-stat-case(stats.at("median")),
+    median-abs-dev: convert-stat-case(stats.at("median_abs_dev")),
+)
+
+#let benches(dir, ids) = {
+    ids.map(id => {
+        let estimates = json(dir + str(id) + "/base/sample.json")
+        let samples = estimates.iters.zip(estimates.times).map(((iters, time)) => time / iters)
+        let stats = json(dir + str(id) + "/base/estimates.json")
+        (id: id, samples: samples, stats: convert-stats-case(stats))
+    }).fold((:), (dict, elem) => dict + ((str(elem.id)): (
+        samples: elem.samples,
+        stats: elem.stats,
+    )))
+}
+
+#let runtime-stats(data) = {
+    let runtimes = data
+        .pairs()
+        .map(((instance-id, bench)) => (
+            instance-id,
+            str(calc.round(bench.stats.mean.point-estimate / 1000000, digits: 2)),
+            str(calc.round(bench.stats.std-dev.point-estimate / 1000000, digits: 2)),
+            str(calc.round(bench.stats.median.point-estimate / 1000000, digits: 2)),
+            str(calc.round(bench.stats.median-abs-dev.point-estimate / 1000000, digits: 2)),
+        ))
+    (
+        ("Instance", "Mean runtime (ms)", str(sym.sigma) + " (ms)", "Median runtime (ms)", "MAD (ms)"),
+        ..runtimes,
+    )
+}
+
+#let avg-runtime-graph(..args) = {
+    set text(size: 10pt)
+
+    canvas({
+        draw.set-style(
+            axes: (stroke: 0.5pt + black),
+            grid: (
+                stroke: (
+                    thickness: 0.5pt,
+                    dash: "dotted",
+                ),
+            ),
+            legend: (
+                fill: white,
+                stroke: 0.5pt + black,
+                padding: 0.2,
+                spacing: 0.2,
+                item: (spacing: 0.2),
+            ),
+        )
+        
+        plot.plot(
+            x-label: [*Instance*],
+            y-label: [*Mean runtime (μs)*],
+            x-format: x => [#x],
+            y-format: y => [10#super[#calc.round(y)]],
+            x-tick-step: 1,
+            y-tick-step: 1,
+            ..args.named(),
+        {
+            for (label, data, colour) in args.pos() {
+                let instance-ids = data
+                    .keys()
+                    .map(int)
+                let mean-runtimes = data
+                    .values()
+                    .map(data => data.stats.mean.point-estimate)
+                    .map(rt => calc.log(rt / 1000, base: 10))
+                
+                let x = palette.red(0)
+                plot.add(
+                    instance-ids.zip(mean-runtimes),
+                    label: label,
+                    line: "linear",
+                    style: (stroke: 1pt + colour),
+                    mark: "o",
+                    mark-size: 0.1,
+                    mark-style: (stroke: 1pt + colour, fill: colour.lighten(50%))
+                )
+            }
+        })
+    })
+}
+
+// #let runtime-boxwhisker(..args) = {
+//     set text(size: 10pt)
+
+//     canvas({
+//         draw.set-style(
+//             axes: (stroke: 0.5pt + black),
+//             grid: (
+//                 stroke: (
+//                     thickness: 0.5pt,
+//                     dash: "dotted",
+//                 ),
+//             ),
+//             boxwhisker: (
+//                 mark-size: 0.1,
+//             ),
+//         )
+
+//         let data = args.pos().first()
+//         let boxwhisker-data = data.pairs().map(((instance-id, bench)) => {
+//             let samples = bench.samples.sorted().map(n => calc.log(n, base: 10))
+//             let sample-count = samples.len()
+
+//             let median = calc.log(bench.stats.median.point-estimate, base: 10)
+
+//             let q1-idx = (sample-count - 1) * 0.25
+//             let q1-low = samples.at(calc.floor(q1-idx))
+//             let q1-high = samples.at(calc.ceil(q1-idx))
+//             let q1 = q1-low + (q1-high - q1-low) * calc.fract(q1-idx)
+
+//             let q3-idx = (sample-count - 1) * 0.75
+//             let q3-low = samples.at(calc.floor(q3-idx))
+//             let q3-high = samples.at(calc.ceil(q3-idx))
+//             let q3 = q3-low + (q3-high - q3-low) * calc.fract(q3-idx)
+
+//             let iqr = q3 - q1
+
+//             let min = q1 - iqr * 1.5
+//             let max = q3 + iqr * 1.5
+
+//             let low-outliers = samples.filter(n => n < min)
+//             let high-outliers = samples.filter(n => n > max)
+//             let outliers = low-outliers + high-outliers
+
+//             (
+//                 label: instance-id,
+//                 outliers: outliers,
+//                 min: min,
+//                 max: max,
+//                 q1: q1,
+//                 q2: median,
+//                 q3: q3,
+//             )
+//         })
+
+//         chart.boxwhisker(
+//             ..args.named(),
+//             label-key: "label",
+//             boxwhisker-data,
+//         )
+//     })
+// }
+
 @table:branch-bound-heathrow-results lists the makespans, earliest and latest de-icing times, objective values, and mean runtimes for all Heathrow problem instances solved by the branch-and-bound program utilising the three different de-icing approaches.
 The small problem instances were solved without a rolling horizon, while a rolling horizon of 10 was used for the medium and large instances.
-Runs that fail to produce feasible solutions are left blank.
+Entries for runs that fail to produce feasible solutions are left blank.
 
-#let branch-bound-heathrow = results-table(
+// TODO: Replace runtime here with runway hold
+#let branch-bound-heathrow-results = results-table(
     group-headers: ([Decomposed de-icing (by TOBT)], [Decomposed de-icing (by CTOT)], [Integrated de-icing]),
     side-headers: true,
     inset: (_, y) => if y <= 1 { 5pt } else { 3.5pt },
@@ -869,7 +1031,7 @@ Runs that fail to produce feasible solutions are left blank.
     center,
     rotate(-90deg, reflow: true)[
         #figure(
-            branch-bound-heathrow,
+            branch-bound-heathrow-results,
             caption: [
                 Results for all problem instances from London Heathrow solved by the branch-and-bound program utilising the different de-icing approaches
             ],
@@ -877,55 +1039,141 @@ Runs that fail to produce feasible solutions are left blank.
     ],
 )
 
-#let heathrow-runtimes = runtime-stats(
-    tobt: runtimes(results.heathrow.branch-bound.tobt),
-    ctot: runtimes(results.heathrow.branch-bound.ctot),
-    integrated: runtimes(results.heathrow.branch-bound.integrated),
+#let heathrow-improvements = {
+    let tobt-ctot = objective-values(results.heathrow.branch-bound.tobt)
+        .zip(objective-values(results.heathrow.branch-bound.ctot))
+        .filter(row => row.all(str => str.len() > 0))
+        .map(row => int(row.first()) / int(row.last()))
+
+    let tobt-integrated = objective-values(results.heathrow.branch-bound.tobt)
+        .zip(objective-values(results.heathrow.branch-bound.integrated))
+        .filter(row => row.all(str => str.len() > 0))
+        .map(row => int(row.first()) / int(row.last()))
+    
+    let ctot-integrated = objective-values(results.heathrow.branch-bound.ctot)
+        .zip(objective-values(results.heathrow.branch-bound.integrated))
+        .filter(row => row.all(str => str.len() > 0))
+        .map(row => int(row.first()) / int(row.last()))
+    
+    (
+        tobt-ctot: avg(..tobt-ctot),
+        tobt-integrated: avg(..tobt-integrated),
+        ctot-integrated: avg(..ctot-integrated),
+    )
+}
+
+It can be observed from @table:branch-bound-heathrow-results that the two different decomposed de-icing approaches -- by TOBT and by CTOT -- result in nearly identical makespans, earliest and latest de-icing times, and objective values across all problem instances, with decomposed de-icing by CTOT attaining only a #calc.round((heathrow-improvements.tobt-ctot - 1.0) * 100, digits: 2)% improvement in objective values on average compared to decomposed de-icing by TOBT.
+
+However, integrated de-icing achieves #calc.round((heathrow-improvements.tobt-integrated - 1.0) * 100, digits: 2)% and #calc.round((heathrow-improvements.ctot-integrated - 1.0) * 100, digits: 2)% better objective values on average compared to decomposed de-icing by TOBT and by CTOT respoectively.
+It also produces consdierably shorter makespans in the larger problem instances, indicating better runway utilisation over time compared to its decomposed counterparts -- even when using a rolling horizon.
+
+#let branch-bound-heathrow-benches = (
+    tobt: benches("benches/heathrow/decomposed de-icing by tobt/", range(1, 20 + 1) + range(26, 30 + 1)),
+    ctot: benches("benches/heathrow/decomposed de-icing by ctot/", range(1, 20 + 1) + range(26, 30 + 1)),
+    integrated: benches("benches/heathrow/integrated de-icing/", range(1, 30 + 1)),
 )
 
-The total runtime to solve all 30 problem instances is #calc.round(heathrow-runtimes.total.tobt / 1000, digits: 2) seconds for decomposed de-icing by TOBT, #calc.round(heathrow-runtimes.total.ctot / 1000, digits: 2) seconds for decomposed de-icing by CTOT, and #calc.round(heathrow-runtimes.total.integrated / 1000, digits: 2) seconds for the integrated approach.
-This equates to an average runtime of #calc.round(heathrow-runtimes.avg.tobt, digits: 2) milliseconds, #calc.round(heathrow-runtimes.avg.ctot, digits: 2) milliseconds, and #calc.round(heathrow-runtimes.avg.integrated, digits: 2) milliseconds respectively.
-@chart:branch-bound-heathrow-runtimes displays the total and average runtime for each de-icing approach split across each problem instance size group.
+@chart:branch-bound-heathrow-avg-runtimes further shows the mean runtime for each individual problem instance solved using each de-icing approach.
+It can be seen that decomposed de-icing is faster than integrated de-icing for small- and medium-sized problem instances, but slower for large instances.
 
-#let heathrow-avg-runtimes = {
-    let avgs = for (label, ..points) in (
-        ([Small], ..runtime-stats(
-            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(1, 11),
-            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(1, 11),
-            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(1, 11),
-        ).avg.values()),
-        ([Medium], ..runtime-stats(
-            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(11, 21),
-            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(11, 21),
-            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(11, 21),
-        ).avg.values()),
-        ([Large], ..runtime-stats(
-            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(21),
-            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(21),
-            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(21),
-        ).avg.values()),
+#let branch-bound-heathrow-avg-runtimes = avg-runtime-graph(
+    size: (12, 8),
+    y-grid: true,
+    y-min: 1,
+    y-max: 7,
+    legend: "legend.inner-north-west",
+    ([Decomposed de-icing (by TOBT)], branch-bound-heathrow-benches.tobt, palette.red(3).fill),
+    ([Decomposed de-icing (by CTOT)], branch-bound-heathrow-benches.ctot, palette.orange(3).fill),
+    ([Integrated de-icing], branch-bound-heathrow-benches.integrated, palette.blue(3).fill),
+)
+
+#figure(
+    branch-bound-heathrow-avg-runtimes,
+    caption: [
+        Mean runtimes for each de-icing approach of the branch-and-bound program for each problem instance from London Heathrow
+    ],
+) <chart:branch-bound-heathrow-avg-runtimes>
+
+#let heathrow-total-runtimes(from, to) = (
+    tobt: branch-bound-heathrow-benches
+        .tobt
+        .pairs()
+        .filter(((instance-id, ..)) => int(instance-id) in range(from, to + 1))
+        .map(((instance-id, bench)) => bench.stats.mean.point-estimate)
+        .sum(),
+    ctot: branch-bound-heathrow-benches
+        .ctot
+        .pairs()
+        .filter(((instance-id, ..)) => int(instance-id) in range(from, to + 1))
+        .map(((instance-id, bench)) => bench.stats.mean.point-estimate)
+        .sum(),
+    integrated: branch-bound-heathrow-benches
+        .integrated
+        .pairs()
+        .filter(((instance-id, ..)) => int(instance-id) in range(from, to + 1))
+        .map(((instance-id, bench)) => bench.stats.mean.point-estimate)
+        .sum(),
+)
+
+#let heathrow-avg-runtimes(from, to) = (
+    tobt: avg(
+        ..branch-bound-heathrow-benches
+            .tobt
+            .pairs()
+            .filter(((instance-id, ..)) => int(instance-id) in range(from, to + 1))
+            .map(((instance-id, bench)) => bench.stats.mean.point-estimate),
+        ),
+    ctot: avg(
+        ..branch-bound-heathrow-benches
+            .ctot
+            .pairs()
+            .filter(((instance-id, ..)) => int(instance-id) in range(from, to + 1))
+            .map(((instance-id, bench)) => bench.stats.mean.point-estimate),
+        ),
+    integrated: avg(
+        ..branch-bound-heathrow-benches
+            .integrated
+            .pairs()
+            .filter(((instance-id, ..)) => int(instance-id) in range(from, to + 1))
+            .map(((instance-id, bench)) => bench.stats.mean.point-estimate),
+        ),
+)
+
+#let heathrow-total-runtimes-all = heathrow-total-runtimes(1, 30).pairs().fold(
+    (:),
+    (dict, (key, total)) => dict + ((key): calc.round(total / 1000000000, digits: 2)),
+)
+
+#let heathrow-avg-runtimes-all = heathrow-avg-runtimes(1, 30).pairs().fold(
+    (:),
+    (dict, (key, total)) => dict + ((key): calc.round(total / 1000000, digits: 2)),
+)
+
+Even so, integrated de-icing is in fact _faster_ than its decomposed counterparts on average -- the total time taken to solve all 30 problem instances is #heathrow-total-runtimes-all.tobt seconds and #heathrow-total-runtimes-all.ctot seconds for decomposed de-icing by TOBT and by CTOT respectively, and #heathrow-total-runtimes-all.integrated seconds for integrated de-icing.
+This equates to an average runtime of #heathrow-avg-runtimes-all.tobt, #heathrow-avg-runtimes-all.ctot, and #heathrow-avg-runtimes-all.integrated milliseconds respectively across all instances.
+In other words, integrated de-icing is #calc.round((heathrow-avg-runtimes-all.tobt / heathrow-avg-runtimes-all.integrated - 1.0) * 100, digits: 2)% and #calc.round((heathrow-avg-runtimes-all.ctot / heathrow-avg-runtimes-all.integrated - 1.0) * 100, digits: 2)% faster on average than decomposed de-icing by TOBT and by CTOT respectively.
+A breakdown of the total and average runtimes across each instance size group (small, medium, and large) is shown in @chart:heathrow-total-avg-runtimes.
+
+// TODO: Recheck the accuracy of these numbers
+Moreover, it should be noted that both decomposed approaches failed to produce feasible solutions for instances 21 through 25.
+Further testing reveals that a rolling horizon of 20 or higher is required to solve these instances using decomposed de-icing; however, the resulting objective values and mean runtimes are still worse than those achieved by the integrated approach using a lower rolling horizon of 10.
+As such, despite having solved less instances, both decomposed de-icing approaches have higher total (and average) runtimes than that of the integrated approach.
+
+#let heathrow-total-avg-runtimes = {
+    let totals = for (label, ..runtimes) in (
+        ([Small], ..heathrow-total-runtimes(1, 10).values()),
+        ([Medium], ..heathrow-total-runtimes(11, 20).values()),
+        ([Large], ..heathrow-total-runtimes(21, 30).values()),
     ) {
-        ((label, ..points.map(pt => calc.log(pt * 1000, base: 10))),)
+        ((label, ..runtimes.map(rt => calc.log(rt / 1000, base: 10))),)
     }
 
-    let totals = for (label, ..points) in (
-        ([Small], ..runtime-stats(
-            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(1, 11),
-            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(1, 11),
-            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(1, 11),
-        ).total.values()),
-        ([Medium], ..runtime-stats(
-            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(11, 21),
-            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(11, 21),
-            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(11, 21),
-        ).total.values()),
-        ([Large], ..runtime-stats(
-            tobt: runtimes(results.heathrow.branch-bound.tobt).slice(21),
-            ctot: runtimes(results.heathrow.branch-bound.ctot).slice(21),
-            integrated: runtimes(results.heathrow.branch-bound.integrated).slice(21),
-        ).total.values()),
+    let avgs = for (label, ..runtimes) in (
+        ([Small], ..heathrow-avg-runtimes(1, 10).values()),
+        ([Medium], ..heathrow-avg-runtimes(11, 20).values()),
+        ([Large], ..heathrow-avg-runtimes(21, 30).values()),
     ) {
-        ((label, ..points.map(pt => calc.log(pt * 1000, base: 10))),)
+        ((label, ..runtimes.map(rt => calc.log(rt / 1000, base: 10))),)
     }
 
     set text(size: 10pt)
@@ -999,46 +1247,52 @@ This equates to an average runtime of #calc.round(heathrow-runtimes.avg.tobt, di
 }
 
 #figure(
-    heathrow-avg-runtimes,
+    heathrow-total-avg-runtimes,
     caption: [
         Total and average runtimes for each de-icing approach of the branch-and-bound program across each size group of problem instances from London Heathrow
     ],
-) <chart:branch-bound-heathrow-runtimes>
+) <chart:heathrow-total-avg-runtimes>
 
-#todo("Add boxplot for runtimes if possible")
+@chart:branch-bound-heathrow-runtime-stats provides a more detailed overview of the runtimes of each de-icing approach for each Heathrow problem instance, including the mean runtime, standard deviation $sigma$, median runtime, and median absolute deviation (MAD).
+Values that are smaller than a microsecond are displayed as zeros.
 
-#let heathrow-improvements = (
-    tobt-ctot: avg(
-        ..objective-values(results.heathrow.branch-bound.tobt)
-            .zip(objective-values(results.heathrow.branch-bound.ctot))
-            .filter(row => row.all(str => str.len() > 0))
-            .map(row => int(row.first()) / int(row.last())),
-    ),
-    tobt-integrated: avg(
-        ..objective-values(results.heathrow.branch-bound.tobt)
-            .zip(objective-values(results.heathrow.branch-bound.integrated))
-            .filter(row => row.all(str => str.len() > 0))
-            .map(row => int(row.first()) / int(row.last())),
-    ),
-    ctot-integrated: avg(
-        ..objective-values(results.heathrow.branch-bound.ctot)
-            .zip(objective-values(results.heathrow.branch-bound.integrated))
-            .filter(row => row.all(str => str.len() > 0))
-            .map(row => int(row.first()) / int(row.last())),
-    ),
-)
+#let branch-bound-heathrow-runtimes = {
+    let decomposed-missing-ids = range(21, 25 + 1)
 
-The two different decomposed de-icing approaches result in nearly identical makespans, earliest and latest de-icing times, and objective values across all problem instances, with decomposed de-icing by CTOT attaining only a #calc.round((heathrow-improvements.tobt-ctot - 1.0) * 100, digits: 2)% improvement in objective values on average compared to decomposed de-icing by TOBT.
-However, integrated de-icing achieves an improvement in objective values by factors of #calc.round(heathrow-improvements.tobt-integrated, digits: 2) and #calc.round(heathrow-improvements.ctot-integrated, digits: 2) on average compared to decomposed de-icing by TOBT and by CTOT respectively.
+    let tobt = runtime-stats(branch-bound-heathrow-benches.tobt)
+    for instance-id in decomposed-missing-ids {
+        tobt.insert(instance-id, (str(instance-id), "", "", "", ""))
+    }
+    
+    let ctot = runtime-stats(branch-bound-heathrow-benches.ctot)
+    for instance-id in decomposed-missing-ids {
+        ctot.insert(instance-id, (str(instance-id), "", "", "", ""))
+    }
 
-Additionally, integrated de-icing is on average #calc.round(heathrow-runtimes.avg.tobt / heathrow-runtimes.avg.integrated, digits: 2) times faster than decompsed de-icing by TOBT, and #calc.round(heathrow-runtimes.avg.ctot / heathrow-runtimes.avg.integrated, digits: 2) times faster than decomposed de-icing by CTOT.
+    let integrated = runtime-stats(branch-bound-heathrow-benches.integrated)
+
+    results-table(
+        group-headers: ([Decomposed de-icing (by TOBT)], [Decomposed de-icing (by CTOT)], [Integrated de-icing]),
+        side-headers: true,
+        tobt,
+        ctot,
+        integrated,
+    )
+}
+
+#figure(
+    branch-bound-heathrow-runtimes,
+    caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each problem instance from London Heathrow solved by the branch-and-bound program using each de-icing approach],
+) <chart:branch-bound-heathrow-runtime-stats>
 
 @table:branch-bound-furini-results lists the results for all Milan benchmark instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the three different de-icing approaches.
 Since these instances do not contain de-icing data, the pushback duration $p_i$, pre-de-ice taxi duration $m_i$, de-icing duration $o_i$, taxi-out duration $n_i$, and lineup duration $q_i$ are assumed to be five minutes each for all departures.
+Additionally, they do not consider CTOT slots, so there are no results available for decomposed de-icing by CTOT.
 A rolling horizon of size 10 was used to solve each instance.
-Like in @table:branch-bound-heathrow-results, runs that fail to produce feasible solutions are left blank.
+Like in @table:branch-bound-heathrow-results, entries for runs that fail to produce feasible solutions are left blank.
 
-#let branch-bound-furini = results-table(
+// TODO: Replace runtime here with runway hold
+#let branch-bound-furini-results = results-table(
     group-headers: ([Decomposed de-icing], [Integrated de-icing]),
     side-headers: true,
     results.furini.branch-bound.decomposed,
@@ -1046,73 +1300,135 @@ Like in @table:branch-bound-heathrow-results, runs that fail to produce feasible
 )
 
 #figure(
-    branch-bound-furini,
+    branch-bound-furini-results,
     caption: [
-        Results for the Milan Airport benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program utilising the different de-icing approaches
+        Results for the Milan Airport benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program using each de-icing approach
     ],
 ) <table:branch-bound-furini-results>
 
-#let furini-runtimes = runtime-stats(
-    decomposed: runtimes(results.furini.branch-bound.decomposed),
-    integrated: runtimes(results.furini.branch-bound.integrated),
-)
-
-The total runtime to solve all twelve problem instances is #calc.round(furini-runtimes.total.decomposed / 1000, digits: 2) seconds for the decomposed de-icing approach and #calc.round(furini-runtimes.total.integrated / 1000, digits: 2) seconds for the integrated approach.
-This equates to an average runtime of #calc.round(furini-runtimes.avg.decomposed, digits: 2) milliseconds and #calc.round(furini-runtimes.avg.integrated, digits: 2) milliseconds respectively.
-
-#let heathrow-large-avg-runtimes = (
-    tobt: avg(
-        ..runtimes(results.heathrow.branch-bound.tobt)
-            .slice(21)
-            .filter(str => str.len() > 0)
-            .map(float),
-    ),
-    ctot: avg(
-        ..runtimes(results.heathrow.branch-bound.ctot)
-            .slice(21)
-            .filter(str => str.len() > 0)
-            .map(float),
-    ),
-    integrated: avg(
-        ..runtimes(results.heathrow.branch-bound.integrated)
-            .slice(21)
-            .filter(str => str.len() > 0)
-            .map(float),
-    ),
-)
-
-In comparison, the average runtime to solve all large Heathrow problem instances -- which have the same number of aircraft as the Milan problem instances -- is #calc.round(heathrow-large-avg-runtimes.tobt, digits: 2) milliseconds, #calc.round(heathrow-large-avg-runtimes.ctot, digits: 2) milliseconds, and #calc.round(heathrow-large-avg-runtimes.integrated, digits: 2) milliseconds using the decomposed de-icing by TOBT, decomposed de-icing by TOBT, and integrated de-icing approaches respectively.
-
-As evidenced by their much lower runtimes, the Milan problem instances are considerably easier to solve than the large Heathrow instances with the same number of aircraft, despite having more departures to de-ice per instance.
-This is primarily due to the lack of CTOT slots as well as the presence of relatively simple separation matrices, which allows complete orders to be inferred between most aircraft in each instance.
-
-#todo("Add boxplot for runtimes if possible")
+Much like the Heathrow instances, it can be seen from @table:branch-bound-furini-results that both the decomposed and integrated approach result in very similar makespans and earliest and latest de-icing times, although integrated de-icing produces slightly longer makespans and later de-icing end times for some instances.
 
 #let furini-integrated-improvement = {
-    let (sum, count) = objective-values(results.furini.branch-bound.decomposed)
+    let obj-diffs = objective-values(results.furini.branch-bound.decomposed)
         .zip(objective-values(results.furini.branch-bound.integrated))
         .filter(row => row.all(str => str.len() > 0))
         .map(row => int(row.first()) / int(row.last()))
-        .fold((0, 0), ((sum, count), num) => (sum + num, count + 1))
-    sum / count
+    avg(..obj-diffs)
 }
 
-However, the objective values obtained by the integrated de-icing approach are far better than its decomposed counterpart's -- integrated de-icing achieves an improvement in objective values by a factor of #calc.round(furini-integrated-improvement, digits: 2) on average compared to decomposed de-icing.
+However, the objective values achieved by the integrated de-icing approach are far better than its decomposed counterpart's -- integrated de-icing achieves a #calc.round((furini-integrated-improvement - 1.0) * 100, digits: 2)% improvement in objective values on average compared to decomposed de-icing.
 
-// TODO: Check the accuracy of the numbers here
-Furthermore, the decomposed de-icing approach failed to produce a feasible solution for instance FPT01.
-A rolling horizon of 20 or higher is required to solve this instance using decomposed de-icing; however, the resulting objective value and mean runtime are still worse than those achieved by the integrated approach using a lower rolling horizon of 10.
+#let branch-bound-furini-benches = (
+    decomposed: benches("benches/furini/decomposed de-icing/", range(2, 12 + 1)),
+    integrated: benches("benches/furini/integrated de-icing/", range(1, 12 + 1)),
+)
+
+@chart:branch-bound-furini-avg-runtimes further shows the mean runtime for each individual problem instance solved using each de-icing approach.
+It can be seen that unlike the large Heathrow instances, decomposed de-icing is substantially faster than integrated de-icing for all twelve problem instances.
+
+#let branch-bound-furini-avg-runtimes = avg-runtime-graph(
+    size: (12, 8),
+    y-grid: true,
+    y-min: 3,
+    y-max: 6,
+    legend: "legend.inner-north-west",
+    ([Decomposed de-icing], branch-bound-furini-benches.decomposed, palette.red(3).fill),
+    ([Integrated de-icing], branch-bound-furini-benches.integrated, palette.blue(3).fill),
+)
+
+#figure(
+    branch-bound-furini-avg-runtimes,
+    caption: [
+        Mean runtimes for each problem instance introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program using each de-icing approach
+    ],
+) <chart:branch-bound-furini-avg-runtimes>
+
+#let furini-total-runtimes = (
+    decomposed: branch-bound-furini-benches
+        .decomposed
+        .values()
+        .map(bench => bench.stats.mean.point-estimate)
+        .sum(),
+    integrated: branch-bound-furini-benches
+        .integrated
+        .values()
+        .map(bench => bench.stats.mean.point-estimate)
+        .sum(),
+)
+
+#let furini-avg-runtimes = (
+    decomposed: avg(
+        ..branch-bound-furini-benches
+            .decomposed
+            .values()
+            .map(bench => bench.stats.mean.point-estimate),
+    ),
+    integrated: avg(
+        ..branch-bound-furini-benches
+            .integrated
+            .values()
+            .map(bench => bench.stats.mean.point-estimate),
+    ),
+)
+
+Indeed, the total time taken to solve all twelve problem instances is #calc.round(furini-total-runtimes.decomposed / 1000000, digits: 2) milliseconds and #calc.round(furini-total-runtimes.integrated / 1000000, digits: 2) milliseconds for the decomposed and integrated approaches respectively.
+This equates to an average runtime of #calc.round(furini-avg-runtimes.decomposed / 1000000, digits: 2) milliseconds and #calc.round(furini-avg-runtimes.integrated / 1000000, digits: 2) milliseconds respectively, making decomposed de-icing #calc.round((furini-avg-runtimes.integrated / furini-avg-runtimes.decomposed - 1.0) * 100, digits: 2)% faster than integrated de-icing.
+
+#let heathrow-avg-runtimes-large = heathrow-avg-runtimes(21, 30).pairs().fold(
+    (:),
+    (dict, (key, total)) => dict + ((key): calc.round(total / 1000000, digits: 2)),
+)
+
+In comparison, the average runtime to solve all large Heathrow problem instances -- which have the same number of aircraft as the Milan problem instances -- is #heathrow-avg-runtimes-large.tobt milliseconds, #heathrow-avg-runtimes-large.ctot milliseconds, and #heathrow-avg-runtimes-large.integrated milliseconds using decomposed de-icing by TOBT, decomposed de-icing by CTOT, and integrated de-icing respectively.
+
+As evidenced by their much lower mean runtimes, the Milan problem instances are considerably easier to solve than the large Heathrow instances with the same number of aircraft, despite having more departures to de-ice per instance.
+This is primarily due to the lack of CTOT slots as well as the presence of relatively simple separation matrices, which allows complete orders to be inferred between most aircraft in each instance.
+
+@chart:branch-bound-furini-runtime-stats provides a more detailed overview of the runtimes of each de-icing approach for each Milan airport problem instance, including the mean runtime, standard deviation $sigma$, median runtime, and median absolute deviation.
+
+#let branch-bound-furini-runtimes = {
+    let pad-instance-id(instance-id) = if instance-id == "Instance" {
+        instance-id
+    } else if instance-id.len() < 2 {
+        "FPT0" + instance-id
+    } else {
+        "FPT" + instance-id
+    }
+
+    let decomposed = runtime-stats(branch-bound-furini-benches.decomposed)
+        .map(((instance-id, ..rest)) => {
+            (pad-instance-id(instance-id), ..rest)
+        })
+    decomposed.insert(1, ("FPT01", "", "", "", ""))
+    
+    let integrated = runtime-stats(branch-bound-furini-benches.integrated)
+        .map(((instance-id, ..rest)) => {
+            (pad-instance-id(instance-id), ..rest)
+        })
+
+    results-table(
+        group-headers: ([Decomposed de-icing], [Integrated de-icing]),
+        side-headers: true,
+        decomposed,
+        integrated,
+    )
+}
+
+#figure(
+    branch-bound-furini-runtimes,
+    caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each problem instance introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program using each de-icing approach],
+) <chart:branch-bound-furini-runtime-stats>
 
 // TODO: Write more about different de-icing approaches in branch-and-bound program if necessary
 
 == Comparison of Programs
 
-@table:cplex-branch-bound-heathrow lists the makespans, earliest and latest de-icing times, and mean runtimes for all small instances from London Heathrow, solved using the mathematical program implemented in CPLEX as well as the branch-and-bound program -- both utilising an integrated de-icing approach.
+@table:cplex-branch-bound-heathrow-results lists the makespans, earliest and latest de-icing times, and mean runtimes for all small instances from London Heathrow, solved using the mathematical program implemented in CPLEX as well as the branch-and-bound program -- both utilising an integrated de-icing approach.
 The results for the latter are the same as in @table:branch-bound-heathrow-results, but are presented again here for convenience.
 Both implementations achieve the same (optimal) objective values across all instances.
 
 // TODO: Remove the objective values here
-#let cplex-branch-bound-heathrow = results-table(
+#let cplex-branch-bound-heathrow-results = results-table(
     group-headers: ([CPLEX model], [Branch-and-bound program]),
     side-headers: true,
     results.heathrow.cplex.integrated,
@@ -1120,11 +1436,11 @@ Both implementations achieve the same (optimal) objective values across all inst
 )
 
 #figure(
-    cplex-branch-bound-heathrow,
+    cplex-branch-bound-heathrow-results,
     caption: [
         Results for small problem instances from London Heathrow solved by CPLEX as well as the branch-and-bound program, both utilising an integrated de-icing approach
     ],
-) <table:cplex-branch-bound-heathrow>
+) <table:cplex-branch-bound-heathrow-results>
 
 // TODO: Write about comparison of CPLEX model versus branch-and-bound program
 
