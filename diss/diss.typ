@@ -1480,14 +1480,42 @@ These computational results thus indicate that using an integrated de-icing appr
 
 == Project Management
 
-#todo("Write about project management")
+I approached this project in a fairly iterative and flexible manner, following a general work plan I created in the first few weeks of the first semester.
+I had weekly discussions with my supervisor, which helped enforce this iterative approach, and allowed feedback to be obtained regularly and incorporated as soon as possible without adversely impacting the schedule.
+These weekly meetings also provided me with the motivation to consistently and regularly work on on the project.
+Additionally, I made my work plan as general and broad as possible in order to allow for ample flexibility, which worked very well with the project's iterative nature and proved to be beneficial later down the line.
 
-// TODO: Check if a better heading could be used
+During the first semester, it took me longer than I had anticipated to produce an initial working branch-and-bound implementation, leading to some delays in the schedule I had created.
+I had initially allocated two weeks for this task; however, I required closer to three weeks to complete it, since I first needed to acquire a sound understanding of the pruning rules introduced by #cite(<demaere-pruning-rules>, form: "prose") as well as approach used by #cite(<psaraftis-dynamic-programming>, form: "prose") to reduce the complexity of runway sequencing.
+Looking back, I also spent more time than necessary on writing the project proposal, which left me with less time for other tasks.
+
+Thankfully, I had accounted for such delays and intentionally left gaps in my work plan to serve as buffer periods.
+These were incredibly valuable as they allowed me to extend and adapt my work plan in a flexible manner without delaying the tasks that were remaining to be completed.
+Additionally, certain tasks -- such as developing the sequence visualiser and incorporating a rolling horizon into the branch-and-bound program -- were completed ahead of schedule, which further offset the delays and enabled me to stay on schedule for the rest of the project.
+Towards the end of the first semester, I was able to revise my original work plan to be more realistic based on the progress I had made so far.
+
+A large portion of the second semester was spent on acquiring an understanding of mathematical programming, as this project was my first foray into mathematical programming and operations research.
+As part of this, my supervisor initially suggested I enrol into a module focused on discrete optimisation.
+However, I chose not to do this as I wanted to explore other modules, and I was confident in being able to grasp the required concepts quickly.
+The resources for mathematical modelling and CPLEX shared with me by my supervisor aided me greatly in this regard.
+One of my key takeaways from these resources was the use of sparse data to create lean and efficient mathematical models in CPLEX, which enabled me to improve the tractability of my mathematical program.
+
+I was able to meet all the goals I had initially set out for this project, though I was unable to implement a DP algorithm for integrated runway sequencing and de-icing, which was a stretch goal I had mentioned in both my project proposal and interim report.
+Although it may have been possible to experiment in this area during the final few weeks of the second semester, I decided to focus on writing my dissertation and polishing my existing code and implementations instead.
+
+Overall, I was able to create a realistic yet flexible project schedule, and correctly estimate the required time and effort for most tasks, leading to me accomplishing all the objectives I had set out to achieve on time.
+
 == Contributions
 
 #todo("Write about LSEPI and contributions")
 
-= Conclusions
+== Future Development
+
+#todo("Write about furture work")
+
+= Conclusion
+
+#todo("Write conclusion")
 
 = References
 
