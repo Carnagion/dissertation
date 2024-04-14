@@ -268,10 +268,6 @@ Their pruning rules enable significant reductions of the problem's computational
 Furthermore, they show that many of the pruning rules considered transfer to other objective functions commonly considered in the literature, and can thus be used outside of the specific DP approach developed by them @demaere-pruning-rules.
 A subset of these pruning rules is thus incorporated into the model presented in this paper to improve its tractability.
 
-=== Rolling Horizons
-
-#todo("Write about rolling horizon approaches")
-
 = Problem Description
 
 Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequencing problem for a single runway and single de-icing station consists of finding a sequence of landing and take-off times as well as a sequence of de-icing times such that an optimal value is achieved for a given objective function, subject to the satisfaction of all hard constraints.
@@ -611,6 +607,8 @@ The algorithm terminates when all nodes are _fathomed_ -- i.e. all nodes have ei
 The full branch-and-bound algorithm as described above is shown in @code:branch-bound:
 
 #let branch-bound-code = pseudocode-list[
+    - *input* set of aircraft $F$
+    - *output* optimal sequence of landings, take-offs, and de-icing times
     + $c <- 0$
     + $c_"best" = infinity$
     + $s <- $ empty sequence
@@ -648,6 +646,7 @@ The full branch-and-bound algorithm as described above is shown in @code:branch-
             + reset $t_i$ and $z_i$
         + *end*
     + *end*
+    + *return* $s_"best"$
 ]
 
 #algorithm(
@@ -657,7 +656,7 @@ The full branch-and-bound algorithm as described above is shown in @code:branch-
     ],
 ) <code:branch-bound>
 
-This algorithm is de-icing approach-agnostic, i.e. it only describes the branch-and-bound procedure itself, not how an individual aircraft is assigned a landing or take-off time or a de-icing time.
+The algorithm presented above is de-icing approach-agnostic, i.e. it only describes the branch-and-bound procedure itself, not how an individual aircraft is assigned a landing or take-off time or a de-icing time.
 The benefit of this is twofold -- first, it allows for generic and easily extendable implementations of de-icing approaches, and second, it allows each de-icing approach to be compared as fairly as possible since the only difference in code comes from scheduling individual aircraft.
 
 The two different de-icing approaches -- decomposed and integrated, wherein the former is further split into decomposed by TOBT and decomposed by CTOT -- are discussed further in the sections below.
@@ -699,9 +698,47 @@ $ z_i = max(t_i - q_i - r_i - n_i - o_i, t_i - h_i - o_i, max_(j in s_i) z_j + o
 
 === Rolling Horizon Extension
 
-#todo("Include explanation and pseudocode for rolling horizon")
+Altough the branch-and-bound algorithm shown in @code:branch-bound produces optimal solutions, it scales poorly with the size of the input.
+When attempting to optimally solve very challenging problem instances with any more than 15 aircraft -- such as those considered in the first half of @section:compare-deice -- the runtime of the algorithm quickly surpasses the stringent time limits required by real-time applications.
 
-// TODO: Check if this belongs here or is better off somewhere else
+A rolling horizon extension is thus presented to counter this and improve the tractability of the branch-and-bound algorithm.
+The main idea of a rolling horizon is to consider subsets of a large set of aircraft, which are small enough to be solved in real-time, and to then reconstruct a full solution to the set of aircraft from the partial solutions of each subset @furini-improved-horizon.
+It reduces the computational cost for runway sequencing, albeit at the expense of optimality -- it is a heuristic method that is not guaranteed to produce an optimal solution.
+
+The rolling horizon algorithm works by repeating the branch-and-bound search $(|F| - k)$ times -- where $k$ is the size of the rolling horizon -- and saving only the first sequenced aircraft from each iteration to the current sequence $s$.
+The remaining aircraft that are not selected from the optimal solution for each iteration are available to be sequenced again the following iteration.
+In the final iteration, all aircraft from the best solution produced by the branch-and-bound algorithm are appended to the current sequence $s$, instead of just the first aircraft.
+The full rolling horizon extension is shown below.
+
+#let rolling-horizon = pseudocode-list[
+    - *input* set of aircraft $F$, size of rolling horizon $k$
+    - *output* sequence of landings, take-offs, and de-icing times
+    + $s_"best" <- $ empty sequence
+    + $s_"prev" <- s_"best"$
+    + $k_"start" <- 0$
+    + $k_"end" <- min(k, |F|)$
+    + $s_"prev" <- $ perform branch-and-bound up to $k_"end"$ aircraft
+    + *while* $k_"end" < |F|$ *do*
+        + $i <- $ first aircraft in $s_"prev"$
+        + push $i$ to $s$
+        + remove $i$ from ordered sets of separation-identical aircraft
+        + $k_"start" <- k_"start" + 1$
+        + $k_"end" <- k_"end" + 1$
+        + $s_"prev" <- $ perform branch-and-bound up to $k_"end"$ aircraft
+    + *end*
+    + append $s_"prev"$ to $s_"best"$
+    + *return* $s_"best"$
+]
+
+#show figure.where(kind: "lovelace"): set box(width: 1fr)
+
+#algorithm(
+    rolling-horizon,
+    caption: [
+        Rolling horizon algorithm for solving larger problem instances using the branch-and-bound program
+    ],
+) <code:rolling-horizon>
+
 == Sequence Visualiser
 
 #todo("Write about visualiser")
