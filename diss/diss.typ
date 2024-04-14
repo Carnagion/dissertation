@@ -190,11 +190,6 @@ The literature on machine scheduling has traditionally comrpised of two main kin
 Big-$M$ formulations represent the landing or take-off time of an aircraft as a single continuous variable.
 However, such formulations typically need to apply a heuristic decomposition of the problem in order to meet computation time limits for instances of practical interest @avella-time-indexed.
 
-#cite(<beasley-scheduling-aircraft>, form: "prose") introduce a linear programming (LP)-based tree search approach for the problem of sequencing arrivals on a single runway, and later extend their formulation to handle multiple runways as well.
-They consider hard time window constraints and use an objective function that penalises landing before or after a given target time for each arrival.
-Unlike many previous approaches that assumed an indefinite latest time limit for landing, their approach employs more realistic latest landing times based on fuel considerations.
-This allows for simplifying the problem by exploiting the presence of increased disjoint intervals, caused by relatively narrow hard time windows.
-
 In contrast to big-$M$ formulations, time-indexed formulations discretise the overall time horizon in small time periods.
 The schedule of an aircraft is modelled by a set of binary decision variables, only one of which will be 1 -- identifying the aircraft's landing or take-off time -- in any feasible solution.
 In general, time-indexed formulations return much stronger bounds than big-$M$ formulations, but at the cost of increasing the number of variables and constants, and consequently computation times @avella-time-indexed.
@@ -202,7 +197,12 @@ This makes them often unattractive for real-time applications of runway sequenci
 
 #cite(<avella-time-indexed>, form: "prose") counter this claim by presenting a time-indexed MIP formulation based on a novel class of valid clique inequalities for the single machine scheduling problem with sequence-dependent setup times.
 They generalise a family of inequalities introduced by #cite(<nogueira-mixed-integer>, form: "prose").
-Their formulation significantly improve the quality of the lower bounds, reduces the number of constraints, and is capable of solving difficult instances from large airports in Europe, namely Stockholm Arlanda, Hamburg, and Milano Linate.
+Their formulation significantly improve the quality of the lower bounds, reduces the number of constraints, and is capable of solving difficult real-world instances from large airports in Europe, namely Stockholm Arlanda, Hamburg, and Milano Linate.
+
+#cite(<beasley-scheduling-aircraft>, form: "prose") introduce a linear programming (LP)-based tree search approach for the problem of sequencing arrivals on a single runway, and later extend their formulation to handle multiple runways as well.
+They consider hard time window constraints and use an objective function that penalises landing before or after a given target time for each arrival.
+Unlike many previous approaches that assumed an indefinite latest time limit for landing, their approach employs more realistic latest landing times based on fuel considerations.
+This allows for simplifying the problem by exploiting the presence of increased disjoint intervals, caused by relatively narrow hard time windows.
 
 #cite(<beasley-scheduling-aircraft>, form: "prose") also present an alternative time-indexed 0-1 MIP formulation that can be derived by discretising time, although they note that this formulation produces a relatively large number of variables and constraints, and do not explore it further.
 
