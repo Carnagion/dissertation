@@ -143,8 +143,6 @@
 // NOTE: Forces the page numbering to begin from here rather than from the cover page or abstract page
 #counter(page).update(1)
 
-// TODO: Revise all headings as necessary
-
 = Introduction
 
 #todo("Write introduction")
@@ -509,7 +507,6 @@ These constraints are inferred from disjoint time windows as well as complete or
 
 @constraint:schedule-binary, @constraint:deice-binary, and @constraint:precedence-binary restrict the decision variables for landings or take-offs, de-icing, and aircraft precedences to binary values.
 
-// TODO: Check if this section looks better elsewhere, such as just after time windows or precedences, or just after the model
 === Disjoint Time Windows <section:disjoint-time-windows>
 
 #cite(<beasley-scheduling-aircraft>, form: "prose") show that it can be determined for certain pairs of distinct aircraft $(i, j)$ whether $i$ lands or takes off before $j$ does, based on their sets of possible landing or take-off times.
@@ -543,7 +540,6 @@ It is then possible to impose the following precedence and separation constraint
     $ &t_j >= t_i + delta_(i, j) dot gamma_(i, j) - (d_i - r_j) dot gamma_(j, i) &forall (i, j) in F_O $
 ]
 
-// TODO: Check if this section looks better elsewhere, such as just after time windows or precedences, or just after the model
 === Complete Orders <section:complete-orders>
 
 A _complete order_ exists between any two aircraft $i$ and $j$ if the objective value and feasibility of a sequence $s$ containing both $i$ and $j$ cannot be improved by reversing the order of $i$ and $j$ in $s$.
@@ -872,7 +868,6 @@ The full rolling horizon extension is shown below.
 
 == Problem Instances
 
-// TODO: Check if Heathrow or University of Bologna should be cited
 The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarised in @table:heathrow-instances -- as well as benchmark problem instances from Milan Airport.
 The latter were first introduced by #cite(<furini-improved-horizon>, form: "prose"), and were obtained from the University of Bologna Operations Research Group's freely accessible online library of instances @unibo-codes-instances.
 
@@ -1063,7 +1058,6 @@ By contrast, the Milan problem instances are significantly simpler due to having
 The small problem instances were solved without a rolling horizon, while a rolling horizon of 10 was used for the medium and large instances.
 Entries for runs that fail to produce feasible solutions are left blank.
 
-// TODO: Replace runtime here with runway hold
 #let branch-bound-heathrow-results = results-table(
     group-headers: ([Decomposed de-icing (by TOBT)], [Decomposed de-icing (by CTOT)], [Integrated de-icing]),
     side-headers: true,
@@ -1339,7 +1333,6 @@ Additionally, they do not consider CTOT slots, so there are no results available
 A rolling horizon of size 10 was used to solve each instance.
 Like in @table:branch-bound-heathrow-results, entries for runs that fail to produce feasible solutions are left blank.
 
-// TODO: Replace runtime here with runway hold
 #let branch-bound-furini-results = results-table(
     group-headers: ([Decomposed de-icing], [Integrated de-icing]),
     side-headers: true,
