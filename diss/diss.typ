@@ -270,7 +270,7 @@ A subset of these pruning rules is thus incorporated into the model presented in
 
 = Problem Description
 
-Given a set of arrivals $A$ and departures $D$, the runway and de-icing sequencing problem for a single runway and single de-icing station consists of finding a sequence of landing and take-off times as well as a sequence of de-icing times such that an optimal value is achieved for a given objective function, subject to the satisfaction of all hard constraints.
+Given a set of arrivals $A$ and departures $D$, the runway sequencing and de-icing problem for a single runway and single de-icing station consists of finding a sequence of landing and take-off times as well as a sequence of de-icing times such that an optimal value is achieved for a given objective function, subject to the satisfaction of all hard constraints.
 
 == Notation
 
@@ -437,7 +437,7 @@ $ c_v (i) = cases(
 
 == Model <section:model>
 
-A time-indexed formulation is employed in order to linearise the objective function and hence solve the integrated runway and de-icing sequencing problem using 0-1 integer linear programming.
+A time-indexed formulation is employed in order to linearise the objective function and hence solve the integrated runway sequencing and de-icing problem using 0-1 integer linear programming.
 
 First, the landing or take-off time of an aircraft $i$ is constrained to lie between the earliest possible time $i$ can be scheduled to land or take off -- its _release time_ $r_i$ and the latest possible time $i$ can be scheduled to land or take off -- its _due time_ $d_i$.
 The release time of $i$ be calculated as the maximum of its base time $b_i$, start time $e_i$ of its hard time window, and start time $u_i$ of its CTOT slot (if applicable):
@@ -464,7 +464,7 @@ Much like the landing or take-off time, every departure $i$ is assigned exactly 
 
 $ sum_(z in Z_i) zeta_(i, z) = 1 $
 
-Putting together these constraints, objectives, and time-indexed formulations, a 0-1 integer linear model for the integrated runway and de-icing sequencing problem is presented below:
+Putting together these constraints, objectives, and time-indexed formulations, a 0-1 integer linear model for the integrated runway sequencing and de-icing problem is presented below:
 
 #multi-equation[
     $ "Minimise" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <eq:objective-function>
@@ -586,7 +586,7 @@ The model presented in in @section:model has been implemented as a mathematical 
 == Branch-and-Bound Program <section:branch-bound>
 
 // TODO: Explain why Rust is used if necessary
-A branch-and-bound algorithm to optimally solve the integrated runway and de-icing sequencing problem as described in @section:model (as well as its decomposed version) is also developed, using a depth-first-search that incrementally builds up sequences by adding one aircraft to the current partial sequence at every step.
+A branch-and-bound algorithm to optimally solve the integrated runway sequencing and de-icing problem as described in @section:model (as well as its decomposed version) is also developed, using a depth-first-search that incrementally builds up sequences by adding one aircraft to the current partial sequence at every step.
 The algorithm is implemented in the Rust programming language @rust.
 
 The algorithm begins with no known best sequence, and a best cost $c_"best"$ of infinity.
@@ -652,7 +652,7 @@ The full branch-and-bound algorithm as described above is shown in @code:branch-
 #algorithm(
     branch-bound-code,
     caption: [
-        Branch-and-bound algorithm for runway and de-icing sequencing
+        Branch-and-bound algorithm for runway sequencing and de-icing
     ],
 ) <code:branch-bound>
 
@@ -1552,7 +1552,16 @@ Overall, I was able to create a realistic yet flexible project schedule, and cor
 
 = Conclusion
 
-#todo("Write conclusion")
+To summarise, this paper introduced a novel mathematical model for the integrated runway sequencing and de-icing problem, as well as a branch-and-bound search algorithm capable of solving the problem to optimality.
+A number of techniques from the literature on machine scheduling and runway sequencing were applied to exploit the fundamental characteristics of the problem and improve the efficiency of both the 0-1 MIP formulation and the branch-and-bound program.
+A rolling horizon extension was also developed in order to improve the tractability of the latter.
+
+Both the branch-and-bound program and the MIP formulation were then evaluated using real-world problem instances from two major airports in Europe -- namely London Heathrow and Milan Linate -- with vastly different problem characteristics.
+This involved comparing the integrated de-icing approach against two different decomposed approaches, which sort aircraft by TOBT and by CTOT respectively and generate a de-icing queue first before solving the runway sequencing problem.
+
+The results show that using an integrated de-icing approach over either of the decomposed approaches leads to significant improvements in total delay and CTOT compliance, while still achieving similar -- and in some cases, better -- runway utilisation and stand holding times.
+When combined with a rolling horizon heuristic, the branch-and-bound algorithm with integrated de-icing is able to produce solutions well within the tight time restrictions imposed by real-time applications -- in some cases, it is even faster than the decomposed approaches using the same rolling horizon.
+Integrated de-icing is thus a viable and attractive approach for many airports around the world dealing with large and difficult runway sequencing problem instances.
 
 = References
 
