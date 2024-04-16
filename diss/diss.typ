@@ -178,14 +178,14 @@ Their results show that the availability of more information about aircraft taxi
 
 === Mathematical Programming
 
-Many existing mixed-integer programming (MIP) approaches to runway sequencing view the problem as a variant of classical machine scheduling problem with sequence-dependent setup times -- the runways are the machines, flights correspond to jobs, and runway separations to setup times @avella-time-indexed.
-The literature on machine scheduling has traditionally comprised of two main kinds of formulations -- big-$M$ and time-indexed @avella-time-indexed.
+Many existing mixed-integer programming (MIP) approaches to runway sequencing view the problem as a variant of classical machine scheduling problem with sequence-dependent setup times -- the runways correspond to machines, flights to jobs, and runway separations to setup times @avella-time-indexed.
+According to #cite(<avella-time-indexed>, form: "prose"), the literature on machine scheduling has traditionally comprised of two main kinds of formulations -- big-$M$ and time-indexed.
 
 Big-$M$ formulations represent the landing or take-off time of an aircraft as a single continuous variable.
-However, such formulations typically need to apply a heuristic decomposition of the problem in order to meet computation time limits for instances of practical interest @avella-time-indexed.
+However, such formulations typically need to resort to some heuristic approaches -- such as rolling horizons -- on top of the core formulation itself in order to meet computation time limits for instances of practical interest @avella-time-indexed.
 
 In contrast to big-$M$ formulations, time-indexed formulations discretise the overall time horizon in small time periods.
-The schedule of an aircraft is modelled by a set of binary decision variables, only one of which will be 1 -- identifying the aircraft's landing or take-off time -- in any feasible solution.
+The schedule of an aircraft is modelled by a set of binary decision variables, only one of which will be 1 in any feasible solution -- the one identifying the aircraft's landing or take-off time.
 In general, time-indexed formulations return much stronger bounds than big-$M$ formulations, but at the cost of increasing the number of variables and constants, and consequently computation times @avella-time-indexed.
 This makes them often unattractive for real-time applications of runway sequencing, where there are stringent limits on the computation times @bennell-runway-scheduling.
 
@@ -250,7 +250,7 @@ The model and branch-and-bound program presented in @section:model and @section:
 === Pruning Rules
 
 In contrast to approaches like CPS that reduce the search space of the problem by limiting the positional shifting of aircraft within the sequence, pruning rules exploit the characteristics of the problem or objective function to infer that a current sequence (or any future sequences based on it) is sub-optimal.
-This has the advantage of being able to prune partial subsequences that show known poor characteristics much earlier, even before dominating partial sequences have been generated @demaere-pruning-rules.
+This has the advantage of being able to prune partial subsequences that show known poor characteristics much earlier @demaere-pruning-rules.
 
 Pruning rules have been extensively studied in the literature involving machine scheduling @demaere-pruning-rules @allahverdi-survey-scheduling.
 However, #cite(<allahverdi-survey-scheduling>, form: "prose") show that a majority of these approaches do not consider sequence-dependent setup times, despite them being prevalent in runway sequencing problems and in many other applications of machine scheduling.
@@ -319,7 +319,7 @@ Given a set of arrivals $A$ and departures $D$, the runway sequencing and de-ici
 
 == Constraints
 
-A feasible solution to the problem must satisfy runway precedence, separation requirements, base times, hard time windows, CTOT slots, holdover times, and runway hold times.
+A feasible solution to the problem must satisfy precedence constraints, separation requirements, base times, hard time windows, CTOT slots, holdover times, and runway hold times.
 A sequence that violates these hard constraints is considered to be infeasible, and can thus be eliminated from the solution space.
 
 === Precedences
@@ -330,21 +330,22 @@ The following constraint can then be imposed on every pair of distinct aircraft 
 
 $ gamma_(i, j) + gamma_(j, i) = 1 $
 
-That is, either $i$ must land or take off before $j$, or the other way around.
-Similar precedence constraints exist for de-icing -- given any two distinct departures $i$ and $j$, either $i$ must finish its de-icing before $j$ can start de-icing, or the other way around:
+That is, either $i$ must land or take off before $j$ or vice-versa.
+Similar precedence constraints exist for de-icing -- given any two distinct departures $i$ and $j$, either $i$ must finish its de-icing before $j$ can start de-icing, $j$ must finish its de-icing before $i$ can start:
 
 $ z_j >= z_i + o_i or z_i >= z_j + o_j $
 
 === Runway Separations
 
-Any two consecutive aircraft $i$ and $j$ (where $i$ precedes $j$) are required to have a minimum _runway separation_ $delta_(i, j)$ between them, which is determined by their weight classes, speed groups, and (for departures) Standard Instrument Departure (SID) routes.
-An aircraft's weight class influences the severity of wake turbulence it causes, the time required for this turbulence to dissipate, and its sensitivity to the wake turbulence caused by other aircraft.
-Larger or heavier aircraft typically generate greater turbulence, to which smaller or lighter aircraft are more sensitive.
-Consequently, a larger separation may be required when a large aircraft is followed by a small one, than when a small aircraft is followed by a large one @demaere-pruning-rules.
+Any two consecutive aircraft $i$ and $j$ (where $i$ precedes $j$) are required to have a minimum _runway separation_ $delta_(i, j)$ between them, which is determined by their weight classes in the case of arrivals, or their weight classes, speed groups, and Standard Instrument Departure (SID) routes in the case of departures.
 
-Similarly, a larger separation may be required when a slow aircraft is followed by a faster one on the same route, to prevent the latter from catching up to the former before their routes diverge.
-Separations for SID routes are also influenced by the climb and relative bearing of the route, as well as congestion in downstream airspace sectors.
-The latter factor may require an increased separation upon take-off to space out traffic and prevent the overloading of en-route sectors and controllers @demaere-pruning-rules.
+An aircraft's weight class influences the severity of wake turbulence it produces during flight, the time required for this turbulence to dissipate, and its sensitivity to the wake turbulence caused by other aircraft.
+Larger or heavier aircraft typically generate greater turbulence, to which smaller or lighter aircraft are more sensitive.
+As such, a greater separation may be required when a large or heavy aircraft is followed by a small or light one, than when a small or light aircraft is followed by a large or heavy one @demaere-pruning-rules.
+
+Similarly, a larger separation may be required when a slow aircraft is followed by a faster one on the same SID route, to prevent the latter from catching up to the former before their routes diverge.
+The climb and relative bearing of the route also influence separation requirements for aircraft.
+Additionally, congestion in downstream airspace sectors also has an impact on separation requirements -- in some cases, the separation between two consecutive aircraft may need to be increased to space out traffic and prevent en-route sectors and controllers from being overwhelmed @demaere-pruning-rules.
 
 The minimum separation that must be maintained between two aircraft is thus the maximum of the separations due to their weight classes, speed groups, and SID routes.
 The required separations between each ordered pair of distinct aircraft can therefore be expressed as a separation matrix @demaere-pruning-rules.
@@ -458,14 +459,14 @@ Much like the landing or take-off time, every departure $i$ is assigned exactly 
 
 $ sum_(z in Z_i) zeta_(i, z) = 1 $
 
-Putting together these constraints, objectives, and time-indexed formulations, a 0-1 integer linear model for the integrated runway sequencing and de-icing problem is presented below:
+Putting together these constraints and objectives, a 0-1 integer linear model for the integrated runway sequencing and de-icing problem is presented below:
 
 #multi-equation[
-    $ "Minimise" space &f(s) = sum_(i in s) c_d (i) + c_v (i) $ <eq:objective-function>
-    $ &c_d (i) = sum_(t in T_i) tau_(i, t) dot (t - b_i)^2 &forall i in F $ <eq:delay-cost>
-    $ &c_v (i) = sum_(t in T_i) tau_(i, t) dot (t > v_i) dot (t - v_i)^2 &forall i in D $ <eq:ctot-violation-cost>
-    $ &t_i = sum_(t in T_i) tau_(i, t) dot t &forall i in F $ <eq:scheduled-time>
-    $ &z_i = sum_(z in Z_i) zeta_(i, z) dot z &forall i in D $ <eq:deice-time>
+    $ "Minimise" space &f(s) = sum_(i in s) (c_d (i) + c_v (i)) $ <eq:objective-function>
+    $ &c_d (i) = sum_(t in T_i) (tau_(i, t) dot (t - b_i)^2) &forall i in F $ <eq:delay-cost>
+    $ &c_v (i) = sum_(t in T_i) (tau_(i, t) dot (t > v_i) dot (t - v_i)^2) &forall i in D $ <eq:ctot-violation-cost>
+    $ &t_i = sum_(t in T_i) (tau_(i, t) dot t) &forall i in F $ <eq:scheduled-time>
+    $ &z_i = sum_(z in Z_i) (zeta_(i, z) dot z) &forall i in D $ <eq:deice-time>
     $ "Subject to" space &sum_(t in T_i) tau_(i, t) = 1 &forall i in F $ <constraint:schedule-once>
     $ &sum_(z in Z_i) zeta_(i, z) = 1 &forall i in D $ <constraint:deice-once>
     $ &gamma_(i, j) + gamma_(j, i) = 1 &forall i in F, j in F, i != j $ <constraint:schedule-precedence>
