@@ -153,7 +153,7 @@
 
 = Existing Literature
 
-Early approaches to runway sequencing used by many airports around the world include simple first-come, first-serve (FCFS) algorithms optimising for a single objective @bianco-minimizing-time.
+Early approaches to runway sequencing used by many airports around the world include simple first-come, first-served (FCFS) algorithms optimising for a single objective @bianco-minimizing-time.
 Although very simple to implement and computationally inexpensive, FCFS strategies are well-known to produce excessive delays @bianco-minimizing-time.
 Therefore, a number of approaches that optimise certain aspects -- such as delay, runway utilisation, and CTOT compliance -- without violating safety constraints or compromising the tractability of the problem have been proposed in the past.
 
@@ -179,7 +179,7 @@ Their results show that the availability of more information about aircraft taxi
 === Mathematical Programming
 
 Many existing mixed-integer programming (MIP) approaches to runway sequencing view the problem as a variant of classical machine scheduling problem with sequence-dependent setup times -- the runways are the machines, flights correspond to jobs, and runway separations to setup times @avella-time-indexed.
-The literature on machine scheduling has traditionally comrpised of two main kinds of formulations -- big-$M$ and time-indexed @avella-time-indexed.
+The literature on machine scheduling has traditionally comprised of two main kinds of formulations -- big-$M$ and time-indexed @avella-time-indexed.
 
 Big-$M$ formulations represent the landing or take-off time of an aircraft as a single continuous variable.
 However, such formulations typically need to apply a heuristic decomposition of the problem in order to meet computation time limits for instances of practical interest @avella-time-indexed.
