@@ -834,34 +834,6 @@ The full rolling horizon extension is shown below.
     sum / count
 }
 
-#let runtime-stats(..groups) = {
-    let individual = groups
-        .named()
-        .pairs()
-        .map(pair => {
-            let key = pair.first()
-            let vals = pair.last()
-            ((key): vals.filter(str => str.len() > 0).map(float))
-        })
-        .fold((:), (dict, pair) => dict + pair)
-
-    let total = individual
-        .pairs()
-        .map(pair => (pair.first(), pair.last().sum()))
-        .fold((:), (dict, (key, val)) => dict + ((key): val))
-    
-    let avg = individual
-        .pairs()
-        .map(pair => (pair.first(), avg(..pair.last())))
-        .fold((:), (dict, (key, val)) => dict + ((key): val))
-    
-    (
-        individual: individual,
-        total: total,
-        avg: avg,
-    )
-}
-
 == Problem Instances
 
 The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarised in @table:heathrow-instances -- as well as benchmark problem instances from Milan Airport.
@@ -1128,7 +1100,7 @@ It can be seen that decomposed de-icing is faster than integrated de-icing for s
 #figure(
     branch-bound-heathrow-avg-runtimes,
     caption: [
-        Mean runtimes for each de-icing approach of the branch-and-bound program for each problem instance from London Heathrow
+        Mean runtimes for each problem instance from London Heathrow solved by the branch-and-bound program using each de-icing approach
     ],
 ) <chart:branch-bound-heathrow-avg-runtimes>
 
@@ -1464,7 +1436,7 @@ This is primarily due to the lack of CTOT slots as well as the presence of relat
 The results for the latter are the same as in @table:branch-bound-heathrow-results, but are presented again here for convenience.
 Both implementations achieve the same (optimal) objective values across all instances.
 
-// TODO: Remove the objective values here
+// TODO: Remove the objective values here and add CPLEX data
 #let cplex-branch-bound-heathrow-results = results-table(
     group-headers: ([CPLEX model], [Branch-and-bound program]),
     side-headers: true,
@@ -1482,7 +1454,69 @@ Both implementations achieve the same (optimal) objective values across all inst
 Although not shown in @table:cplex-branch-bound-heathrow-results, the solutions produced by the mathematical program are in some cases different to those produced by the branch-and-bound program, albeit with the same objective values.
 This is due to symmetries in the problem, leading to solutions where the order of certain aircraft with the same base times, time windows, and CTOT slots is swapped around with no change to the total delay or CTOT violations.
 
-#todo("Include runtimes for CPLEX model and write more about comparison with branch-and-bound program")
+@chart:cplex-heathrow-avg-runtimes shows the mean runtime for each individual problem instance solved by CPLEX as well as by the branch-and-bound program, both using integrated de-icing.
+The runtimes for the latter are already reported in @chart:branch-bound-heathrow-avg-runtimes and @table:branch-bound-furini-runtime-stats, but are shown here again for ease of comparison.
+
+#let cplex-heathrow-benches = {
+    let data = csv("benches/cplex.csv").slice(1)
+    data
+        .enumerate()
+        .fold((:), (dict, (idx, (mean, std-dev, median, mad))) => {
+            let id = str(idx + 1)
+            dict + (
+                (id): (
+                    stats: (
+                        mean: (point-estimate: float(mean) * 1000000000),
+                        std-dev: (point-estimate: float(std-dev) * 1000000000),
+                        median: (point-estimate: float(median) * 1000000000),
+                        median-abs-dev: (point-estimate: float(mad) * 1000000000),
+                    ),
+                ),
+            )
+        })
+}
+
+#let cplex-heathrow-avg-runtimes = {
+    let branch-bound-heathrow-small = branch-bound-heathrow-benches
+        .integrated
+        .pairs()
+        .filter(((key, ..)) => key in cplex-heathrow-benches)
+        .fold((:), (dict, ((key, val))) => dict + ((key): val))
+
+    avg-runtime-graph(
+        size: (12, 8),
+        y-grid: true,
+        y-min: 1,
+        y-max: 8,
+        legend: "legend.inner-north-west",
+        ([CPLEX], cplex-heathrow-benches, palette.red(3).fill),
+        ([Branch-and-bound], branch-bound-heathrow-small, palette.blue(3).fill),
+    )
+}
+
+#figure(
+    cplex-heathrow-avg-runtimes,
+    caption: [
+        Mean runtimes for each problem instance from London Heathrow solved by CPLEX as well as the branch-and-bound program using integrated de-icing
+    ],
+) <chart:cplex-heathrow-avg-runtimes>
+
+It can be clearly seen that the mathematical program implemented in CPLEX is many orders of magnitude slower than the branch-and-bound program.
+
+// TODO: Compare CPLEX runtimes with branch-and-bound runtimes
+
+@table:cplex-heathrow-runtime-stats provides a more detailed overview of the runtimes of running CPLEX on all small problem instances from London Heathrow, including the mean runtimes, standard deviations $sigma$, median runtimes, and median absolute deviations.
+
+#let cplex-heathrow-runtimes = results-table(
+    group-headers: ([*Integrated de-icing*],),
+    side-headers: true,
+    runtime-stats(cplex-heathrow-benches),
+)
+
+#figure(
+    cplex-heathrow-runtimes,
+    caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each problem instance from London Heathrow solved by CPLEX using the integrated de-icing approach]
+) <table:cplex-heathrow-runtime-stats>
 
 == Impact
 
