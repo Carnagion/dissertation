@@ -1576,37 +1576,37 @@ These computational results thus indicate that using an integrated de-icing appr
 
 == Project Management
 
-I approached this project in a fairly iterative and flexible manner, following a general work plan I created in the first few weeks of the first semester.
+I approached this project in a fairly iterative and flexible manner, following a general schedule I created in the first few weeks of the first semester.
 I had weekly discussions with my supervisor, which helped enforce this iterative approach, and allowed feedback to be obtained regularly and incorporated as soon as possible without adversely impacting the schedule.
 These weekly meetings also provided me with the motivation to consistently and regularly work on on the project.
-Additionally, I made my work plan as general and broad as possible in order to allow for ample flexibility, which worked very well with the project's iterative nature and proved to be beneficial later down the line.
+Additionally, I made my schedule as general and broad as possible in order to allow for ample flexibility, which worked very well with the project's iterative nature and proved to be beneficial down the line.
 
-During the first semester, it took me longer than I had anticipated to produce an initial working branch-and-bound implementation, leading to some delays in the schedule I had created.
+During the first semester, developing an initial working branch-and-bound implementation took me longer than I had anticipated, leading to some delay in my schedule.
 I had initially allocated two weeks for this task; however, I required closer to three weeks to complete it, since I first needed to acquire a sound understanding of the pruning rules introduced by #cite(<demaere-pruning-rules>, form: "prose") as well as approach used by #cite(<psaraftis-dynamic-programming>, form: "prose") to reduce the complexity of runway sequencing.
-Looking back, I also spent more time than necessary on writing the project proposal, which left me with less time for other tasks.
+In hindsight, I also spent more time than necessary on writing the project proposal, which left me with less time for other tasks.
 
-Thankfully, I had accounted for such delays and intentionally left gaps in my work plan to serve as buffer periods.
-These were incredibly valuable as they allowed me to extend and adapt my work plan in a flexible manner without delaying the tasks that were remaining to be completed.
-Additionally, certain tasks -- such as developing the sequence visualiser and incorporating a rolling horizon into the branch-and-bound program -- were completed ahead of schedule, which further offset the delays and enabled me to stay on schedule for the rest of the project.
-Towards the end of the first semester, I was able to revise my original work plan to be more realistic based on the progress I had made so far.
+Thankfully, I foresaw such delays and accounted for them with gaps in my schedule to serve as buffer periods.
+These were incredibly valuable as they allowed me to extend and adapt my schedule in a flexible manner without delaying the tasks that were remaining to be completed.
+Additionally, some of the later tasks -- such as developing the sequence visualiser and incorporating a rolling horizon into the branch-and-bound program -- were completed ahead of schedule, which further offset the delays and enabled me to stay on schedule for the rest of the project.
+Towards the end of the first semester, I was able to revise my original schedule to be more realistic based on the progress I had made so far.
 
 A large portion of the second semester was spent on acquiring an understanding of mathematical programming, as this project was my first foray into mathematical programming and operations research.
 As part of this, my supervisor initially suggested I enrol into a module focused on discrete optimisation.
-However, I chose not to do this as I wanted to explore other modules, and I was confident in being able to grasp the required concepts quickly.
-The resources for mathematical modelling and CPLEX shared with me by my supervisor aided me greatly in this regard.
+However, I wished to explore other modules focused on machine learning and compilers, which did not leave me with enough credits for the discrete optimisation module.
+The resources for mathematical modelling and CPLEX shared by my supervisor were extremely helpful in providing me with a foundation in discrete optimisation, and as such, I decided not to enrol in the module.
 One of my key takeaways from these resources was the use of sparse data to create lean and efficient mathematical models in CPLEX, which enabled me to improve the tractability of my mathematical program.
 
 I was able to meet all the goals I had initially set out for this project, though I was unable to implement a DP algorithm for integrated runway sequencing and de-icing, which was a stretch goal I had mentioned in both my project proposal and interim report.
 Although it may have been possible to experiment in this area during the final few weeks of the second semester, I decided to focus on writing my dissertation and polishing my existing code and implementations instead.
 
-Overall, I was able to create a realistic yet flexible project schedule, and correctly estimate the required time and effort for most tasks, leading to me accomplishing all the objectives I had set out to achieve on time.
+Overall, I was able to create a realistic and flexible project schedule, and best estimate the required time and effort for most tasks, leading to me accomplishing all the objectives I had set out to achieve on time.
 
 == Contributions
 
 The development of new runway sequencing approaches that are able to generate optimal solutions to the problem in more efficient ways than before directly benefits airports and the aviation industry.
 The model and algorithms presented here enable further reductions in delay and CTOT compliance and improve runway utilisation, which by extension reduce operating costs.
 Additionally, the reduction in delay has an indirect impact on passengers, saving their time as well.
-The equitable distribution of delay achieved by the cost function discussed in @section:delay further ensures that aircraft are not disproportionately delayed due to circumstances beyond their control, and avoids unintentionally favouring or being biased against certain aircraft or airlines.
+The equitable distribution of delay achieved by the cost function discussed in @section:delay further ensures that aircraft are not disproportionately delayed due to circumstances beyond their control, and avoids unintentionally favouring or being biased towards certain aircraft or airlines.
 
 With regards to the United Nations' Sustainable Development Goals, this project has the potential to indirectly contribute to sustainable development.
 As already mentioned in @section:compare-deice, the branch-and-bound algorithm optimises for stand holding when using an integrated de-icing appraoch, minimising runway holding times and consequently fuel consumption from runway holding.
@@ -1616,7 +1616,8 @@ This is a significant improvement over approaches that do not consider runway ho
 
 == Future Developments
 
-Although this project is complete as of now, there are many areas that can be researched further or incorporated into the model and algorithms presented here to make them more realistic or efficient.
+This project has achieved all the objectives set out within the given timeframe.
+However, there is scope for further research, which can be incorporated into the model and algorithms presented here to make them more realistic or efficient.
 
 An obvious extension would be to consider multiple runways and multiple de-icing stations.
 Although both are already supported in limited capacity by pre-allocating the specific runway and de-icing station for each aircraft, factoring in multiple runways and multiple de-icing stations would generalise the model.
