@@ -145,13 +145,44 @@
 
 = Introduction
 
-#todo("Write introduction")
+An airport's maximum capacity and throughput -- i.e. the number of aircraft landing or taking off per unit of time -- is bounded by the capacity of its runway(s) @lieder-dynamic-programming.
+Increasing the runway capacity of an airport can be done by adding more runways -- however, this is often not feasible due to the high infrastructure costs and long-term planning required, nor is it always possible due to the limited availability of land @demaere-pruning-rules.
+Therefore, the efficient use of existing runways by intelligently scheduling runway operations -- i.e. landings and take-offs -- is crucial for maximising the capacity of airports and minimise delays, fuel emissions, and operating costs.
 
-== Motivation
+The runway sequencing problem refers to the NP-hard problem @demaere-pruning-rules of finding a feasible sequence of landing and take-off times for a given set of aircraft such that a set of constraints is satisfied and an optimal value for a given objective function is met.
+Aircraft landing on or taking off from a given airport must comply with strict separation requirements that are dictated by the aircraft classes of the preceding and succeeding operations, among other factors @lieder-scheduling-aircraft @lieder-dynamic-programming.
+Aircraft may also be subject to a number of other constraints, including earliest landing or take-off times, hard time windows during which they must land or take off, and Calculated Take-Off Time (CTOT) slots (for departures).
+Moreover, aircraft that are taking off may also require application of de-icing fluid to prevent the formation of frost or ice on their surface, which could otherwise compromise their aerodynamic stability.
+This imposes further constraints on the take-off times of these aircraft since de-icing fluid only remains effective for a certain period of time -- called the Holdover Time (HOT) -- during which the aircraft must take off.
+Such constraints -- which are further detailed in @section:problem-description -- affect the order on which aircraft land or take-off, which in turn affects the delays for each aircraft as well as the overall runway utilisation.
 
-#todo("Write about motivation")
+Prior approaches to runway sequencing have mainly focused on the problem in isolation or considered solved runway sequencing and de-icing in a decomposed or partially integrated manner -- i.e. generating solutions for the two problems independently of each other and then combining them.
+Many of these approaches are discussed in @section:literature.
+However, solutions that integrate runway sequencing with other problems -- such as the integrated runway sequencing and ground movement problem explored by #cite(<atkin-hybrid-metaheuristics>, form: "prose") -- have shown that the availability of more information from their integration can offer key insights into simplifying the problem(s) and produce better solutions overall.
+It is therefore important to investigate the feasibility of an integrated approach to runway sequencing and de-icing and evaluate its effectiveness by comparing it to fully decomposed or partially integrated approaches.
 
-= Existing Literature
+This project thus introduces a mathematical model for the integrated runway sequencing and de-icing problem and a branch-and-bound algorithm for solving it.
+In doing so, this project provides fundamental insights into the characteristics of runway sequencing and de-icing and the advantages of integrated de-icing over decomposed de-icing, which is of value to future research in the field.
+This paper is structured as follows:
+
+@section:literature contains an overview of the existing literature on runway sequencing as well as some of the past approaches that are (or are not) adopted in this project.
+An in-depth description of the integrated runway sequencing and de-icing problem is provided in @section:problem-description, with @section:constraints and @section:objectives further providing detailed explanations of the constraints and objectives respectively.
+A mathematical model for the problem is introduced in @section:model.
+
+@section:implementation then presents the two implementations of the aforementioned model -- a mathematical program and a branch-and-bound algorithm, both capable of solving the problem to optimality.
+These implementations are discussed individually in @section:mathematical-program and @section:branch-bound respectively.
+Additionally, the branch-and-bound program also incorporates two decomposed approaches to runway sequencing and de-icing -- each using a different method for determining the order in which aircraft de-ice.
+These decomposed approaches are discussed further in @section:deice-decomposed, while the calculation of landing or take-off times and de-icing times using the integrated approach is explained in @section:deice-integrated.
+
+@section:results presents the results of evaluating both the mathematical program as well as the branch-and-bound algorithm on multiple real-world problem instances obtained from two major airports in Europe -- namely London Heathrow and Milan Linate.
+The integrated approach and both decomposed approaches implemented by the branch-and-bound algorithm are compared on the basis of their resulting objective values, runway utilisation, and runway hold times, as well as their runtimes.
+The mathematical program and the branch-and-bound program -- both using integrated de-icing -- are also compared using a subset of the problem instances from London Heathrow.
+The impact of these results is discussed in @section:impact.
+
+Finally, @section:reflections reflects on the management and progress of this project, its broader implications as a whole concerning Legal, Social, Ethical, and Professional Issues (LSEPI), and its potential future directions.
+@section:conclusion concludes this paper, re-iterating the impact of the results discussed in @section:results and the conclusions drawn from them.
+
+= Existing Literature <section:literature>
 
 Early approaches to runway sequencing used by many airports around the world include simple first-come, first-served (FCFS) algorithms optimising for a single objective @bianco-minimizing-time.
 Although very simple to implement and computationally inexpensive, FCFS strategies are well-known to produce excessive delays @bianco-minimizing-time.
@@ -191,7 +222,7 @@ This makes them often unattractive for real-time applications of runway sequenci
 
 #cite(<avella-time-indexed>, form: "prose") counter this claim by presenting a time-indexed MIP formulation based on a novel class of valid clique inequalities for the single machine scheduling problem with sequence-dependent setup times.
 They generalise a family of inequalities introduced by #cite(<nogueira-mixed-integer>, form: "prose").
-Their formulation significantly improve the quality of the lower bounds, reduces the number of constraints, and is capable of solving difficult real-world instances from large airports in Europe, namely Stockholm Arlanda, Hamburg, and Milano Linate.
+Their formulation significantly improve the quality of the lower bounds, reduces the number of constraints, and is capable of solving difficult real-world instances from large airports in Europe, namely Stockholm Arlanda, Hamburg, and Milan Linate.
 
 #cite(<beasley-scheduling-aircraft>, form: "prose") introduce a linear programming (LP)-based tree search approach for the problem of sequencing arrivals on a single runway, and later extend their formulation to handle multiple runways as well.
 They consider hard time window constraints and use an objective function that penalises landing before or after a given target time for each arrival.
@@ -237,7 +268,7 @@ A number of approaches in the past -- such as that of #cite(<psaraftis-dynamic-p
 CPS restricts an aircraft's maximum shift in position relative to its original position in some initial sequence, which is typically obtained using a FCFS approach.
 Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also enforces positional equity by preventing aircraft from being advanced or delayed disproportionately compared to other aircraft @dear-dynamic-scheduling @demaere-pruning-rules.
 
-Although CPS can be an effective and efficient approach in many cases of arrival sequencing, delays may differ widely between arrivals and departures in mixed-mode operations, making maximum position shift constraints impractical @demaere-pruning-rules.
+According to #cite(<demaere-pruning-rules>, form: "prose"), although CPS can be an effective and efficient approach in many cases of arrival sequencing, it is overall impractical in mixed-mode operations due to the large differences in delay between arrivals and departures.
 
 #cite(<atkin-tsat-allocation>, form: "prose") further show that when CTOT slots are considered, CTOT compliance and positional equity are heavily in conflict -- there is a tradeoff between the number of CTOT violations and positional equity.
 Moreover, having a hard constraint of or high penalty for positional equity may be highly counter-productive for take-offs even apart from its conflict with delay or CTOT compliance @atkin-tsat-allocation.
@@ -262,7 +293,7 @@ Their pruning rules enable significant reductions of the problem's computational
 Furthermore, they show that many of the pruning rules considered transfer to other objective functions commonly considered in the literature, and can thus be used outside of the specific DP approach developed by them @demaere-pruning-rules.
 A subset of these pruning rules is thus incorporated into the model presented in this paper to improve its tractability.
 
-= Problem Description
+= Problem Description <section:problem-description>
 
 Given a set of arrivals $A$ and departures $D$, the runway sequencing and de-icing problem for a single runway and single de-icing station consists of finding a sequence of landing and take-off times as well as a sequence of de-icing times such that an optimal value is achieved for a given objective function, subject to the satisfaction of all hard constraints.
 
@@ -317,7 +348,7 @@ Given a set of arrivals $A$ and departures $D$, the runway sequencing and de-ici
     caption: [Overview of notation and definitions used in model],
 ) <table:notation>
 
-== Constraints
+== Constraints <section:constraints>
 
 A feasible solution to the problem must satisfy precedence constraints, separation requirements, base times, hard time windows, CTOT slots, holdover times, and runway hold times.
 A sequence that violates these hard constraints is considered to be infeasible, and can thus be eliminated from the solution space.
@@ -401,7 +432,7 @@ The maximum runway holding duration $w_i$ for a departure $i$ is thus modelled a
 
 $ t_i - z_i <= o_i + n_i + q_i + w_i $
 
-== Objectives
+== Objectives <section:objectives>
 
 The objective function $f(s)$ for a partial or final sequence $s$ is defined in @eq:objective-function.
 It considers total delay and CTOT compliance, and is based on the function described by #cite(<demaere-pruning-rules>, form: "prose").
@@ -567,11 +598,11 @@ The following precedence and separation constraints can thus be imposed on every
 $ gamma_(i, j) = 1 $
 $ t_j >= t_i + delta_(i, j) $
 
-= Implementation
+= Implementation <section:implementation>
 
 #todo("Write short introduction to different approaches used")
 
-== Mathematical Program
+== Mathematical Program <section:mathematical-program>
 
 // TODO: Write more about CPLEX implementation if necessary
 The model presented in in @section:model has been implemented as a mathematical program in Optimisation Programming Language (OPL) @opl, which is packaged with IBM's ILOG CPLEX Optimisation Studio @cplex.
@@ -654,7 +685,7 @@ The benefit of this is twofold -- first, it allows for generic and easily extend
 
 The two different de-icing approaches -- decomposed and integrated, wherein the former is further split into decomposed by TOBT and decomposed by CTOT -- are discussed further in the sections below.
 
-=== Decomposed De-Icing
+=== Decomposed De-Icing <section:deice-decomposed>
 
 Under decomposed de-icing, a de-icing queue is first generated before performing the main branch-and-bound procedure.
 This queue is then used to fix the de-icing times of departures before scheduling their take-off times.
@@ -674,7 +705,7 @@ On the other hand, if $i$ is an aircraft which is either an arrival or a departu
 
 $ t_i = max(r_i, max_(j in s_i) t_j + delta_(j, i)) $ <eq:earliest-landing>
 
-=== Integrated De-icing
+=== Integrated De-icing <section:deice-integrated>
 
 Unlike its decomposed counterpart, integrated de-icing does not calculate a de-icing queue beforehand, but instead calculates the de-icing times for aircraft along with their landing or take-off times.
 
@@ -736,7 +767,7 @@ The full rolling horizon extension is shown below.
 
 #todo("Write about visualiser")
 
-= Results
+= Results <section:results>
 
 #todo("Write introduction to results")
 
@@ -837,7 +868,7 @@ The full rolling horizon extension is shown below.
 
 == Problem Instances
 
-The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarised in @table:heathrow-instances -- as well as benchmark problem instances from Milan Airport.
+The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarised in @table:heathrow-instances -- as well as benchmark problem instances from Milan Linate.
 The latter were first introduced by #cite(<furini-improved-horizon>, form: "prose"), and were obtained from the University of Bologna Operations Research Group's freely accessible online library of instances @unibo-codes-instances.
 
 #let heathrow-instances = results-table(
@@ -854,11 +885,12 @@ The latter were first introduced by #cite(<furini-improved-horizon>, form: "pros
     ],
 ) <table:heathrow-instances>
 
-The terminal maneuvering area around Heathrow is highly complex, with up to six different SID routes in use at any given time and up to five different weight classes to consider.
+These problem instances reflect realistic use cases and have a variety of different characteristics.
+For example, the problem instances from London Heathrow are highly complex, with up to six different SID routes in use at any given time and up to five different weight classes to consider.
 This results in a complex separation matrix, in which triangle inequalities are often violated -- i.e. the runway separation for an aircraft is influenced by multiple preceding aircraft rather than just the immediately preceding aircraft @demaere-pruning-rules.
 Additionally, a substantial number of aircraft are also subject to CTOTs, which further reduces the number of complete orders that can be inferred.
 
-By contrast, the Milan problem instances are significantly simpler due to having a relatively high number of separation-identical aircraft and a mix of both arrivals and departures, which allows complete orders to be inferred between a relatively large number of aircraft in each instance.
+By contrast, the problem instances from Milan Linate are significantly simpler due to having a relatively high number of separation-identical aircraft and a mix of both arrivals and departures, which allows complete orders to be inferred between a relatively large number of aircraft in each instance.
 
 == Comparison of De-Icing Approaches <section:compare-deice>
 
@@ -1312,7 +1344,7 @@ Like in @table:branch-bound-heathrow-results, entries for runs that fail to prod
 #figure(
     branch-bound-furini-results,
     caption: [
-        Results for the Milan Airport benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program using each de-icing approach
+        Results for the Milan benchmark problem instances introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program using each de-icing approach
     ],
 ) <table:branch-bound-furini-results>
 
@@ -1394,7 +1426,7 @@ In comparison, the average runtime to solve all large Heathrow problem instances
 As evidenced by their much lower mean runtimes, the Milan problem instances are considerably easier to solve than the large Heathrow instances with the same number of aircraft, despite having more departures to de-ice per instance.
 This is primarily due to the lack of CTOT slots as well as the presence of relatively simple separation matrices, which allows complete orders to be inferred between most aircraft in each instance.
 
-@table:branch-bound-furini-runtime-stats provides a more detailed overview of the runtimes of each de-icing approach for each Milan Airport problem instance, including the mean runtime, standard deviation $sigma$, median runtime, and median absolute deviation.
+@table:branch-bound-furini-runtime-stats provides a more detailed overview of the runtimes of each de-icing approach for each problem instance from Milan Linate, including the mean runtime, standard deviation $sigma$, median runtime, and median absolute deviation.
 
 #let branch-bound-furini-runtimes = {
     let pad-instance-id(instance-id) = if instance-id == "Instance" {
@@ -1519,14 +1551,14 @@ It can be clearly seen that the mathematical program implemented in CPLEX is man
     caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each problem instance from London Heathrow solved by CPLEX using the integrated de-icing approach]
 ) <table:cplex-heathrow-runtime-stats>
 
-== Impact
+== Impact <section:impact>
 
 The results discussed in @section:compare-deice clearly show that for the objective values achieved by integrated de-icing are no worse than those achieved by decomposed de-icing for all problem instances considered, and are often significantly better.
 @table:cplex-branch-bound-heathrow-results confirms that integrated de-icing indeed achieves optimal values for the objective function considered here, when applied without a rolling horizon.
 
 The results reported in @table:branch-bound-heathrow-results for real-world problem instances from London Heathrow show that significant improvements in total delay and CTOT compliance can be obtained when using integrated de-icing as opposed to decomposed de-icing, while also not compromising on runway utilisation and stand holding times.
 
-By contrast, integrated de-icing sometimes results in slightly worse runway utilisation and higher runway holding times for the problem instances from Milan Airport, as seen in @table:branch-bound-furini-results.
+By contrast, integrated de-icing sometimes results in slightly worse runway utilisation and higher runway holding times for the problem instances from Milan Linate, as seen in @table:branch-bound-furini-results.
 Nevertheless, the improvement in objective values obtained from using integrated de-icing is nearly #calc.round(furini-integrated-improvement / heathrow-improvements.tobt-integrated) times as much as the improvements reported for the Heathrow instances, and outweighs the increase in makespan and runway holding times.
 
 The branch-and-bound implementation using de-icing is slower than decomposed de-icing for most problem instances considered in @section:compare-deice -- namely the Milan problem instances and the small- and medium-sized Heathrow instances.
@@ -1538,7 +1570,7 @@ However, it is possible to parallelise this algorithm, which may yield further r
 
 These computational results thus indicate that using an integrated de-icing approach does not affect the tractability of runway sequencing, and that it is viable for real-time applications with strict limits on computation time.
 
-= Reflections
+= Reflections <section:reflections>
 
 #todo("Write introduction to reflection")
 
@@ -1601,7 +1633,7 @@ There would thus be a need to re-investigate pruning rules with the inclusion of
 
 // TODO: Write more about future directions if necessary
 
-= Conclusion
+= Conclusion <section:conclusion>
 
 To summarise, this paper introduced a novel mathematical model for the integrated runway sequencing and de-icing problem, and a branch-and-bound algorithm capable of solving the problem to optimality.
 A number of techniques from the literature on machine scheduling and runway sequencing were applied to exploit the fundamental characteristics of the problem and improve the efficiency of both the 0-1 MIP formulation and the branch-and-bound program.
