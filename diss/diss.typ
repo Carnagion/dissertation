@@ -312,7 +312,8 @@ Given a set of arrivals $A$ and departures $D$, the runway sequencing and de-ici
     $A$, [Set of arrivals],
     $D$, [Set of departures],
     $F$, [Set of aircraft, defined as $A union D$],
-    $b_i$, [Base landing or take-off time for aircraft $i$],
+    $x_i$, [Earliest possible landing or take-off time for aircraft $i$],
+    $b_i$, [Base time for aircraft $i$, used in calculating delay],
     $p_i$, [Pushback duration for departure $i$],
     $m_i$, [Duration to taxi from gates to de-icing station for departure $i$],
     $o_i$, [De-icing duration for departure $i$],
@@ -350,7 +351,7 @@ Given a set of arrivals $A$ and departures $D$, the runway sequencing and de-ici
 
 == Constraints <section:constraints>
 
-A feasible solution to the problem must satisfy precedence constraints, separation requirements, base times, hard time windows, CTOT slots, holdover times, and runway hold times.
+A feasible solution to the problem must satisfy precedence constraints, separation requirements, earliest landing or take-off times, hard time windows, CTOT slots, holdover times, and runway hold times.
 A sequence that violates these hard constraints is considered to be infeasible, and can thus be eliminated from the solution space.
 
 === Precedences
@@ -384,12 +385,12 @@ The required separations between each ordered pair of distinct aircraft can ther
 However, runway separations do not necessarily obey the _triangle inequality_ -- i.e. for any three aircraft $i$, $j$, and $k$, the inequality $delta_(i, j) + delta_(j, k) >= delta_(i, k)$ is not necessarily true @demaere-pruning-rules.
 An aircraft's landing or take-off time can thus be influenced by not just the immediately preceding aircraft, but by multiple preceding aircraft.
 
-=== Base Times
+=== Earliest Times
 
-Every aircraft has an earliest possible landing or take-off time -- henceforth referred to as its _base time_ -- which is defined as the time the aircraft enters the runway queue and finishes lining up (for departures), or the local airspace (for arrivals).
-The base time $b_i$ of an aircraft $i$ is modelled as a hard constraint -- i.e. $i$ cannot be scheduled to land or take off before $b_i$:
+Every aircraft $i$ has an earliest possible time $x_i$ it can land or take off.
+This is modelled as a hard constraint -- i.e. $i$ cannot be scheduled to land or take off before $x_i$:
 
-$ t_i >= b_i $
+$ t_i >= x_i $
 
 === Time Windows
 
@@ -444,8 +445,8 @@ Although not directly included as an objective, it is utilised for the evaluatio
 
 === Delay <section:delay>
 
-The delay for an aircraft $i$ is defined as the difference between its landing or take-off time $t_i$ and its base time $b_i$.
-Its delay cost $c_d (i)$, defined in @eq:delay-cost, is then calculated as the delay squared, and is equivalent to the following function:
+The delay for an aircraft $i$ is defined as the difference between its landing or take-off time $t_i$ and its _base time_ $b_i$ -- the latter of which is defined as the time the aircraft enters the local airspace (for arrivals) or as the time the aircraft enters the runway queue and finishes lining up (for departures).
+The aircraft's delay cost $c_d (i)$, defined in @eq:delay-cost, is then calculated as the delay squared, and is equivalent to the following function:
 
 $ c_d (i) = (t_i - b_i)^2 $
 
@@ -466,9 +467,9 @@ $ c_v (i) = cases(
 A time-indexed formulation is employed in order to linearise the objective function and hence solve the integrated runway sequencing and de-icing problem using 0-1 integer linear programming.
 
 First, the landing or take-off time of an aircraft $i$ is constrained to lie between the earliest possible time $i$ can be scheduled to land or take off -- its _release time_ $r_i$ and the latest possible time $i$ can be scheduled to land or take off -- its _due time_ $d_i$.
-The release time of $i$ be calculated as the maximum of its base time $b_i$, start time $e_i$ of its hard time window, and start time $u_i$ of its CTOT slot (if applicable):
+The release time of $i$ be calculated as the maximum of its earliest time $x_i$, base time $b_i$, start time $e_i$ of its hard time window, and start time $u_i$ of its CTOT slot (if applicable):
 
-$ r_i = max(b_i, e_i, u_i) $
+$ r_i = max(x_i, b_i, e_i, u_i) $
 
 Meanwhile, the due time of $i$ is simply the end time $l_i$ of its hard time window.
 A feasible runway sequence will always schedule $i$ at a time between $r_i$ and $d_i$.
@@ -570,22 +571,21 @@ It is then possible to impose the following precedence and separation constraint
 
 === Complete Orders <section:complete-orders>
 
-A _complete order_ exists between any two aircraft $i$ and $j$ if the objective value and feasibility of a sequence $s$ containing both $i$ and $j$ cannot be improved by reversing the order of $i$ and $j$ in $s$.
-By exploiting complete orders, it is possible to simplify the problem of runway sequencing (or more generally, machine scheduling) to one of interleaving ordered sets of aircraft, always only sequencing the first available aircraft from each set @demaere-pruning-rules.
-This enables a reduction in the problem's worst-case computational complexity from $O(n!)$ to $O(m^2 (n + 1)^m)$, where $n$ denotes the number of aircraft, and $m$ denotes the number of distinct aircraft types @psaraftis-dynamic-programming @demaere-pruning-rules.
+A _complete order_ exists between any two aircraft $i$ and $j$ if the objective value of a sequence $s$ containing both $i$ and $j$ cannot be improved any further by reversing the order of $i$ and $j$ in $s$.
+Exploiting complete orders by creating ordered sets of aircraft simplifies the problem of runway sequencing (or more generally, machine scheduling) to one of interleaving these ordered sets, always sequencing only the first available aircraft from each set @demaere-pruning-rules.
+This reduces the problem's worst-case computational complexity from $O(n!)$ to $O(m^2 (n + 1)^m)$, where $n$ denotes the number of aircraft, and $m$ denotes the number of distinct aircraft types @psaraftis-dynamic-programming.
 
 #cite(<psaraftis-dynamic-programming>, form: "prose") first showed the existence of such complete orders between _separation-identical_ aircraft.
 Two distinct aircraft $i$ and $j$ are separation-identical if their mutual separations with respect to every other aircraft $k in F$ are the same -- i.e. $i$ and $j$ are separation-identical if and only if:
 
 $ forall k in F, k != i and k != j and delta_(i, k) = delta_(j, k) and delta_(k, i) = delta_(k, j) $ <eq:are-separation-identical>
 
-Additionally, a complete order may be inferred upon a set of separation-identical aircraft if the complete orders for each of the individual constraints and objectives are consistent within the set.
-#cite(<demaere-pruning-rules>, form: "prose") show that this is the case for an objective that considers delay and makespan, even with hard time window constraints -- as long as there is a consistent order between every aircraft's base times, release times, and end times of hard time windows.
+Additionally, #cite(<demaere-pruning-rules>, form: "prose") show that a complete order may be inferred upon a set of separation-identical aircraft if the complete orders for each of the individual objectives are consistent within the set -- i.e. as long as there is a consistent order between every aircraft's base times, release times, and hard time windows.
 A complete order can thus be inferred between two separation-identical aircraft $i$ and $j$ if and only if:
 
 $ b_i <= b_j and r_i <= r_j and l_i <= l_j $ <eq:are-complete-ordered>
 
-However, complete orders cannot be inferred between two separation-identical aircraft if one or both aircraft are subject to a CTOT, due to the piecewise linear, discontinuous, and non-convex nature of the CTOT violation cost function $c_v (i)$ @demaere-pruning-rules.
+However, complete orders cannot be inferred between two separation-identical aircraft if one or both aircraft are subject to CTOT slots, due to the piecewise, discontinuous, and non-convex nature of the CTOT violation cost function $c_v (i)$ @demaere-pruning-rules.
 Thus, in addition to satisfying @eq:are-complete-ordered, neither of the two aircraft must be subject to a CTOT slot.
 
 Following from @eq:are-separation-identical and @eq:are-complete-ordered, it is possible to define the set $F_C$ of pairs of distinct aircraft $(i, j)$ where $i$ and $j$ are separation-identical and have a complete order such that $i$ must land or take off before $j$:
@@ -1542,7 +1542,7 @@ The runtimes for the latter are already reported in @chart:branch-bound-heathrow
 #figure(
     cplex-heathrow-avg-runtimes,
     caption: [
-        Mean runtimes for each problem instance from London Heathrow solved by CPLEX as well as the branch-and-bound program using integrated de-icing
+        Mean runtimes for each small problem instance from London Heathrow solved by CPLEX as well as the branch-and-bound program using integrated de-icing
     ],
 ) <chart:cplex-heathrow-avg-runtimes>
 
@@ -1560,7 +1560,7 @@ It can be clearly seen that the mathematical program implemented in CPLEX is man
 
 #figure(
     cplex-heathrow-runtimes,
-    caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each problem instance from London Heathrow solved by CPLEX using the integrated de-icing approach]
+    caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each small problem instance from London Heathrow solved by CPLEX using the integrated de-icing approach]
 ) <table:cplex-heathrow-runtime-stats>
 
 == Impact <section:impact>
