@@ -146,7 +146,9 @@
 = Introduction
 
 An airport's maximum capacity and throughput -- i.e. the number of aircraft landing or taking off per unit of time -- is bounded by the capacity of its runway(s) @lieder-dynamic-programming.
-Increasing the runway capacity of an airport can be done by adding more runways -- however, this is often not feasible due to the high infrastructure costs and long-term planning required, nor is it always possible due to the limited availability of land @demaere-pruning-rules.
+This effecively makes an airport's runway systems a bottleneck in the global air traffic network @lieder-scheduling-aircraft.
+However, there is an ever-increasing demand for air transportation @lieder-scheduling-aircraft @demaere-pruning-rules @furini-improved-horizon, increasing the pressure on already limited airport resources.
+The total runway capacity of an airport can be increased by adding more runways -- however, this is often not feasible due to the high infrastructure costs and long-term planning required, nor is it always possible due to the limited availability of land @demaere-pruning-rules.
 Therefore, the efficient use of existing runways by intelligently scheduling runway operations -- i.e. landings and take-offs -- is crucial for maximising the capacity of airports and minimise delays, fuel emissions, and operating costs.
 
 The runway sequencing problem refers to the NP-hard problem @demaere-pruning-rules of finding a feasible sequence of landing and take-off times for a given set of aircraft such that a set of constraints is satisfied and an optimal value for a given objective function is met.
