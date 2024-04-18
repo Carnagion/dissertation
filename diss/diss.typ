@@ -96,7 +96,7 @@
 
     // TODO: Remove name before submitting
     #stack(dir: ltr, spacing: 1fr)[
-        _By_\
+        _Authored By_\
         Indraneel Mahendrakumar\
         20372495\
         #email("psyim3@nottingham.ac.uk")\
@@ -123,12 +123,12 @@
     #text(size: 14pt)[*Abstract*]
 
     #box(width: 85%, align(left)[
-        Global air transportation demand has been continuously increasing in recent times -- and is only predicted to increase further, placing growing pressure on airports all around the world.
-        At the same time, increasing runway capacity at airports is not easy due to the limited availability of space and the high costs of infrastructure.
-        This underlines the need for efficient and intelligent scheduling of runway operations in order to minimise delays and operating costs at airports.
+        Air transportation demand around the globe has been continuously increasing in recent times -- and is only predicted to increase further, placing growing challenges on airports.
+        At the same time, increasing runway capacity at airports is not always feasible due to the limited availability of space and the high costs of infrastructure.
+        This underlines the need for intelligent, efficient, and optimal scheduling of runway operations in order to minimise delays and operating costs at airports.
 
         Most existing approaches to runway sequencing solve the problem in isolation.
-        However, approaches at integrating other optimisation problems with runway sequencing in the past have yielded significantly positive results, showing that the availability of more information can make the integrated problem easier to solve than a decomposed version.
+        However, prior approaches at integrating other optimisation problems with runway sequencing have yielded significantly positive results, showing that the availability of more information can make the integrated problem easier to solve than a decomposed version.
 
         This dissertation thus explores the integrated runway sequencing and de-icing problem, introducing a mathematical model and a branch-and-bound algorithm for solving it to optimality.
         Furthermore, a rolling horizon heuristic is also proposed to improve the computational tractability of the latter.
@@ -163,7 +163,7 @@ Aircraft landing on or taking off from a given airport must comply with strict s
 Aircraft may also be subject to a number of other constraints, including earliest landing or take-off times, hard time windows during which they must land or take off, and Calculated Take-Off Time (CTOT) slots (for departures).
 Moreover, aircraft that are taking off may also require application of de-icing fluid to prevent the formation of frost or ice on their surface, which could otherwise compromise their aerodynamic stability.
 This imposes further constraints on the take-off times of these aircraft since de-icing fluid only remains effective for a certain period of time -- called the Holdover Time (HOT) -- during which the aircraft must take off.
-Such constraints -- which are further detailed in @section:problem-description -- affect the order on which aircraft land or take-off, which in turn affects the delays for each aircraft as well as the overall runway utilisation.
+Such constraints -- which are further detailed in @section:problem-description -- affect the order in which aircraft land or take-off, which in turn affects the delays for each aircraft as well as the overall runway utilisation and operating costs.
 
 Prior approaches to runway sequencing have mainly focused on the problem in isolation or consider runway sequencing and de-icing in a decomposed or partially integrated manner -- i.e. generating solutions for the two problems independently of each other and then combining them.
 Many of these approaches are discussed in @section:literature.
@@ -172,10 +172,12 @@ It is therefore important to investigate the feasibility of an integrated approa
 
 This project thus introduces a mathematical model for the integrated runway sequencing and de-icing problem and a branch-and-bound algorithm for solving it.
 In doing so, this project provides fundamental insights into the characteristics of runway sequencing and de-icing and the advantages of integrated de-icing over decomposed de-icing, which is of value to future research in the field.
+
 This dissertation is structured as follows:
 
 @section:literature contains an overview of the existing literature on runway sequencing as well as some of the past approaches that are (or are not) adopted in this project.
-An in-depth description of the integrated runway sequencing and de-icing problem is provided in @section:problem-description, with @section:constraints and @section:objectives further providing detailed explanations of the constraints and objectives respectively.
+
+@section:problem-description provides an in-depth description of the integrated runway sequencing and de-icing problem, with @section:constraints and @section:objectives further providing detailed explanations of the constraints and objectives respectively.
 A mathematical model for the problem is introduced in @section:model.
 
 @section:implementation then presents the two implementations of the aforementioned model -- a mathematical program and a branch-and-bound algorithm, both capable of solving the problem to optimality.
@@ -188,7 +190,8 @@ The integrated approach and both decomposed approaches implemented by the branch
 The mathematical program and the branch-and-bound program -- both using integrated de-icing -- are also compared using a subset of the problem instances from London Heathrow.
 The impact of these results is discussed in @section:impact.
 
-Finally, @section:reflections reflects on the management and progress of this project, its broader implications as a whole concerning Legal, Social, Ethical, and Professional Issues (LSEPI), and its potential future directions.
+@section:reflections reflects on the management and progress of this project, its broader implications as a whole concerning Legal, Social, Ethical, and Professional Issues (LSEPI), and its potential future directions.
+
 @section:conclusion concludes this dissertation, re-iterating the impact of the results discussed in @section:results and the conclusions drawn from them.
 
 = Existing Literature <section:literature>
@@ -201,7 +204,7 @@ These approaches can be grouped into two main categories -- exact and approximat
 == Exact Methods <section:exact-methods>
 
 Exact methods produce a global optimal solution (if possible) to a problem.
-Many exact methods have been introduce in the literature on runway sequencing, including mathematical programming, dynamic programming (DP), and branch-and-bound, which are discussed in detail in the following sections.
+Many exact methods have been introduced in the literature on runway sequencing, including mathematical programming, dynamic programming (DP), and branch-and-bound, which are discussed in detail in the following sections.
 
 === Mathematical Programming
 
@@ -228,7 +231,7 @@ This makes them often unattractive for real-time applications of runway sequenci
 
 #cite(<avella-time-indexed>, form: "prose") counter this claim by presenting a time-indexed MIP formulation based on a novel class of valid clique inequalities for the single machine scheduling problem with sequence-dependent setup times.
 They generalise a family of inequalities introduced by #cite(<nogueira-mixed-integer>, form: "prose").
-Their formulation significantly improve the quality of the lower bounds, reduces the number of constraints, and is capable of solving difficult real-world instances from large airports in Europe, namely Stockholm Arlanda, Hamburg, and Milan Linate.
+Their formulation significantly improves the quality of the lower bounds, reduces the number of constraints, and is capable of solving difficult real-world instances from large airports in Europe, namely Stockholm Arlanda, Hamburg, and Milan Linate.
 
 #cite(<beasley-scheduling-aircraft>, form: "prose") also present an alternative time-indexed 0-1 MIP formulation that can be derived by discretising time, although they note that this formulation produces a relatively large number of variables and constraints, and do not explore it further.
 
@@ -298,7 +301,7 @@ According to #cite(<demaere-pruning-rules>, form: "prose"), although CPS can be 
 #cite(<atkin-tsat-allocation>, form: "prose") further show that when CTOT slots are considered, CTOT compliance and positional equity are heavily in conflict -- there is a tradeoff between the number of CTOT violations and positional equity.
 Moreover, having a hard constraint of or high penalty for positional equity may be highly counter-productive for take-offs even apart from its conflict with delay or CTOT compliance @atkin-tsat-allocation.
 
-For instance, there may be an aircraft that must wait for the start of its CTOT slot, during which other aircraft may be sequenced with no additional delay -- however, penalising positional inequity would (wrongfully) penalise such a sequence, forcing the other aircraft to take off after the one with the CTOT slot and increasing the overall delay in the process @atkin-tsat-allocation.
+For instance, there may be an aircraft that must wait for the start of its CTOT slot, during which other aircraft may be sequenced with no additional delay -- however, penalising positional inequity would wrongfully penalise such a sequence, forcing the other aircraft to take off after the one with the CTOT slot and increasing the overall delay in the process @atkin-tsat-allocation.
 
 The differing delays that accumulate across different Standard Instrument Departure (SID) routes, hard time window constraints, and CTOT constraints can thus require large maximum position shifts to obtain good runway sequences, thereby challenging the tractability of CPS-based approaches @demaere-pruning-rules.
 The model and branch-and-bound program presented in @section:model and @section:branch-bound of this dissertation therefore do not employ CPS, making them more practical and viable for real-world scenarios considering departures with complex separation requirements and CTOT compliance.
@@ -835,7 +838,7 @@ The black mark the landing or take-off times and the de-icing times (for departu
 The grey background spans the journey of a departure from the beginning of pushback to its eventual take-off.
 Different parts of each row can be hovered over to produce tooltips displaying the pushback duration, taxi duration, runway hold duration, lineup duration, and delay.
 
-Although simple, this output is helpful for obtaining a better view and understanding of the solutions generated by the branch-and-bound program or the mathematical program.
+This simple output is helpful for obtaining a better view and understanding of the solutions generated by the branch-and-bound program or the mathematical program.
 It was also invaluable in finding and eliminating bugs in both implementations during development.
 
 = Results <section:results>
@@ -1644,14 +1647,14 @@ These computational results thus indicate that using an integrated de-icing appr
 = Reflections <section:reflections>
 
 This project has been an incredibly enjoyable experience for me as a whole.
-It is incredibly satisfying to see what I have accomplished since when I began working on it -- especially considering that I was not at all familiar with operations research and mathematical modelling at the time.
+It is extremely satisfying to see what I have accomplished, especially considering that I was not familiar with operations research and mathematical modelling at the beginning of the project.
 In the process of conducting research and reviewing the literature on runway sequencing and machine scheduling, I have gained a deeper and more thorough understanding of operations research, combinatorial optimisation, mathematical modelling, and artificial intelligence methods like branch-and-bound.
 It has also furthered my interest in these fields, and opened new avenues for further exploration.
 
 == Project Management
 
 I approached this project in a fairly iterative and flexible manner, following a general schedule I created in the first few weeks of the first semester.
-I had weekly discussions with my supervisor, which helped enforce this iterative approach, and allowed feedback to be obtained regularly and incorporated as soon as possible without adversely impacting the schedule.
+I had weekly discussions with my supervisor, which helped enforce this iterative approach, and allowed feedback to be obtained regularly and incorporated as soon as possible.
 These weekly meetings also provided me with the motivation to consistently and regularly work on on the project.
 Additionally, I made my schedule as general and broad as possible in order to allow for ample flexibility, which worked very well with the project's iterative nature and proved to be beneficial down the line.
 
@@ -1659,21 +1662,22 @@ During the first semester, developing an initial working branch-and-bound implem
 I had initially allocated two weeks for this task; however, I required closer to three weeks to complete it, since I first needed to acquire a sound understanding of the pruning rules introduced by #cite(<demaere-pruning-rules>, form: "prose") as well as approach used by #cite(<psaraftis-dynamic-programming>, form: "prose") to reduce the complexity of runway sequencing.
 In hindsight, I also spent more time than necessary on writing the project proposal, which left me with less time for other tasks.
 
-Thankfully, I foresaw such delays and accounted for them with gaps in my schedule to serve as buffer periods.
-These were incredibly valuable as they allowed me to extend and adapt my schedule in a flexible manner without delaying the tasks that were remaining to be completed.
+Thankfully, I foresaw such unexpected delays and accounted for them with gaps in my schedule to serve as buffer periods.
+These were incredibly valuable as they allowed me to extend and adapt my schedule in a flexible manner without adversely impacting the remaining tasks.
 Additionally, some of the later tasks -- such as developing the sequence visualiser and incorporating a rolling horizon into the branch-and-bound program -- were completed ahead of schedule, which further offset the delays and enabled me to stay on schedule for the rest of the project.
 Towards the end of the first semester, I was able to revise my original schedule to be more realistic based on the progress I had made so far.
 
-A large portion of the second semester was spent on acquiring an understanding of mathematical programming, as this project was my first foray into mathematical programming and operations research.
+A large portion of the second semester was spent on acquiring an understanding of mathematical programming, as this project was my first foray into the field.
 As part of this, my supervisor initially suggested I enrol into a module focused on discrete optimisation.
-However, I wished to explore other modules focused on machine learning and compilers, which did not leave me with enough credits for the discrete optimisation module.
-The resources for mathematical modelling and CPLEX shared by my supervisor were extremely helpful in providing me with a foundation in discrete optimisation, and as such, I decided not to enrol in the module.
+However, I wished to explore other modules focused on machine learning and compilers, which did not leave me with enough credits remaining for the discrete optimisation module.
+The resources for mathematical modelling and CPLEX shared by my supervisor were extremely helpful in providing me with a foundation in discrete optimisation.
 One of my key takeaways from these resources was the use of sparse data to create lean and efficient mathematical models in CPLEX, which enabled me to improve the tractability of my mathematical program.
 
-I was able to meet all the goals I had initially set out for this project, though I was unable to implement a DP algorithm for integrated runway sequencing and de-icing, which was a stretch goal I had mentioned in both my project proposal and interim report.
-Although it may have been possible to experiment in this area during the final few weeks of the second semester, I decided to focus on writing my dissertation and polishing my existing code and implementations instead.
+My project proposal and interim report mentioned a stretch goal of impleemnting a DP algorithm for integrated runway sequencing and de-icing.
+I was able to meet all the goals I had initially set out for this project, except for this one.
+During the final few weeks of the second semester, it may have been possible to squeeze in time to explore this goal, but this may have eaten into my time for polishing the existing code and writing my dissertation.
 
-Overall, I was able to create a realistic and flexible project schedule, and best estimate the required time and effort for most tasks, leading to me accomplishing all the objectives I had set out to achieve on time.
+Overall, I was able to create a realistic and flexible project schedule, and best estimate the required time and effort for most tasks, enabling me to accomplish all the objectives I had set out to achieve on time.
 
 == Contributions
 
@@ -1682,8 +1686,8 @@ The model and algorithms presented here enable further reductions in delay and C
 Additionally, the reduction in delay has an indirect impact on passengers, saving their time as well.
 The equitable distribution of delay achieved by the cost function discussed in @section:delay further ensures that aircraft are not disproportionately delayed due to circumstances beyond their control, and avoids unintentionally favouring or being biased towards certain aircraft or airlines.
 
-With regards to the United Nations' Sustainable Development Goals, this project has the potential to indirectly contribute to sustainable development.
-As already mentioned in @section:compare-deice, the branch-and-bound algorithm optimises for stand holding when using an integrated de-icing appraoch, minimising runway holding times and consequently fuel consumption from runway holding.
+This project has the potential to indirectly contribute to the Sustainable Development Goals proposed by the United Nations.
+As already mentioned in @section:compare-deice, the branch-and-bound algorithm optimises for stand holding when using an integrated de-icing appraoch, minimising runway holding times and consequently fuel consumption and emissions from runway holding.
 This is a significant improvement over approaches that do not consider runway holding times or allocate large amounts of runway holding times without optimising for stand holding.
 
 Some private data was used for the evaluation of the model and branch-and-bound algorithm presented in this dissertation -- namely the problem instances from London Heathrow.
