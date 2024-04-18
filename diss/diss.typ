@@ -82,16 +82,10 @@
 //       the default IEEE style or provides a better way of customising this
 #show cite.where(form: "prose"): set cite(style: "ieee-et-al-min.csl")
 
-// TODO: Remove when all todos are removed
-#let todo(message) = raw("// TODO: " + message, block: true, lang: "rust")
-
 #v(1fr)
 #align(center)[
-    // TODO: Should the heading be changed to something better?
-    // TODO: Experiment with a proper heading instead of larger text size
     #text(size: 18pt)[*Integrated Aircraft Runway Sequencing and De-Icing*]
 
-    // TODO: Check if "Final Dissertation" is what it should be called
     #text(size: 14pt)[_COMP3003 Final Dissertation_]
 
     #v(0.2fr)
@@ -124,7 +118,6 @@
 #v(1fr)
 
 #align(center)[
-    // TODO: Experiment with a proper heading instead of larger text size
     #text(size: 14pt)[*Abstract*]
 
     #box(width: 85%, align(left)[
@@ -452,7 +445,6 @@ $ t_i - z_i - o_i <= h_i $
 
 === Runway Hold Times
 
-// TODO: Write a better explanation for this section
 Delays are ideally absorbed by stand holding -- a departure $i$ only needs to push back only when absolutely necessary to meet its de-ice time $z_i$ (if applicable) and take-off time $t_i$.
 
 However, in some cases it may be better to absorb delays at the runway by _runway holding_ instead -- i.e. arriving and waiting at the runway before a departure's scheduled take-off time.
@@ -1511,15 +1503,13 @@ This is primarily due to the lack of CTOT slots as well as the presence of relat
     caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each problem instance introduced by #cite(<furini-improved-horizon>, form: "prose") solved by the branch-and-bound program using each de-icing approach],
 ) <table:branch-bound-furini-runtime-stats>
 
-// TODO: Write more about different de-icing approaches in branch-and-bound program if necessary
-
 == Comparison of Programs <section:compare-programs>
 
 @table:cplex-branch-bound-heathrow-results lists the makespans, earliest and latest de-icing times, and total runway hold times for all small instances from London Heathrow, solved using the mathematical program implemented in CPLEX as well as the branch-and-bound program -- both utilising an integrated de-icing approach.
 The results for the latter are the same as in @table:branch-bound-heathrow-results, but are presented again here for convenience.
 Both implementations achieve the same (optimal) objective values across all instances.
 
-// TODO: Remove the objective values here and add CPLEX data
+// TODO: Remove the objective values here
 #let cplex-branch-bound-heathrow-results = results-table(
     group-headers: ([CPLEX model], [Branch-and-bound program]),
     side-headers: true,
