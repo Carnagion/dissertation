@@ -126,9 +126,21 @@
 #align(center)[
     // TODO: Experiment with a proper heading instead of larger text size
     #text(size: 14pt)[*Abstract*]
-]
 
-#todo("Write abstract")
+    #box(width: 85%, align(left)[
+        Global air transportation demand has been continuously increasing in recent times -- and is only predicted to increase further, placing growing pressure on airports all around the world.
+        At the same time, increasing runway capacity at airports is not easy due to the limited availability of space and the high costs of infrastructure.
+        This underlines the need for efficient and intelligent scheduling of runway operations in order to minimise delays and operating costs at airports.
+
+        Most existing approaches to runway sequencing solve the problem in isolation.
+        However, approaches at integrating other optimisation problems with runway sequencing in the past have yielded significantly positive results, showing that the availability of more information can make the integrated problem easier to solve than a decomposed version.
+
+        This dissertation thus explores the integrated runway sequencing and de-icing problem, introducing a mathematical model and a branch-and-bound algorithm for solving it to optimality.
+        Furthermore, a rolling horizon heuristic is also proposed to improve the computational tractability of the latter.
+        These are evaluated on a variety of problem instances from two major international airports, and compared against two different decomposed approaches to runway sequencing and de-icing.
+        The results reported here indicate that integrated de-icing achieves significantly better objective values than its decomposed counterparts while still remaining well within the stringent time limits required for highly dynamic and real-time systems.
+    ])
+]
 
 #v(1fr)
 
