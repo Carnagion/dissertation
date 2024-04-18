@@ -237,7 +237,7 @@ Their formulation significantly improves the quality of the lower bounds, reduce
 === Dynamic Programming
 
 Dynamic programming (DP) is a general optimisation technique for making sequential decisions.
-There have been several attempts to develop efficient DP algorithms for runway sequencing, since it is known to work well for runway sequencing -- almost all runway sequencing problems can be modelled as DP problems as DP algorithms can evaluate partial sequences independently of the exact sequencing decisions taken to generate them @bennell-runway-scheduling.
+There have been several attempts to develop efficient DP algorithms for runway sequencing, since it is known to work well for runway sequencing -- almost all runway sequencing problems can be modelled as DP problems since DP algorithms can evaluate partial sequences independently of the exact sequencing decisions taken to generate them @bennell-runway-scheduling.
 DP can also yield optimal solutions significantly faster than MIP solvers @lieder-dynamic-programming.
 
 #cite(<psaraftis-dynamic-programming>, form: "prose") proposes a DP algorithm for the single runway scheduling problem, considering runway utilisation and total delay as an objective function.
@@ -1645,7 +1645,7 @@ These computational results thus indicate that using an integrated de-icing appr
 = Reflections <section:reflections>
 
 This project has been an incredibly enjoyable experience for me as a whole.
-It is extremely satisfying to see what I have accomplished, especially considering that I was not familiar with operations research and mathematical modelling at the beginning of the project.
+It is extremely satisfying to see what I have accomplished, especially considering that I was not familiar with operations research and mathematical modelling at the beginning of this project.
 In the process of conducting research and reviewing the literature on runway sequencing and machine scheduling, I have gained a deeper and more thorough understanding of operations research, combinatorial optimisation, mathematical modelling, and artificial intelligence methods like branch-and-bound.
 It has also furthered my interest in these fields, and opened new avenues for further exploration.
 
@@ -1736,7 +1736,7 @@ Integrated de-icing is thus a viable and attractive approach for many airports a
 #hide[
     #let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     #set heading(
-        numbering: ((num)) => "Appendix " + alphabet.at(num - 1),
+        numbering: ((num)) => "Appendix " + alphabet.at(num - 1) + " " + str(sym.dot) + " ",
         supplement: none,
         bookmarked: false,
     )
