@@ -70,7 +70,8 @@ fn write_flights(
         let flight = match flight {
             Flight::Arr(arr) => RawFlight {
                 kind: FlightKind::Arr,
-                base_time: Some(seconds(start, arr.base_time)),
+                earliest_time: seconds(start, arr.earliest_time),
+                base_time: seconds(start, arr.base_time),
                 tobt: None,
                 pushback_duration: None,
                 deice_taxi_duration: None,
@@ -89,7 +90,8 @@ fn write_flights(
             },
             Flight::Dep(dep) => RawFlight {
                 kind: FlightKind::Dep,
-                base_time: Some(seconds(start, dep.base_time)),
+                earliest_time: seconds(start, dep.earliest_time),
+                base_time: seconds(start, dep.base_time),
                 tobt: Some(seconds(start, dep.tobt)),
                 pushback_duration: Some(dep.pushback_duration.as_secs()),
                 deice_taxi_duration: dep
@@ -113,7 +115,7 @@ fn write_flights(
         flight.write_to_sheet(idx as u32 + 1, 2, sheet)?;
     }
 
-    let range = cell_range_absolute(1, 2, instance.flights().len() as u32, 15);
+    let range = cell_range_absolute(1, 2, instance.flights().len() as u32, 16);
     workbook.define_name("flights", &format!("=Data!{}", range))?;
 
     Ok(())
@@ -129,9 +131,9 @@ fn write_separations(
     if instance.flights().len() > 1 {
         sheet.merge_range(
             0,
-            17,
+            18,
             0,
-            17 + instance.flights().len() as u16 - 1,
+            18 + instance.flights().len() as u16 - 1,
             "Separations",
             &Format::default(),
         )?;
@@ -141,14 +143,14 @@ fn write_separations(
         .flat_map(|i| (0..instance.flights().len()).map(move |j| (i, j)));
     for (row, col) in pairs {
         let sep = instance.separations()[(row, col)].as_secs();
-        sheet.write(1 + row as u32, 17 + col as u16, sep)?;
+        sheet.write(1 + row as u32, 18 + col as u16, sep)?;
     }
 
     let range = cell_range_absolute(
         1,
-        17,
+        18,
         instance.flights().len() as u32,
-        17 + instance.flights().len() as u16 - 1,
+        18 + instance.flights().len() as u16 - 1,
     );
     workbook.define_name("sep", &format!("=Data!{}", range))?;
 
@@ -159,8 +161,10 @@ fn write_separations(
 struct RawFlight {
     #[serde(rename = "Kind")]
     kind: FlightKind,
+    #[serde(rename = "Earliest time")]
+    earliest_time: u64,
     #[serde(rename = "Base time")]
-    base_time: Option<u64>,
+    base_time: u64,
     #[serde(rename = "TOBT")]
     tobt: Option<u64>,
     #[serde(rename = "Pushback duration")]
@@ -200,19 +204,20 @@ impl RawFlight {
         };
         sheet
             .write(row, col + 0, kind)?
-            .write(row, col + 1, self.base_time)?
-            .write(row, col + 2, self.tobt)?
-            .write(row, col + 3, self.pushback_duration)?
-            .write(row, col + 4, self.deice_taxi_duration)?
-            .write(row, col + 5, self.deice_duration)?
-            .write(row, col + 6, self.deice_hot)?
-            .write(row, col + 7, self.taxi_duration)?
-            .write(row, col + 8, self.lineup_duration)?
-            .write(row, col + 9, self.ctot_target)?
-            .write(row, col + 10, self.ctot_allow_early)?
-            .write(row, col + 11, self.ctot_allow_late)?
-            .write(row, col + 12, self.window_earliest)?
-            .write(row, col + 13, self.window_length)?;
+            .write(row, col + 1, self.earliest_time)?
+            .write(row, col + 2, self.base_time)?
+            .write(row, col + 3, self.tobt)?
+            .write(row, col + 4, self.pushback_duration)?
+            .write(row, col + 5, self.deice_taxi_duration)?
+            .write(row, col + 6, self.deice_duration)?
+            .write(row, col + 7, self.deice_hot)?
+            .write(row, col + 8, self.taxi_duration)?
+            .write(row, col + 9, self.lineup_duration)?
+            .write(row, col + 10, self.ctot_target)?
+            .write(row, col + 11, self.ctot_allow_early)?
+            .write(row, col + 12, self.ctot_allow_late)?
+            .write(row, col + 13, self.window_earliest)?
+            .write(row, col + 14, self.window_length)?;
         Ok(())
     }
 }
