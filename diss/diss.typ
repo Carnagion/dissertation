@@ -143,7 +143,7 @@
 // NOTE: Forces the page numbering to begin from here rather than from the cover page or abstract page
 #counter(page).update(1)
 
-= Introduction
+= Introduction <section:introduction>
 
 An airport's maximum capacity and throughput -- i.e. the number of aircraft landing or taking off per unit of time -- is bounded by the capacity of its runway(s) @lieder-dynamic-programming.
 This effecively makes an airport's runway systems a bottleneck in the global air traffic network @lieder-scheduling-aircraft.
@@ -158,7 +158,7 @@ Moreover, aircraft that are taking off may also require application of de-icing 
 This imposes further constraints on the take-off times of these aircraft since de-icing fluid only remains effective for a certain period of time -- called the Holdover Time (HOT) -- during which the aircraft must take off.
 Such constraints -- which are further detailed in @section:problem-description -- affect the order on which aircraft land or take-off, which in turn affects the delays for each aircraft as well as the overall runway utilisation.
 
-Prior approaches to runway sequencing have mainly focused on the problem in isolation or considered solved runway sequencing and de-icing in a decomposed or partially integrated manner -- i.e. generating solutions for the two problems independently of each other and then combining them.
+Prior approaches to runway sequencing have mainly focused on the problem in isolation or consider runway sequencing and de-icing in a decomposed or partially integrated manner -- i.e. generating solutions for the two problems independently of each other and then combining them.
 Many of these approaches are discussed in @section:literature.
 However, solutions that integrate runway sequencing with other problems -- such as the integrated runway sequencing and ground movement problem explored by #cite(<atkin-hybrid-metaheuristics>, form: "prose") -- have shown that the availability of more information from their integration can offer key insights into simplifying the problem(s) and produce better solutions overall.
 It is therefore important to investigate the feasibility of an integrated approach to runway sequencing and de-icing and evaluate its effectiveness by comparing it to fully decomposed or partially integrated approaches.
@@ -189,29 +189,26 @@ Finally, @section:reflections reflects on the management and progress of this pr
 Early approaches to runway sequencing used by many airports around the world include simple first-come, first-served (FCFS) algorithms optimising for a single objective @bianco-minimizing-time.
 Although very simple to implement and computationally inexpensive, FCFS strategies are well-known to produce excessive delays @bianco-minimizing-time.
 Therefore, a number of approaches that optimise certain aspects -- such as delay, runway utilisation, and CTOT compliance -- without violating safety constraints or compromising the tractability of the problem have been proposed in the past.
+These approaches can be grouped into two main categories -- exact and approximate methods, which are discussed in detail in @section:exact-methods and @section:approximate-methods respectively.
 
-== Approximate Methods
+== Exact Methods <section:exact-methods>
 
-#todo("Write short introduction to approximate methods")
-
-=== Heuristics
-
-#cite(<bianco-minimizing-time>, form: "prose") propose two heuristic approaches -- Cheapest Addition Heuristic (CAH) and Cheapest Insertion Heuristic (CIH) -- that each generate sequences by either appending remaining aircraft to partial sequences, or inserting them.
-They note that the latter almost always performed better than the former, as it searches for the best partial sequences obtained by inserting new aircraft anywhere within the sequence as opposed to just at the end.
-However, it is also much more computationally expensive -- these heuristics are shown to have computational complexities of $O(n^2 log(n))$ and $O(n^4)$ respectively @bianco-minimizing-time @bennell-runway-scheduling.
-The heuristics are evaluated on mainly randomly generated test instances.
-
-#cite(<atkin-hybrid-metaheuristics>, form: "prose") introduce a hybridised approach using different search methods and metaheuristics to solve the integrated runway scheduling and ground movement problem at London Heathrow.
-They consider total delay, CTOT compliance, positional delay, and throughput as part of their objective function.
-Their results show that the availability of more information about aircraft taxiing from the integration of the problem can reduce delays and CTOT violations.
-
-== Exact Methods
-
-#todo("Write short introduction to exact methods")
+Exact methods produce a global optimal solution (if possible) to a problem.
+Many exact methods have been introduce in the literature on runway sequencing, including mathematical programming, dynamic programming (DP), and branch-and-bound, which are discussed in detail in the following sections.
 
 === Mathematical Programming
 
-Many existing mixed-integer programming (MIP) approaches to runway sequencing view the problem as a variant of classical machine scheduling problem with sequence-dependent setup times -- the runways correspond to machines, flights to jobs, and runway separations to setup times @avella-time-indexed.
+Two of the most common mathematical programming techniques for solving runway sequencing (and more generally, machine scheduling) are linear programming (LP) and mixed-integer programming (MIP).
+LP models represent their constraints and objectives using linear relationships.
+By contrast, MIP formulations have one or more discrete variables -- i.e. they are constrained to be integers or binary values.
+The use of discrete variables expands the scope of the problems that can be formulated using MIP, since certain values or constraints may not be linearisable -- however, such models are typically more difficult to solve than LP models.
+
+#cite(<beasley-scheduling-aircraft>, form: "prose") introduce a LP-based tree search approach for the problem of sequencing arrivals on a single runway, and later extend their formulation to handle multiple runways as well.
+They consider hard time window constraints and use an objective function that penalises landing before or after a given target time for each arrival.
+Unlike many previous approaches that assumed an indefinite latest time limit for landing, their approach employs more realistic latest landing times based on fuel considerations.
+This allows for simplifying the problem by exploiting the presence of increased disjoint intervals, caused by relatively narrow hard time windows.
+
+Many existing MIP approaches to runway sequencing view the problem as a variant of classical machine scheduling problem with sequence-dependent setup times -- the runways correspond to machines, flights to jobs, and runway separations to setup times @avella-time-indexed.
 According to #cite(<avella-time-indexed>, form: "prose"), the literature on machine scheduling has traditionally comprised of two main kinds of formulations -- big-$M$ and time-indexed.
 
 Big-$M$ formulations represent the landing or take-off time of an aircraft as a single continuous variable.
@@ -225,11 +222,6 @@ This makes them often unattractive for real-time applications of runway sequenci
 #cite(<avella-time-indexed>, form: "prose") counter this claim by presenting a time-indexed MIP formulation based on a novel class of valid clique inequalities for the single machine scheduling problem with sequence-dependent setup times.
 They generalise a family of inequalities introduced by #cite(<nogueira-mixed-integer>, form: "prose").
 Their formulation significantly improve the quality of the lower bounds, reduces the number of constraints, and is capable of solving difficult real-world instances from large airports in Europe, namely Stockholm Arlanda, Hamburg, and Milan Linate.
-
-#cite(<beasley-scheduling-aircraft>, form: "prose") introduce a linear programming (LP)-based tree search approach for the problem of sequencing arrivals on a single runway, and later extend their formulation to handle multiple runways as well.
-They consider hard time window constraints and use an objective function that penalises landing before or after a given target time for each arrival.
-Unlike many previous approaches that assumed an indefinite latest time limit for landing, their approach employs more realistic latest landing times based on fuel considerations.
-This allows for simplifying the problem by exploiting the presence of increased disjoint intervals, caused by relatively narrow hard time windows.
 
 #cite(<beasley-scheduling-aircraft>, form: "prose") also present an alternative time-indexed 0-1 MIP formulation that can be derived by discretising time, although they note that this formulation produces a relatively large number of variables and constraints, and do not explore it further.
 
@@ -260,13 +252,37 @@ Results show that their branch-and-bound implementation solves smaller problem i
 They develop a specialised simplex algorithm capable of determining landing times rapidly and a heuristic algorithm to obtain the upper and lower bounds for the branch-and-bound algorithm.
 Furthermore, they utilise a variety of pre-processing methods to improve the efficiency of the algorithm, and evaluate both their heuristic and their branch-and-bound approaches on instances involving up to 50 aircraft.
 
+== Approximate Methods <section:approximate-methods>
+
+In contrast to exact methods, approximate methods utilise techniques such as heuristics to find a solution without necessarily finding a global optimum -- although they will often find a near-optimal solution.
+However, approximate methods can often find solutions very quickly -- typically faster than most exact methods.
+This makes them a better choice for solving large problem instances which may not be solvable within the required time limit, as is often the case with real-time applications.
+
+#cite(<bianco-minimizing-time>, form: "prose") propose two heuristic approaches -- Cheapest Addition Heuristic (CAH) and Cheapest Insertion Heuristic (CIH) -- that each generate sequences by either appending remaining aircraft to partial sequences, or inserting them.
+They note that the latter almost always performed better than the former, as it searches for the best partial sequences obtained by inserting new aircraft anywhere within the sequence as opposed to just at the end.
+However, it is also much more computationally expensive -- these heuristics are shown to have computational complexities of $O(n^2 log(n))$ and $O(n^4)$ respectively @bianco-minimizing-time @bennell-runway-scheduling.
+The heuristics are evaluated on mainly randomly generated test instances.
+
+#cite(<atkin-hybrid-metaheuristics>, form: "prose") introduce a hybridised approach using different search methods and metaheuristics to solve the integrated runway scheduling and ground movement problem at London Heathrow.
+They consider total delay, CTOT compliance, positional delay, and throughput as part of their objective function.
+Their results show that the availability of more information about aircraft taxiing from the integration of the problem can reduce delays and CTOT violations.
+
+Approximate methods may also be combined with exact methods -- such as by using a heuristic to break down a large problem instance into smaller parts that can each be solved to optimality, or by providing a near-optimal solution as the initial solution to an LP or MIP solver, which allows it to find an optimal solution quicker.
+This makes the overall method heuristic.
+
+#cite(<furini-improved-horizon>, form: "prose") explore such a hybrid approach by introducing a rolling horizon approach to partition a set of aircraft into chunks and solves the runway sequenching problem to optimality for each of these chunks.
+The resulting partial solutions are then re-combined into a complete solution for the original set of aircraft.
+They compare three different approaches to generating such chunks of aircraft, and show that the combination of multiple chunking rules leads to an improvement with respect to an approach that does not utilise chunking.
+A similar rolling horizon algorithm for the branch-and-bound algorithm introduced in this paper is also presented in @section:rolling-horizon.
+
 == Paradigms
 
-#todo("Write short introduction to paradigms to improve tractability")
+Approaches to runway sequencing can also be grouped into two different categories or paradigms -- constrained position shifts (CPS) and pruning rules.
+These aim to reduce the complexity of the problem and improve the computational tractability of solutions, so that they may be of practical use in scenarios with harsh time limits, such as in real-time applications.
 
 === Constrained Position Shifts
 
-A number of approaches in the past -- such as that of #cite(<psaraftis-dynamic-programming>, form: "prose") and #cite(<balakrishnan-runway-operations>, form: "prose") -- have employed Constrained Position Shifting (CPS), a technique that was first introduced by #cite(<dear-dynamic-scheduling>, form: "prose").
+A number of approaches in the past -- such as that of #cite(<psaraftis-dynamic-programming>, form: "prose") and #cite(<balakrishnan-runway-operations>, form: "prose") -- have employed CPS, which was first introduced by #cite(<dear-dynamic-scheduling>, form: "prose").
 CPS restricts an aircraft's maximum shift in position relative to its original position in some initial sequence, which is typically obtained using a FCFS approach.
 Not only does this prune the search space by reducing the number of aircraft that must be considered for each position in the sequence, but it also enforces positional equity by preventing aircraft from being advanced or delayed disproportionately compared to other aircraft @dear-dynamic-scheduling @demaere-pruning-rules.
 
@@ -448,7 +464,7 @@ Although not directly included as an objective, it is utilised for the evaluatio
 === Delay <section:delay>
 
 The delay for an aircraft $i$ is defined as the difference between its landing or take-off time $t_i$ and its _base time_ $b_i$ -- the latter of which is defined as the time the aircraft enters the local airspace (for arrivals) or as the time the aircraft enters the runway queue and finishes lining up (for departures).
-The aircraft's delay cost $c_d (i)$, defined in @eq:delay-cost, is then calculated as the delay squared, and is equivalent to the following function:
+The aircraft's delay cost $c_d (i)$ -- defined in @eq:delay-cost -- is then calculated as the delay squared, and is equivalent to the following function:
 
 $ c_d (i) = (t_i - b_i)^2 $
 
@@ -602,7 +618,8 @@ $ t_j >= t_i + delta_(i, j) $
 
 = Implementation <section:implementation>
 
-#todo("Write short introduction to different approaches used")
+Implementations of the aforementioned model as well as a branch-and-bound algorithm are discussed in @section:mathematical-program and @section:branch-bound respectively, with a rolling horizon extension to the latter presented in @section:rolling-horizon.
+Additionally, a tool for visualising the runway sequences generated by these algorithms has also been developed -- this is discussed in @section:sequence-vis.
 
 == Mathematical Program <section:mathematical-program>
 
@@ -683,7 +700,7 @@ The full branch-and-bound algorithm as described above is shown in @code:branch-
 ) <code:branch-bound>
 
 The algorithm presented above is de-icing approach-agnostic -- i.e. it only describes the branch-and-bound procedure itself, not how an individual aircraft is assigned a landing or take-off time or a de-icing time.
-The benefit of this is twofold -- first, it allows for generic and easily extendable implementations of de-icing approaches, and second, it allows each de-icing approach to be compared as fairly as possible since the only difference in code comes from scheduling individual aircraft.
+The benefit of this is twofold -- first, it allows for generic and easily extensible implementations of de-icing approaches, and second, it allows each de-icing approach to be compared as fairly as possible since the only difference in code comes from scheduling individual aircraft.
 
 The two different de-icing approaches -- decomposed and integrated, wherein the former is further split into decomposed by TOBT and decomposed by CTOT -- are discussed further in the sections below.
 
@@ -722,7 +739,7 @@ Once its take-off time is known, its de-icing time $z_i$ can be calculated as th
 
 $ z_i = max(t_i - q_i - r_i - n_i - o_i, t_i - h_i - o_i, max_(j in s_i) z_j + o_i + n_i + q_i) $
 
-=== Rolling Horizon Extension
+=== Rolling Horizon Extension <section:rolling-horizon>
 
 Altough the branch-and-bound algorithm shown in @code:branch-bound produces optimal solutions, it scales poorly with the size of the input.
 When attempting to optimally solve very challenging problem instances with any more than 15 aircraft -- such as those considered in the first half of @section:compare-deice -- the runtime of the algorithm quickly surpasses the stringent time limits required by real-time applications.
@@ -765,7 +782,7 @@ The full rolling horizon extension is shown below.
     ],
 ) <code:rolling-horizon>
 
-== Sequence Visualiser
+== Sequence Visualiser <section:sequence-vis>
 
 The visualiser takes any sequence of landing or take-off times and de-icing times, and produces a Scalable Vector Graphic (SVG) file showing.
 SVG was chosen as the image format due to wide support for SVG rendering in many browsers and image applications, and because its XML-like syntax makes SVG files relatively easy to create and manipulate within code.
@@ -783,7 +800,9 @@ It was also invaluable in finding and eliminating bugs in both implementations d
 
 = Results <section:results>
 
-#todo("Write introduction to results")
+This section presents the results (and their impact) of evaluating both the mathematical program as well as the branch-and-bound algorithm.
+As mentioned in @section:introduction, the integrated approach and both decomposed approaches implemented by the latter are compared on the basis of their resulting objective values, runway utilisation, and runway hold times, as well as their runtimes.
+The mathematical program and the branch-and-bound program -- both using integrated de-icing -- are also compared using a subset of the problem instances presented in @section:problem-instances.
 
 #let results-table(group-headers: (), side-headers: false, ..datasets) = {
     let header-groups = datasets
@@ -880,7 +899,7 @@ It was also invaluable in finding and eliminating bugs in both implementations d
     sum / count
 }
 
-== Problem Instances
+== Problem Instances <section:problem-instances>
 
 The performance of the CPLEX model and the branch-and-bound program (utilising the three different de-icing approaches) is illustrated here using complex real-world problem instances from a single day of departure operations at London Heathrow -- whose characteristics are summarised in @table:heathrow-instances -- as well as benchmark problem instances from Milan Linate.
 The latter were first introduced by #cite(<furini-improved-horizon>, form: "prose"), and were obtained from the University of Bologna Operations Research Group's freely accessible online library of instances @unibo-codes-instances.
@@ -1586,7 +1605,10 @@ These computational results thus indicate that using an integrated de-icing appr
 
 = Reflections <section:reflections>
 
-#todo("Write introduction to reflection")
+This project has been an incredibly enjoyable experience for me as a whole.
+It is incredibly satisfying to see what I have accomplished since when I began working on it -- especially considering that I was not at all familiar with operations research and mathematical modelling at the time.
+In the process of conducting research and reviewing the literature on runway sequencing and machine scheduling, I have gained a deeper and more thorough understanding of operations research, combinatorial optimisation, mathematical modelling, and artificial intelligence methods like branch-and-bound.
+It has also furthered my interest in these fields, and opened new avenues for further exploration.
 
 == Project Management
 
@@ -1626,7 +1648,10 @@ With regards to the United Nations' Sustainable Development Goals, this project 
 As already mentioned in @section:compare-deice, the branch-and-bound algorithm optimises for stand holding when using an integrated de-icing appraoch, minimising runway holding times and consequently fuel consumption from runway holding.
 This is a significant improvement over approaches that do not consider runway holding times or allocate large amounts of runway holding times without optimising for stand holding.
 
-// TODO: Write more about LSEPI if necessary
+Some private data was used for the evaluation of the model and branch-and-bound algorithm presented in this paper -- namely the problem instances from London Heathrow.
+This data was only provided when necessary, and was stored on an encrypted hard drive accessible only to the author.
+Additionally, care was taken to prevent the data from being uploaded to a publicly accessible repository, or from being included in the executable files produced when compiling the project.
+This ensured the confidentiality of the data throughout the process.
 
 == Future Developments
 
