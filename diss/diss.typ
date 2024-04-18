@@ -900,7 +900,7 @@ It was also invaluable in finding and eliminating bugs in both implementations d
 
 This section presents the results (and their impact) of evaluating both the mathematical program as well as the branch-and-bound algorithm.
 All measurements reported were taken on a computer running Windows 10 (64-bit) with an Intel Core i7-10750H 2.60 GHz CPU and 32 GB of memory, with a sample size of 100.
-Additionally, the runtimes are obtained by running each benchmark with a sample size of 100, with a timer resolution of 1 microsecond.
+Additionally, the runtimes are obtained by running each benchmark with a sample size of 100, with a timer resolution of 1 nanosecond.
 
 #let results-table(group-headers: (), side-headers: false, ..datasets) = {
     let header-groups = datasets
