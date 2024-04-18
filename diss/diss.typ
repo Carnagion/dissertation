@@ -660,14 +660,14 @@ The full branch-and-bound algorithm as described above is shown in @code:branch-
     + $c_"best" = infinity$
     + $s <- $ empty sequence
     + $s_"best" <- s$
-    + $q <- $ empty stack
+    + $Q <- $ empty stack
     + *for* each $X$ *in* ordered sets of separation-identical aircraft *do*
         + $i <- $ first aircraft in $X$
         + schedule $t_i$ and $z_i$
-        + push $(i, 0)$ to $q$
+        + push $(i, 0)$ to $Q$
     + *end*
-    + *while* $q$ is not empty *do*
-        + $(i, k) <- $ pop from $q$
+    + *while* $Q$ is not empty *do*
+        + $(i, k) <- $ pop from $Q$
         + *for* each $j$ *in* $s$ from index $k$ onwards *do*
             + $c <- c - c_d (j) - c_v (j)$
             + reset $t_i$ and $z_i$
@@ -685,7 +685,7 @@ The full branch-and-bound algorithm as described above is shown in @code:branch-
                 + *for* each $X$ *in* ordered sets of separation-identical aircraft *do*
                     + *if* $X$ has any aircraft that are not in $s$ *do*
                         + $j <- $ first aircraft in $X$ that is not in $s$
-                        + push $(j, k + 1)$ to $q$
+                        + push $(j, k + 1)$ to $Q$
                     + *end*
                 + *end*
             + *end*
@@ -699,7 +699,7 @@ The full branch-and-bound algorithm as described above is shown in @code:branch-
 #algorithm(
     branch-bound-code,
     caption: [
-        Branch-and-bound algorithm for runway sequencing and de-icing
+        Branch-and-bound for runway sequencing and de-icing
     ],
 ) <code:branch-bound>
 
@@ -716,6 +716,34 @@ This queue is then used to fix the de-icing times of departures before schedulin
 To generate the de-icing queue, a list of all departures to be de-iced is first created and then sorted by either their TOBTs or their CTOT slots, depending on which decomposed de-icing approach is to be used.
 In the latter case, additional sorting may be necessary to prioritise aircraft with CTOT slots over those without and ensure maximal CTOT compliance.
 Aircraft in this list may then be assigned de-icing times in a FCFS manner, taking into account their release times and the time that the previous aircraft finishes de-icing.
+This process is shown in @code:deice-queue.
+
+#let deice-queue = pseudocode-list[
+    - *input* set of departures to de-ice $D$
+    - *output* de-icing times for all departures in $D$
+    + $Q <- $ empty queue
+    + $z_"prev" <- $ none
+    + sort $D$ by TOBT or by CTOT
+    + *for* $i$ *in* $D$ *do*
+        + *if* $i$ must de-ice *then*
+            + $z_i <- max(r_i - q_i - n_i - o_i, r_i - h_i - o_i)$
+            + *if* $z_"prev" = $ none *then*
+                + $z_i <- max(z_i, z_"prev")$
+            + *end*
+            + $z_"prev" <- z_i$
+            + push $z_i$ to $Q$
+        + *end*
+    + *end*
+    + *return* $Q$
+]
+
+#algorithm(
+    deice-queue,
+    caption: [
+        Generating de-icing queues in decomposed de-icing
+    ],
+) <code:deice-queue>
+
 The de-icing time $z_i$ of a departure $i$ within the de-icing queue $Q$ is thus given by the following expression, where $Q_i$ is the set of departures that have been scheduled to de-ice before $i$:
 
 $ z_i = max(r_i - q_i - n_i - o_i, r_i - h_i - o_i, max_(j in Q_i) z_j + o_j) $ <eq:deice-queue>
@@ -782,7 +810,7 @@ The full rolling horizon extension is shown below.
 #algorithm(
     rolling-horizon,
     caption: [
-        Rolling horizon algorithm for solving larger problem instances using the branch-and-bound program
+        Rolling horizon for solving larger problem instances using the branch-and-bound program
     ],
 ) <code:rolling-horizon>
 
@@ -1588,7 +1616,7 @@ It can be clearly seen that the mathematical program implemented in CPLEX is man
 
 #figure(
     cplex-heathrow-runtimes,
-    caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each small problem instance from London Heathrow solved by CPLEX using the integrated de-icing approach]
+    caption: [Mean, standard deviation, median, and median absolute deviation of runtimes for each small problem instance from London Heathrow solved by CPLEX using the integrated de-icing approach],
 ) <table:cplex-heathrow-runtime-stats>
 
 == Impact <section:impact>
