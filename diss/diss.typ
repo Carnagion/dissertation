@@ -170,7 +170,7 @@ It is therefore important to investigate the feasibility of an integrated approa
 
 This project thus introduces a mathematical model for the integrated runway sequencing and de-icing problem and a branch-and-bound algorithm for solving it.
 In doing so, this project provides fundamental insights into the characteristics of runway sequencing and de-icing and the advantages of integrated de-icing over decomposed de-icing, which is of value to future research in the field.
-This paper is structured as follows:
+This dissertation is structured as follows:
 
 @section:literature contains an overview of the existing literature on runway sequencing as well as some of the past approaches that are (or are not) adopted in this project.
 An in-depth description of the integrated runway sequencing and de-icing problem is provided in @section:problem-description, with @section:constraints and @section:objectives further providing detailed explanations of the constraints and objectives respectively.
@@ -187,7 +187,7 @@ The mathematical program and the branch-and-bound program -- both using integrat
 The impact of these results is discussed in @section:impact.
 
 Finally, @section:reflections reflects on the management and progress of this project, its broader implications as a whole concerning Legal, Social, Ethical, and Professional Issues (LSEPI), and its potential future directions.
-@section:conclusion concludes this paper, re-iterating the impact of the results discussed in @section:results and the conclusions drawn from them.
+@section:conclusion concludes this dissertation, re-iterating the impact of the results discussed in @section:results and the conclusions drawn from them.
 
 = Existing Literature <section:literature>
 
@@ -278,7 +278,7 @@ This makes the overall method heuristic.
 #cite(<furini-improved-horizon>, form: "prose") explore such a hybrid approach by introducing a rolling horizon approach to partition a set of aircraft into chunks and solves the runway sequenching problem to optimality for each of these chunks.
 The resulting partial solutions are then re-combined into a complete solution for the original set of aircraft.
 They compare three different approaches to generating such chunks of aircraft, and show that the combination of multiple chunking rules leads to an improvement with respect to an approach that does not utilise chunking.
-A similar rolling horizon algorithm for the branch-and-bound algorithm introduced in this paper is also presented in @section:rolling-horizon.
+A similar rolling horizon algorithm for the branch-and-bound algorithm introduced in this dissertation is also presented in @section:rolling-horizon.
 
 == Paradigms
 
@@ -299,7 +299,7 @@ Moreover, having a hard constraint of or high penalty for positional equity may 
 For instance, there may be an aircraft that must wait for the start of its CTOT slot, during which other aircraft may be sequenced with no additional delay -- however, penalising positional inequity would (wrongfully) penalise such a sequence, forcing the other aircraft to take off after the one with the CTOT slot and increasing the overall delay in the process @atkin-tsat-allocation.
 
 The differing delays that accumulate across different Standard Instrument Departure (SID) routes, hard time window constraints, and CTOT constraints can thus require large maximum position shifts to obtain good runway sequences, thereby challenging the tractability of CPS-based approaches @demaere-pruning-rules.
-The model and branch-and-bound program presented in @section:model and @section:branch-bound of this paper therefore do not employ CPS, making them more practical and viable for real-world scenarios considering departures with complex separation requirements and CTOT compliance.
+The model and branch-and-bound program presented in @section:model and @section:branch-bound of this dissertation therefore do not employ CPS, making them more practical and viable for real-world scenarios considering departures with complex separation requirements and CTOT compliance.
 
 === Pruning Rules
 
@@ -314,7 +314,7 @@ Nor do they consider complex non-linear, non-convex, or discontinuous objective 
 Their pruning rules enable significant reductions of the problem's computational complexity without compromising the optimality of the generated solutions, and are usually much more computationally efficient compared to pruning rules based on local improvements @demaere-pruning-rules.
 
 Furthermore, they show that many of the pruning rules considered transfer to other objective functions commonly considered in the literature, and can thus be used outside of the specific DP approach developed by them @demaere-pruning-rules.
-A subset of these pruning rules is thus incorporated into the model presented in this paper to improve its tractability.
+A subset of these pruning rules is thus incorporated into the model presented in this dissertation to improve its tractability.
 
 = Problem Description <section:problem-description>
 
@@ -1683,7 +1683,7 @@ With regards to the United Nations' Sustainable Development Goals, this project 
 As already mentioned in @section:compare-deice, the branch-and-bound algorithm optimises for stand holding when using an integrated de-icing appraoch, minimising runway holding times and consequently fuel consumption from runway holding.
 This is a significant improvement over approaches that do not consider runway holding times or allocate large amounts of runway holding times without optimising for stand holding.
 
-Some private data was used for the evaluation of the model and branch-and-bound algorithm presented in this paper -- namely the problem instances from London Heathrow.
+Some private data was used for the evaluation of the model and branch-and-bound algorithm presented in this dissertation -- namely the problem instances from London Heathrow.
 This data was only provided when necessary, and was stored on an encrypted hard drive accessible only to the author.
 Additionally, care was taken to prevent the data from being uploaded to a publicly accessible repository, or from being included in the executable files produced when compiling the project.
 This ensured the confidentiality of the data throughout the process.
@@ -1710,7 +1710,7 @@ There would thus be a need to re-investigate pruning rules with the inclusion of
 
 = Conclusion <section:conclusion>
 
-To summarise, this paper introduced a novel mathematical model for the integrated runway sequencing and de-icing problem, and a branch-and-bound algorithm capable of solving the problem to optimality.
+To summarise, this dissertation introduced a novel mathematical model for the integrated runway sequencing and de-icing problem, and a branch-and-bound algorithm capable of solving the problem to optimality.
 A number of techniques from the literature on machine scheduling and runway sequencing were applied to exploit the fundamental characteristics of the problem and improve the efficiency of both the 0-1 MIP formulation and the branch-and-bound program.
 A rolling horizon extension was also developed in order to improve the tractability of the latter.
 
