@@ -122,7 +122,7 @@
     #text(size: 14pt)[*Abstract*]
 
     #box(width: 85%, align(left)[
-        Air transportation demand around the globe has been continuously increasing in recent times -- and is only predicted to increase further, placing growing challenges on airports.
+        Air transportation demand around the globe has been continuously increasing in recent times and is only predicted to increase further, placing growing challenges on airports.
         At the same time, increasing runway capacity at airports is not always feasible due to the limited availability of space and the high costs of infrastructure.
         This underlines the need for intelligent, efficient, and optimal scheduling of runway operations in order to minimise delays and operating costs at airports.
 
@@ -1625,7 +1625,7 @@ In comparison, the average runtime taken by the branch-and-bound program using t
 
 == Impact <section:impact>
 
-The results discussed in @section:compare-deice clearly show that for the objective values achieved by integrated de-icing are no worse than those achieved by decomposed de-icing for all problem instances considered, and are often significantly better.
+The results discussed in @section:compare-deice clearly show that the objective values achieved by integrated de-icing are no worse than those achieved by decomposed de-icing for all problem instances considered, and are often significantly better.
 @table:cplex-branch-bound-heathrow-results confirms that integrated de-icing indeed achieves optimal values for the objective function considered here, when applied without a rolling horizon.
 
 The results reported in @table:branch-bound-heathrow-results for real-world problem instances from London Heathrow show that significant improvements in total delay and CTOT compliance can be obtained when using integrated de-icing as opposed to decomposed de-icing, while also not compromising on runway utilisation and stand holding times.
@@ -1671,7 +1671,7 @@ However, I wished to explore other modules focused on machine learning and compi
 The resources for mathematical modelling and CPLEX shared by my supervisor were extremely helpful in providing me with a foundation in discrete optimisation.
 One of my key takeaways from these resources was the use of sparse data as mentioned in @section:mathematical-program to create lean and efficient mathematical models in CPLEX, which enabled me to improve the tractability of my mathematical program.
 
-My project proposal and interim report mentioned a stretch goal of impleemnting a DP algorithm for integrated runway sequencing and de-icing.
+My project proposal and interim report mentioned a stretch goal of implemnting a DP algorithm for integrated runway sequencing and de-icing.
 I was able to meet all the goals I had initially set out for this project, except for this one.
 During the final few weeks of the second semester, it may have been possible to squeeze in time to explore this goal, but this may have eaten into my time for polishing the existing code and writing my dissertation.
 
