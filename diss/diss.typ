@@ -1123,68 +1123,6 @@ By contrast, the problem instances from Milan Linate are significantly simpler d
     })
 }
 
-// #let runtime-boxwhisker(..args) = {
-//     set text(size: 10pt)
-
-//     canvas({
-//         draw.set-style(
-//             axes: (stroke: 0.5pt + black),
-//             grid: (
-//                 stroke: (
-//                     thickness: 0.5pt,
-//                     dash: "dotted",
-//                 ),
-//             ),
-//             boxwhisker: (
-//                 mark-size: 0.1,
-//             ),
-//         )
-
-//         let data = args.pos().first()
-//         let boxwhisker-data = data.pairs().map(((instance-id, bench)) => {
-//             let samples = bench.samples.sorted().map(n => calc.log(n, base: 10))
-//             let sample-count = samples.len()
-
-//             let median = calc.log(bench.stats.median.point-estimate, base: 10)
-
-//             let q1-idx = (sample-count - 1) * 0.25
-//             let q1-low = samples.at(calc.floor(q1-idx))
-//             let q1-high = samples.at(calc.ceil(q1-idx))
-//             let q1 = q1-low + (q1-high - q1-low) * calc.fract(q1-idx)
-
-//             let q3-idx = (sample-count - 1) * 0.75
-//             let q3-low = samples.at(calc.floor(q3-idx))
-//             let q3-high = samples.at(calc.ceil(q3-idx))
-//             let q3 = q3-low + (q3-high - q3-low) * calc.fract(q3-idx)
-
-//             let iqr = q3 - q1
-
-//             let min = q1 - iqr * 1.5
-//             let max = q3 + iqr * 1.5
-
-//             let low-outliers = samples.filter(n => n < min)
-//             let high-outliers = samples.filter(n => n > max)
-//             let outliers = low-outliers + high-outliers
-
-//             (
-//                 label: instance-id,
-//                 outliers: outliers,
-//                 min: min,
-//                 max: max,
-//                 q1: q1,
-//                 q2: median,
-//                 q3: q3,
-//             )
-//         })
-
-//         chart.boxwhisker(
-//             ..args.named(),
-//             label-key: "label",
-//             boxwhisker-data,
-//         )
-//     })
-// }
-
 @table:branch-bound-heathrow-results lists the makespans, earliest and latest de-icing times, objective values, and total runway hold times for all Heathrow problem instances solved by the branch-and-bound program utilising the three different de-icing approaches.
 The small problem instances were solved without a rolling horizon, while a rolling horizon of 10 was used for the medium and large instances.
 Entries for runs that fail to produce feasible solutions are left blank.
