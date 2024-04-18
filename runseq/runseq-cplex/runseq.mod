@@ -10,6 +10,7 @@ tuple Ctot {
 };
 
 tuple Arrival {
+  	int earliestTime;
   	int baseTime;
   	TimeWindow window;
 };
@@ -21,6 +22,7 @@ tuple Deice {
 }
 
 tuple Departure {
+  	int earliestTime;
   	int baseTime;
   	int tobt;
   	int pushbackDuration;
@@ -39,6 +41,7 @@ tuple Flight {
   	string kind;
   	
   	// NOTE: For both arrivals and departures
+  	int earliestTime;
   	int baseTime;
   	
   	// NOTE: For departures only
@@ -74,10 +77,12 @@ setof(int) Arrivals = { i | i in Flights: isArrival[i] == true };
 setof(int) Departures = { i | i in Flights: isDeparture[i] == true };
 
 Arrival arrs[i in Arrivals] = <
+	flights[i].earliestTime,
 	flights[i].baseTime,
 	flights[i].window>;
 
 Departure deps[i in Departures] = <
+	flights[i].earliestTime,
 	flights[i].baseTime,
 	flights[i].tobt,
 	flights[i].pushbackDuration,
@@ -127,12 +132,12 @@ int hasCtot[i in Flights] = isDeparture[i] == true
 int earliestCtotTime[i in Departures] = deps[i].ctot.targetTime - deps[i].ctot.allowEarly;
 int latestCtotTime[i in Departures] = deps[i].ctot.targetTime + deps[i].ctot.allowLate;
 
-int arrReleaseTime[i in Arrivals] = maxl(arrs[i].baseTime, earliestWindowTime[i]);
+int arrReleaseTime[i in Arrivals] = maxl(arrs[i].earliestTime, arrs[i].baseTime, earliestWindowTime[i]);
 int arrDueTime[i in Arrivals] = latestWindowTime[i];
 
 int depReleaseTime[i in Departures] = hasCtot[i] == true
-	? maxl(deps[i].baseTime, earliestCtotTime[i], earliestWindowTime[i])
-	: maxl(deps[i].baseTime, earliestWindowTime[i]);
+	? maxl(deps[i].earliestTime, deps[i].baseTime, earliestCtotTime[i], earliestWindowTime[i])
+	: maxl(deps[i].earliestTime, deps[i].baseTime, earliestWindowTime[i]);
 int depDueTime[i in Departures] = latestWindowTime[i];
 	
 int releaseTime[i in Flights] = isArrival[i] == true ? arrReleaseTime[i]
