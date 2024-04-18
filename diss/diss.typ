@@ -1711,6 +1711,8 @@ Ideally, this would improve the realism of the model by assigning a cost for the
 However, modelling runway holding times as an objective would no longer permit the application of some of the pruning rules introduced by #cite(<demaere-pruning-rules>, form: "prose") due to the nature of the (new) objective function.
 There would thus be a need to re-investigate pruning rules with the inclusion of runway holding times.
 
+If feasible, I would like to explore some of these extensions and my stretch goal in the near future and work towards publishing this dissertation as a paper in a scientific journal.
+
 = Conclusion <section:conclusion>
 
 To summarise, this dissertation introduced a novel mathematical model for the integrated runway sequencing and de-icing problem, and a branch-and-bound algorithm capable of solving the problem to optimality.
