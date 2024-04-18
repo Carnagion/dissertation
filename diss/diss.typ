@@ -899,8 +899,8 @@ It was also invaluable in finding and eliminating bugs in both implementations d
 = Results <section:results>
 
 This section presents the results (and their impact) of evaluating both the mathematical program as well as the branch-and-bound algorithm.
-As mentioned in @section:introduction, the integrated approach and both decomposed approaches implemented by the latter are compared on the basis of their resulting objective values, runway utilisation, and runway hold times, as well as their runtimes.
-The mathematical program and the branch-and-bound program -- both using integrated de-icing -- are also compared using a subset of the problem instances presented in @section:problem-instances.
+All measurements reported were taken on a computer running Windows 10 (64-bit) with an Intel Core i7-10750H 2.60 GHz CPU and 32 GB of memory, with a sample size of 100.
+Additionally, the runtimes are obtained by running each benchmark with a sample size of 100, with a timer resolution of 1 microsecond.
 
 #let results-table(group-headers: (), side-headers: false, ..datasets) = {
     let header-groups = datasets
@@ -1671,7 +1671,7 @@ However, I wished to explore other modules focused on machine learning and compi
 The resources for mathematical modelling and CPLEX shared by my supervisor were extremely helpful in providing me with a foundation in discrete optimisation.
 One of my key takeaways from these resources was the use of sparse data as mentioned in @section:mathematical-program to create lean and efficient mathematical models in CPLEX, which enabled me to improve the tractability of my mathematical program.
 
-My project proposal and interim report mentioned a stretch goal of implemnting a DP algorithm for integrated runway sequencing and de-icing.
+My project proposal and interim report mentioned a stretch goal of implementing a DP algorithm for integrated runway sequencing and de-icing.
 I was able to meet all the goals I had initially set out for this project, except for this one.
 During the final few weeks of the second semester, it may have been possible to squeeze in time to explore this goal, but this may have eaten into my time for polishing the existing code and writing my dissertation.
 
