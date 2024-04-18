@@ -1,0 +1,1723 @@
+<svg height="702px" width="2908px" xmlns="http://www.w3.org/2000/svg">
+<style type="text/css">
+.hide { fill-opacity: 0; stroke-opacity: 0; }
+            .hide:hover { fill-opacity: 1; stroke-opacity: 1; }
+</style>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="0" y="5"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="0" y="5"/>
+<rect height="2" style="fill: #000000;" width="132" x="0" y="15"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="132" y="5"/>
+<rect height="2" style="fill: #000000;" width="120" x="132" y="15"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="252" y="5"/>
+<rect height="2" style="fill: #000000;" width="120" x="252" y="15"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="372" y="5">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="372" x2="372" y1="0" y2="20"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="370" y="8"/>
+<title>
+Base time (2024-02-24 06:10:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="372" x2="372" y1="3" y2="17"/>
+<rect height="4" style="fill: #000000;" width="4" x="370" y="8"/>
+<title>
+Take-off (2024-02-24 06:10:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="120" y="25"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="120" y="25"/>
+<rect height="2" style="fill: #000000;" width="132" x="120" y="35"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="252" y="25"/>
+<rect height="2" style="fill: #000000;" width="120" x="252" y="35"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="372" y="25"/>
+<rect height="2" style="fill: #000000;" width="120" x="372" y="35"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="492" y="25">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="492" x2="492" y1="20" y2="40"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="490" y="28"/>
+<title>
+Base time (2024-02-24 06:15:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="492" x2="492" y1="23" y2="37"/>
+<rect height="4" style="fill: #000000;" width="4" x="490" y="28"/>
+<title>
+Take-off (2024-02-24 06:15:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="176" y="45"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="176" y="45"/>
+<rect height="2" style="fill: #000000;" width="132" x="176" y="55"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="308" y="45"/>
+<rect height="2" style="fill: #000000;" width="120" x="308" y="55"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="428" y="45"/>
+<rect height="2" style="fill: #000000;" width="120" x="428" y="55"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="56" x="492" y="45">
+<title>
+Delay (140 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="492" x2="492" y1="40" y2="60"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="490" y="48"/>
+<title>
+Base time (2024-02-24 06:15:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="548" x2="548" y1="43" y2="57"/>
+<rect height="4" style="fill: #000000;" width="4" x="546" y="48"/>
+<title>
+Take-off (2024-02-24 06:17:50)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="240" y="65"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="240" y="65"/>
+<rect height="2" style="fill: #000000;" width="132" x="240" y="75"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="372" y="65"/>
+<rect height="2" style="fill: #000000;" width="120" x="372" y="75"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="492" y="65"/>
+<rect height="2" style="fill: #000000;" width="120" x="492" y="75"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="612" y="65">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="612" x2="612" y1="60" y2="80"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="610" y="68"/>
+<title>
+Base time (2024-02-24 06:20:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="612" x2="612" y1="63" y2="77"/>
+<rect height="4" style="fill: #000000;" width="4" x="610" y="68"/>
+<title>
+Take-off (2024-02-24 06:20:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="360" y="85"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="360" y="85"/>
+<rect height="2" style="fill: #000000;" width="132" x="360" y="95"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="492" y="85"/>
+<rect height="2" style="fill: #000000;" width="120" x="492" y="95"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="612" y="85"/>
+<rect height="2" style="fill: #000000;" width="120" x="612" y="95"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="732" y="85">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="732" x2="732" y1="80" y2="100"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="730" y="88"/>
+<title>
+Base time (2024-02-24 06:25:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="732" x2="732" y1="83" y2="97"/>
+<rect height="4" style="fill: #000000;" width="4" x="730" y="88"/>
+<title>
+Take-off (2024-02-24 06:25:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="600" y="105"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="600" y="105"/>
+<rect height="2" style="fill: #000000;" width="132" x="600" y="115"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="732" y="105"/>
+<rect height="2" style="fill: #000000;" width="120" x="732" y="115"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="852" y="105"/>
+<rect height="2" style="fill: #000000;" width="120" x="852" y="115"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="972" y="105">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="972" x2="972" y1="100" y2="120"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="970" y="108"/>
+<title>
+Base time (2024-02-24 06:35:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="972" x2="972" y1="103" y2="117"/>
+<rect height="4" style="fill: #000000;" width="4" x="970" y="108"/>
+<title>
+Take-off (2024-02-24 06:35:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="650.8000000000001" y="125"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="650.8000000000001" y="125"/>
+<rect height="2" style="fill: #000000;" width="132" x="650.8000000000001" y="135"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="782.8000000000001" y="125"/>
+<rect height="2" style="fill: #000000;" width="120" x="782.8000000000001" y="135"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="902.8000000000001" y="125"/>
+<rect height="2" style="fill: #000000;" width="120" x="902.8000000000001" y="135"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="50.800000000000004" x="972" y="125">
+<title>
+Delay (127 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="972" x2="972" y1="120" y2="140"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="970" y="128"/>
+<title>
+Base time (2024-02-24 06:35:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1022.8000000000001" x2="1022.8000000000001" y1="123" y2="137"/>
+<rect height="4" style="fill: #000000;" width="4" x="1020.8000000000001" y="128"/>
+<title>
+Take-off (2024-02-24 06:37:37)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="720" y="145"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="720" y="145"/>
+<rect height="2" style="fill: #000000;" width="132" x="720" y="155"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="852" y="145"/>
+<rect height="2" style="fill: #000000;" width="120" x="852" y="155"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="972" y="145"/>
+<rect height="2" style="fill: #000000;" width="120" x="972" y="155"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="1092" y="145">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1092" x2="1092" y1="140" y2="160"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1090" y="148"/>
+<title>
+Base time (2024-02-24 06:40:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1092" x2="1092" y1="143" y2="157"/>
+<rect height="4" style="fill: #000000;" width="4" x="1090" y="148"/>
+<title>
+Take-off (2024-02-24 06:40:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="840" y="165"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="840" y="165"/>
+<rect height="2" style="fill: #000000;" width="132" x="840" y="175"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="972" y="165"/>
+<rect height="2" style="fill: #000000;" width="120" x="972" y="175"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1092" y="165"/>
+<rect height="2" style="fill: #000000;" width="120" x="1092" y="175"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="1212" y="165">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1212" x2="1212" y1="160" y2="180"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1210" y="168"/>
+<title>
+Base time (2024-02-24 06:45:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1212" x2="1212" y1="163" y2="177"/>
+<rect height="4" style="fill: #000000;" width="4" x="1210" y="168"/>
+<title>
+Take-off (2024-02-24 06:45:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="896" y="185"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="896" y="185"/>
+<rect height="2" style="fill: #000000;" width="132" x="896" y="195"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1028" y="185"/>
+<rect height="2" style="fill: #000000;" width="120" x="1028" y="195"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1148" y="185"/>
+<rect height="2" style="fill: #000000;" width="120" x="1148" y="195"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="56" x="1212" y="185">
+<title>
+Delay (140 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1212" x2="1212" y1="180" y2="200"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1210" y="188"/>
+<title>
+Base time (2024-02-24 06:45:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1268" x2="1268" y1="183" y2="197"/>
+<rect height="4" style="fill: #000000;" width="4" x="1266" y="188"/>
+<title>
+Take-off (2024-02-24 06:47:50)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="681.2" x="612" y="205"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="612" y="205"/>
+<rect height="2" style="fill: #000000;" width="132" x="612" y="215"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="744" y="205"/>
+<rect height="2" style="fill: #000000;" width="120" x="744" y="215"/>
+<title>
+Taxi (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="864" y="205"/>
+<rect height="2" style="fill: #000000;" width="120" x="864" y="215"/>
+<title>
+De-ice (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="984" y="205"/>
+<rect height="2" style="fill: #000000;" width="120" x="984" y="215"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1173.2" y="205"/>
+<rect height="2" style="fill: #000000;" width="120" x="1173.2" y="215"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #1363df" width="69.2" x="1104" y="205"/>
+<rect height="2" style="fill: #000000;" width="69.2" x="1104" y="215"/>
+<title>
+Runway hold (173 seconds)
+</title>
+</g>
+<rect class="hide" height="10" style="fill: #c70039;" width="441.20000000000005" x="852" y="205">
+<title>
+Delay (1103 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="852" x2="852" y1="200" y2="220"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="850" y="208"/>
+<title>
+Base time (2024-02-24 06:30:30)
+</title>
+</g>
+<g>
+<line style="stroke: #000000;" x1="864" x2="864" y1="203" y2="217"/>
+<rect height="4" style="fill: #000000;" width="4" x="862" y="208"/>
+<title>
+De-ice (2024-02-24 06:31:00)
+</title>
+</g>
+<g>
+<line style="stroke: #000000;" x1="1293.2" x2="1293.2" y1="203" y2="217"/>
+<rect height="4" style="fill: #000000;" width="4" x="1291.2" y="208"/>
+<title>
+Take-off (2024-02-24 06:48:53)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="946.4000000000001" y="225"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="946.4000000000001" y="225"/>
+<rect height="2" style="fill: #000000;" width="132" x="946.4000000000001" y="235"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1078.4" y="225"/>
+<rect height="2" style="fill: #000000;" width="120" x="1078.4" y="235"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1198.4" y="225"/>
+<rect height="2" style="fill: #000000;" width="120" x="1198.4" y="235"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="106.4" x="1212" y="225">
+<title>
+Delay (266 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1212" x2="1212" y1="220" y2="240"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1210" y="228"/>
+<title>
+Base time (2024-02-24 06:45:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1318.4" x2="1318.4" y1="223" y2="237"/>
+<rect height="4" style="fill: #000000;" width="4" x="1316.4" y="228"/>
+<title>
+Take-off (2024-02-24 06:49:56)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="972" y="245"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="972" y="245"/>
+<rect height="2" style="fill: #000000;" width="132" x="972" y="255"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1104" y="245"/>
+<rect height="2" style="fill: #000000;" width="120" x="1104" y="255"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1224" y="245"/>
+<rect height="2" style="fill: #000000;" width="120" x="1224" y="255"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="852" x="492" y="245">
+<title>
+Delay (2130 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="492" x2="492" y1="240" y2="260"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="490" y="248"/>
+<title>
+Base time (2024-02-24 06:15:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1344" x2="1344" y1="243" y2="257"/>
+<rect height="4" style="fill: #000000;" width="4" x="1342" y="248"/>
+<title>
+Take-off (2024-02-24 06:51:00)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="996" y="265"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="996" y="265"/>
+<rect height="2" style="fill: #000000;" width="132" x="996" y="275"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1128" y="265"/>
+<rect height="2" style="fill: #000000;" width="120" x="1128" y="275"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1248" y="265"/>
+<rect height="2" style="fill: #000000;" width="120" x="1248" y="275"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="36" x="1332" y="265">
+<title>
+Delay (90 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1332" x2="1332" y1="260" y2="280"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1330" y="268"/>
+<title>
+Base time (2024-02-24 06:50:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1368" x2="1368" y1="263" y2="277"/>
+<rect height="4" style="fill: #000000;" width="4" x="1366" y="268"/>
+<title>
+Take-off (2024-02-24 06:52:00)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1020" y="285"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1020" y="285"/>
+<rect height="2" style="fill: #000000;" width="132" x="1020" y="295"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1152" y="285"/>
+<rect height="2" style="fill: #000000;" width="120" x="1152" y="295"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1272" y="285"/>
+<rect height="2" style="fill: #000000;" width="120" x="1272" y="295"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="60" x="1332" y="285">
+<title>
+Delay (150 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1332" x2="1332" y1="280" y2="300"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1330" y="288"/>
+<title>
+Base time (2024-02-24 06:50:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1392" x2="1392" y1="283" y2="297"/>
+<rect height="4" style="fill: #000000;" width="4" x="1390" y="288"/>
+<title>
+Take-off (2024-02-24 06:53:00)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1045.2" y="305"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1045.2" y="305"/>
+<rect height="2" style="fill: #000000;" width="132" x="1045.2" y="315"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1177.2" y="305"/>
+<rect height="2" style="fill: #000000;" width="120" x="1177.2" y="315"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1297.2" y="305"/>
+<rect height="2" style="fill: #000000;" width="120" x="1297.2" y="315"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="85.2" x="1332" y="305">
+<title>
+Delay (213 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1332" x2="1332" y1="300" y2="320"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1330" y="308"/>
+<title>
+Base time (2024-02-24 06:50:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1417.2" x2="1417.2" y1="303" y2="317"/>
+<rect height="4" style="fill: #000000;" width="4" x="1415.2" y="308"/>
+<title>
+Take-off (2024-02-24 06:54:03)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="584" x="864" y="325"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="864" y="325"/>
+<rect height="2" style="fill: #000000;" width="132" x="864" y="335"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="0" x="996" y="325"/>
+<rect height="2" style="fill: #000000;" width="0" x="996" y="335"/>
+<title>
+Taxi (0 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="996" y="325"/>
+<rect height="2" style="fill: #000000;" width="120" x="996" y="335"/>
+<title>
+De-ice (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1116" y="325"/>
+<rect height="2" style="fill: #000000;" width="120" x="1116" y="335"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1328" y="325"/>
+<rect height="2" style="fill: #000000;" width="120" x="1328" y="335"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #1363df" width="92" x="1236" y="325"/>
+<rect height="2" style="fill: #000000;" width="92" x="1236" y="335"/>
+<title>
+Runway hold (230 seconds)
+</title>
+</g>
+<rect class="hide" height="10" style="fill: #c70039;" width="92" x="1356" y="325">
+<title>
+Delay (230 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1356" x2="1356" y1="320" y2="340"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1354" y="328"/>
+<title>
+Base time (2024-02-24 06:51:30)
+</title>
+</g>
+<g>
+<line style="stroke: #000000;" x1="996" x2="996" y1="323" y2="337"/>
+<rect height="4" style="fill: #000000;" width="4" x="994" y="328"/>
+<title>
+De-ice (2024-02-24 06:36:30)
+</title>
+</g>
+<g>
+<line style="stroke: #000000;" x1="1448" x2="1448" y1="323" y2="337"/>
+<rect height="4" style="fill: #000000;" width="4" x="1446" y="328"/>
+<title>
+Take-off (2024-02-24 06:55:20)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1100" y="345"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1100" y="345"/>
+<rect height="2" style="fill: #000000;" width="132" x="1100" y="355"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1232" y="345"/>
+<rect height="2" style="fill: #000000;" width="120" x="1232" y="355"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1352" y="345"/>
+<rect height="2" style="fill: #000000;" width="120" x="1352" y="355"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="20" x="1452" y="345">
+<title>
+Delay (50 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1452" x2="1452" y1="340" y2="360"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1450" y="348"/>
+<title>
+Base time (2024-02-24 06:55:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1472" x2="1472" y1="343" y2="357"/>
+<rect height="4" style="fill: #000000;" width="4" x="1470" y="348"/>
+<title>
+Take-off (2024-02-24 06:56:20)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1124" y="365"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1124" y="365"/>
+<rect height="2" style="fill: #000000;" width="132" x="1124" y="375"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1256" y="365"/>
+<rect height="2" style="fill: #000000;" width="120" x="1256" y="375"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1376" y="365"/>
+<rect height="2" style="fill: #000000;" width="120" x="1376" y="375"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="44" x="1452" y="365">
+<title>
+Delay (110 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1452" x2="1452" y1="360" y2="380"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1450" y="368"/>
+<title>
+Base time (2024-02-24 06:55:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1496" x2="1496" y1="363" y2="377"/>
+<rect height="4" style="fill: #000000;" width="4" x="1494" y="368"/>
+<title>
+Take-off (2024-02-24 06:57:20)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1148" y="385"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1148" y="385"/>
+<rect height="2" style="fill: #000000;" width="132" x="1148" y="395"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1280" y="385"/>
+<rect height="2" style="fill: #000000;" width="120" x="1280" y="395"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1400" y="385"/>
+<rect height="2" style="fill: #000000;" width="120" x="1400" y="395"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="68" x="1452" y="385">
+<title>
+Delay (170 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1452" x2="1452" y1="380" y2="400"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1450" y="388"/>
+<title>
+Base time (2024-02-24 06:55:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1520" x2="1520" y1="383" y2="397"/>
+<rect height="4" style="fill: #000000;" width="4" x="1518" y="388"/>
+<title>
+Take-off (2024-02-24 06:58:20)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1204" y="405"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1204" y="405"/>
+<rect height="2" style="fill: #000000;" width="132" x="1204" y="415"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1336" y="405"/>
+<rect height="2" style="fill: #000000;" width="120" x="1336" y="415"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1456" y="405"/>
+<rect height="2" style="fill: #000000;" width="120" x="1456" y="415"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="484" x="1092" y="405">
+<title>
+Delay (1210 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1092" x2="1092" y1="400" y2="420"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1090" y="408"/>
+<title>
+Base time (2024-02-24 06:40:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1576" x2="1576" y1="403" y2="417"/>
+<rect height="4" style="fill: #000000;" width="4" x="1574" y="408"/>
+<title>
+Take-off (2024-02-24 07:00:40)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1229.2" y="425"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1229.2" y="425"/>
+<rect height="2" style="fill: #000000;" width="132" x="1229.2" y="435"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1361.2" y="425"/>
+<rect height="2" style="fill: #000000;" width="120" x="1361.2" y="435"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1481.2" y="425"/>
+<rect height="2" style="fill: #000000;" width="120" x="1481.2" y="435"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="29.200000000000003" x="1572" y="425">
+<title>
+Delay (73 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1572" x2="1572" y1="420" y2="440"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1570" y="428"/>
+<title>
+Base time (2024-02-24 07:00:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1601.2" x2="1601.2" y1="423" y2="437"/>
+<rect height="4" style="fill: #000000;" width="4" x="1599.2" y="428"/>
+<title>
+Take-off (2024-02-24 07:01:43)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1253.2" y="445"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1253.2" y="445"/>
+<rect height="2" style="fill: #000000;" width="132" x="1253.2" y="455"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1385.2" y="445"/>
+<rect height="2" style="fill: #000000;" width="120" x="1385.2" y="455"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1505.2" y="445"/>
+<rect height="2" style="fill: #000000;" width="120" x="1505.2" y="455"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="173.20000000000002" x="1452" y="445">
+<title>
+Delay (433 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1452" x2="1452" y1="440" y2="460"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1450" y="448"/>
+<title>
+Base time (2024-02-24 06:55:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1625.2" x2="1625.2" y1="443" y2="457"/>
+<rect height="4" style="fill: #000000;" width="4" x="1623.2" y="448"/>
+<title>
+Take-off (2024-02-24 07:02:43)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1320" y="465"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1320" y="465"/>
+<rect height="2" style="fill: #000000;" width="132" x="1320" y="475"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1452" y="465"/>
+<rect height="2" style="fill: #000000;" width="120" x="1452" y="475"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1572" y="465"/>
+<rect height="2" style="fill: #000000;" width="120" x="1572" y="475"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="1692" y="465">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1692" x2="1692" y1="460" y2="480"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1690" y="468"/>
+<title>
+Base time (2024-02-24 07:05:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1692" x2="1692" y1="463" y2="477"/>
+<rect height="4" style="fill: #000000;" width="4" x="1690" y="468"/>
+<title>
+Take-off (2024-02-24 07:05:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1344" y="485"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1344" y="485"/>
+<rect height="2" style="fill: #000000;" width="132" x="1344" y="495"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1476" y="485"/>
+<rect height="2" style="fill: #000000;" width="120" x="1476" y="495"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1596" y="485"/>
+<rect height="2" style="fill: #000000;" width="120" x="1596" y="495"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="24" x="1692" y="485">
+<title>
+Delay (60 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1692" x2="1692" y1="480" y2="500"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1690" y="488"/>
+<title>
+Base time (2024-02-24 07:05:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1716" x2="1716" y1="483" y2="497"/>
+<rect height="4" style="fill: #000000;" width="4" x="1714" y="488"/>
+<title>
+Take-off (2024-02-24 07:06:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1368" y="505"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1368" y="505"/>
+<rect height="2" style="fill: #000000;" width="132" x="1368" y="515"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1500" y="505"/>
+<rect height="2" style="fill: #000000;" width="120" x="1500" y="515"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1620" y="505"/>
+<rect height="2" style="fill: #000000;" width="120" x="1620" y="515"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="48" x="1692" y="505">
+<title>
+Delay (120 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1692" x2="1692" y1="500" y2="520"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1690" y="508"/>
+<title>
+Base time (2024-02-24 07:05:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1740" x2="1740" y1="503" y2="517"/>
+<rect height="4" style="fill: #000000;" width="4" x="1738" y="508"/>
+<title>
+Take-off (2024-02-24 07:07:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1393.2" y="525"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1393.2" y="525"/>
+<rect height="2" style="fill: #000000;" width="132" x="1393.2" y="535"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1525.2" y="525"/>
+<rect height="2" style="fill: #000000;" width="120" x="1525.2" y="535"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1645.2" y="525"/>
+<rect height="2" style="fill: #000000;" width="120" x="1645.2" y="535"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="73.2" x="1692" y="525">
+<title>
+Delay (183 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1692" x2="1692" y1="520" y2="540"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1690" y="528"/>
+<title>
+Base time (2024-02-24 07:05:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1765.2" x2="1765.2" y1="523" y2="537"/>
+<rect height="4" style="fill: #000000;" width="4" x="1763.2" y="528"/>
+<title>
+Take-off (2024-02-24 07:08:33)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1440" y="545"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1440" y="545"/>
+<rect height="2" style="fill: #000000;" width="132" x="1440" y="555"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1572" y="545"/>
+<rect height="2" style="fill: #000000;" width="120" x="1572" y="555"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1692" y="545"/>
+<rect height="2" style="fill: #000000;" width="120" x="1692" y="555"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="1812" y="545">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1812" x2="1812" y1="540" y2="560"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1810" y="548"/>
+<title>
+Base time (2024-02-24 07:10:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1812" x2="1812" y1="543" y2="557"/>
+<rect height="4" style="fill: #000000;" width="4" x="1810" y="548"/>
+<title>
+Take-off (2024-02-24 07:10:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1476" y="565"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1476" y="565"/>
+<rect height="2" style="fill: #000000;" width="132" x="1476" y="575"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1608" y="565"/>
+<rect height="2" style="fill: #000000;" width="120" x="1608" y="575"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1728" y="565"/>
+<rect height="2" style="fill: #000000;" width="120" x="1728" y="575"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="36" x="1812" y="565">
+<title>
+Delay (90 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1812" x2="1812" y1="560" y2="580"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1810" y="568"/>
+<title>
+Base time (2024-02-24 07:10:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1848" x2="1848" y1="563" y2="577"/>
+<rect height="4" style="fill: #000000;" width="4" x="1846" y="568"/>
+<title>
+Take-off (2024-02-24 07:12:00)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1500" y="585"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1500" y="585"/>
+<rect height="2" style="fill: #000000;" width="132" x="1500" y="595"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1632" y="585"/>
+<rect height="2" style="fill: #000000;" width="120" x="1632" y="595"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1752" y="585"/>
+<rect height="2" style="fill: #000000;" width="120" x="1752" y="595"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="60" x="1812" y="585">
+<title>
+Delay (150 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1812" x2="1812" y1="580" y2="600"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1810" y="588"/>
+<title>
+Base time (2024-02-24 07:10:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1872" x2="1872" y1="583" y2="597"/>
+<rect height="4" style="fill: #000000;" width="4" x="1870" y="588"/>
+<title>
+Take-off (2024-02-24 07:13:00)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="492" x="1440" y="605"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1440" y="605"/>
+<rect height="2" style="fill: #000000;" width="132" x="1440" y="615"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="0" x="1572" y="605"/>
+<rect height="2" style="fill: #000000;" width="0" x="1572" y="615"/>
+<title>
+Taxi (0 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1572" y="605"/>
+<rect height="2" style="fill: #000000;" width="120" x="1572" y="615"/>
+<title>
+De-ice (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1692" y="605"/>
+<rect height="2" style="fill: #000000;" width="120" x="1692" y="615"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1812" y="605"/>
+<rect height="2" style="fill: #000000;" width="120" x="1812" y="615"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #1363df" width="0" x="1812" y="605"/>
+<rect height="2" style="fill: #000000;" width="0" x="1812" y="615"/>
+<title>
+Runway hold (0 seconds)
+</title>
+</g>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="1932" y="605">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1932" x2="1932" y1="600" y2="620"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1930" y="608"/>
+<title>
+Base time (2024-02-24 07:15:30)
+</title>
+</g>
+<g>
+<line style="stroke: #000000;" x1="1572" x2="1572" y1="603" y2="617"/>
+<rect height="4" style="fill: #000000;" width="4" x="1570" y="608"/>
+<title>
+De-ice (2024-02-24 07:00:30)
+</title>
+</g>
+<g>
+<line style="stroke: #000000;" x1="1932" x2="1932" y1="603" y2="617"/>
+<rect height="4" style="fill: #000000;" width="4" x="1930" y="608"/>
+<title>
+Take-off (2024-02-24 07:15:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1584" y="625"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1584" y="625"/>
+<rect height="2" style="fill: #000000;" width="132" x="1584" y="635"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1716" y="625"/>
+<rect height="2" style="fill: #000000;" width="120" x="1716" y="635"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1836" y="625"/>
+<rect height="2" style="fill: #000000;" width="120" x="1836" y="635"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="24" x="1932" y="625">
+<title>
+Delay (60 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1932" x2="1932" y1="620" y2="640"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1930" y="628"/>
+<title>
+Base time (2024-02-24 07:15:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1956" x2="1956" y1="623" y2="637"/>
+<rect height="4" style="fill: #000000;" width="4" x="1954" y="628"/>
+<title>
+Take-off (2024-02-24 07:16:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1608" y="645"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1608" y="645"/>
+<rect height="2" style="fill: #000000;" width="132" x="1608" y="655"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1740" y="645"/>
+<rect height="2" style="fill: #000000;" width="120" x="1740" y="655"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1860" y="645"/>
+<rect height="2" style="fill: #000000;" width="120" x="1860" y="655"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="48" x="1932" y="645">
+<title>
+Delay (120 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="1932" x2="1932" y1="640" y2="660"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="1930" y="648"/>
+<title>
+Base time (2024-02-24 07:15:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="1980" x2="1980" y1="643" y2="657"/>
+<rect height="4" style="fill: #000000;" width="4" x="1978" y="648"/>
+<title>
+Take-off (2024-02-24 07:17:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="1680" y="665"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="1680" y="665"/>
+<rect height="2" style="fill: #000000;" width="132" x="1680" y="675"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1812" y="665"/>
+<rect height="2" style="fill: #000000;" width="120" x="1812" y="675"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="1932" y="665"/>
+<rect height="2" style="fill: #000000;" width="120" x="1932" y="675"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="0" x="2052" y="665">
+<title>
+Delay (0 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="2052" x2="2052" y1="660" y2="680"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="2050" y="668"/>
+<title>
+Base time (2024-02-24 07:20:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="2052" x2="2052" y1="663" y2="677"/>
+<rect height="4" style="fill: #000000;" width="4" x="2050" y="668"/>
+<title>
+Take-off (2024-02-24 07:20:30)
+</title>
+</g>
+</g>
+<g>
+<rect height="10" pointer-events="none" style="fill: #cccccc;" width="372" x="2172" y="685"/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="132" x="2172" y="685"/>
+<rect height="2" style="fill: #000000;" width="132" x="2172" y="695"/>
+<title>
+Pushback (330 seconds)
+</title>
+</g>
+<g/>
+<g/>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="2304" y="685"/>
+<rect height="2" style="fill: #000000;" width="120" x="2304" y="695"/>
+<title>
+Taxi out (300 seconds)
+</title>
+</g>
+<g class="hide">
+<rect height="10" style="fill: #ffd23f;" width="120" x="2424" y="685"/>
+<rect height="2" style="fill: #000000;" width="120" x="2424" y="695"/>
+<title>
+Lineup (300 seconds)
+</title>
+</g>
+<g/>
+<rect class="hide" height="10" style="fill: #c70039;" width="492" x="2052" y="685">
+<title>
+Delay (1230 seconds)
+</title>
+</rect>
+<g>
+<line stroke-dasharray="2 1" style="stroke: #000000;" x1="2052" x2="2052" y1="680" y2="700"/>
+<rect height="4" style="stroke: #000000; fill-opacity: 0;" width="4" x="2050" y="688"/>
+<title>
+Base time (2024-02-24 07:20:30)
+</title>
+</g>
+<g/>
+<g>
+<line style="stroke: #000000;" x1="2544" x2="2544" y1="683" y2="697"/>
+<rect height="4" style="fill: #000000;" width="4" x="2542" y="688"/>
+<title>
+Take-off (2024-02-24 07:41:00)
+</title>
+</g>
+</g>
+</svg>

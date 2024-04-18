@@ -799,7 +799,12 @@ The full rolling horizon extension is shown below.
 The visualiser takes any sequence of landing or take-off times and de-icing times, and produces a Scalable Vector Graphic (SVG) file showing.
 SVG was chosen as the image format due to wide support for SVG rendering in many browsers and image applications, and because its XML-like syntax makes SVG files relatively easy to create and manipulate within code.
 
-// TODO: Add example visual
+#figure(
+    image("15.svg", width: 100%, alt: "Visualiser output for an instance with 35 aircraft"),
+    caption: [
+        Visualiser output for an instance with 35 aircraft
+    ],
+)
 
 Time increases along the horizontal axis.
 The aircraft that are sequenced are laid out vertically, from the first to land or take off at the top to the last at the bottom.
