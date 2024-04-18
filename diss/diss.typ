@@ -94,17 +94,17 @@
 
     #v(0.2fr)
 
-    #let email(email) = link("mailto:" + email, raw(email))
+    _By_\
+    20372495\
 
-    #stack(dir: ltr, spacing: 1fr)[
-        _By_\
-        20372495\
-        #email("psyim3@nottingham.ac.uk")\
-    ][
-        _Supervised By_\
-        Geert De Maere\
-        #email("geert.demaere@nottingham.ac.uk")\
-    ]
+    #v(0.2fr)
+
+    #let email(email) = link("mailto:" + email, raw(email))
+    
+    _Supervised By_\
+    Geert De Maere\
+    #email("geert.demaere@nottingham.ac.uk")\
+    
 
     #v(0.2fr)
 
