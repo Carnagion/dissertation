@@ -44,10 +44,10 @@ impl Flight {
         }
     }
 
-    pub fn window(&self) -> Option<&TimeWindow> {
+    pub fn earliest_time(&self) -> NaiveDateTime {
         match self {
-            Self::Arr(arr) => arr.window.as_ref(),
-            Self::Dep(dep) => dep.window.as_ref(),
+            Self::Arr(arr) => arr.earliest_time,
+            Self::Dep(dep) => dep.earliest_time,
         }
     }
 
@@ -55,6 +55,13 @@ impl Flight {
         match self {
             Self::Arr(arr) => arr.base_time,
             Self::Dep(dep) => dep.base_time,
+        }
+    }
+
+    pub fn window(&self) -> Option<&TimeWindow> {
+        match self {
+            Self::Arr(arr) => arr.window.as_ref(),
+            Self::Dep(dep) => dep.window.as_ref(),
         }
     }
 
@@ -81,6 +88,7 @@ impl From<Departure> for Flight {
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Arrival {
+    pub earliest_time: NaiveDateTime,
     pub base_time: NaiveDateTime,
     pub window: Option<TimeWindow>,
 }
@@ -88,7 +96,7 @@ pub struct Arrival {
 impl Arrival {
     pub fn release_time(&self) -> NaiveDateTime {
         match &self.window {
-            Some(window) => self.base_time.min(window.earliest),
+            Some(window) => self.earliest_time.max(self.base_time).max(window.earliest),
             None => self.base_time,
         }
     }
@@ -98,6 +106,7 @@ impl Arrival {
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Departure {
+    pub earliest_time: NaiveDateTime,
     pub base_time: NaiveDateTime,
     pub tobt: NaiveDateTime,
     #[serde_as(as = "DurationSeconds")]
@@ -113,7 +122,7 @@ pub struct Departure {
 
 impl Departure {
     pub fn release_time(&self) -> NaiveDateTime {
-        let mut release = self.base_time;
+        let mut release = self.earliest_time.max(self.base_time);
         if let Some(window) = &self.window {
             release = release.max(window.earliest);
         }

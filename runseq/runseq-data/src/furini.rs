@@ -80,8 +80,8 @@ fn parse_flight(line: &str) -> Result<Flight, FromFuriniError> {
     let base_time = next_part(&mut parts)?;
     // NOTE: The Furini datasets don't include dates, only times, so we have to manually insert a date for `NaiveDateTime`
     //       to parse correctly. 19 April 2024 is chosen as it is the submission date for this dissertation.
-    let base_time = format!("2024-04-19 {}", base_time);
-    let base_time = NaiveDateTime::parse_from_str(&base_time, "%F %H%M")?;
+    let earliest_time = format!("2024-04-19 {}", base_time);
+    let earliest_time = NaiveDateTime::parse_from_str(&earliest_time, "%F %H%M")?;
 
     // NOTE: I don't actually know what this field is for. It's used in the separation
     //       matrix, but doesn't seem to serve any actual purpose.
@@ -89,12 +89,14 @@ fn parse_flight(line: &str) -> Result<Flight, FromFuriniError> {
 
     let flight = match kind {
         "A" => Ok(Flight::Arr(Arrival {
-            base_time,
+            earliest_time,
+            base_time: earliest_time,
             window: None,
         })),
         "D" => Ok(Flight::Dep(Departure {
-            base_time,
-            tobt: base_time - MINUTE * 25,
+            earliest_time,
+            base_time: earliest_time,
+            tobt: earliest_time - MINUTE * 25,
             pushback_duration: MINUTE * 5,
             deice: Some(Deice {
                 taxi_duration: MINUTE * 5,

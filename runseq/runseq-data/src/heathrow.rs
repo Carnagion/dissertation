@@ -106,15 +106,16 @@ where
                         allow_late: MINUTE * 10,
                     });
 
-                    let mut base_time = flight.tobt + pushback_duration;
+                    let mut earliest_time = flight.tobt + pushback_duration;
                     if let Some(deice) = &deice {
-                        base_time += deice.taxi_duration;
-                        base_time += deice.duration;
+                        earliest_time += deice.taxi_duration;
+                        earliest_time += deice.duration;
                     }
-                    base_time += taxi_duration + lineup_duration;
+                    earliest_time += taxi_duration + lineup_duration;
 
                     Flight::Dep(Departure {
-                        base_time,
+                        earliest_time,
+                        base_time: earliest_time,
                         tobt: flight.tobt,
                         pushback_duration,
                         deice,
