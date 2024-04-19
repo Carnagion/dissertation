@@ -1,4 +1,7 @@
+//! Helpers to visualise sequences of scheduled aircraft landings, take-offs, and de-icing times.
+
 #![deny(rust_2018_idioms)]
+#![warn(missing_docs)]
 
 use chrono::NaiveDateTime;
 
@@ -52,16 +55,24 @@ macro_rules! title {
     }
 }
 
+/// A runway sequence visualiser.
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub struct Visualiser {
     _priv: (),
 }
 
 impl Visualiser {
+    /// Creates a new visualiser with the default settings.
     pub fn new() -> Self {
         Self { _priv: () }
     }
 
+    /// Visualises a runway sequence produced after solving an [`Instance`], returning [`None`] if the sequence is empty.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the number of aircraft in the sequence does not match the number of aircraft in the instance,
+    /// which can happen if the given runway sequence was not produced by solving the given instance.
     pub fn visualise(&self, schedule: &[Schedule], instance: &Instance) -> Option<Document> {
         let start = start_time(schedule, instance)?;
         let end = end_time(schedule, instance)?;
