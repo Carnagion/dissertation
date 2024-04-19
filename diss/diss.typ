@@ -105,12 +105,15 @@
     Geert De Maere\
     #email("geert.demaere@nottingham.ac.uk")\
     
-
     #v(0.2fr)
 
     MSci. Hons. Computer Science with Artificial Intelligence\
     University of Nottingham\
-    2023-2024
+    2023-2024\
+
+    #v(0.2fr)
+
+    I hereby declare that this dissertation is all my own work, except as indicated in the text: I. M.
 ]
 #v(1fr)
 
