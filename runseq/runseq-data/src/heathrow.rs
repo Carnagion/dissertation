@@ -1,3 +1,5 @@
+//! Conversion from London Heathrow datasets.
+
 use std::{collections::HashMap, num::ParseIntError, time::Duration};
 
 use chrono::ParseError;
@@ -21,6 +23,7 @@ const DATETIME_FMT: &'static str = "%Y-%m-%d %H:%M:%S";
 
 const MINUTE: Duration = Duration::from_secs(60);
 
+/// Parses all problem instances in a Heathrow dataset into [`Instance`]s.
 pub fn from_heathrow(
     flights: &str,
     pushback_durs: &str,
@@ -35,6 +38,8 @@ pub fn from_heathrow(
     )
 }
 
+/// Parses all problem instances in a Heathrow dataset into [`Instances`], limiting the number of aircraft to the given
+/// aircraft limit and stopping after the given instance limit.
 pub fn from_heathrow_with_limits(
     flights: &str,
     pushback_durs: &str,
@@ -148,18 +153,25 @@ fn parse_pushback_durs<'a>(
         .collect()
 }
 
+/// The error returned when parsing a Heathrow problem instance fails.
 #[derive(Debug, Error)]
 pub enum FromHeathrowError {
+    /// One or more parts of the aircraft data is missing.
     #[error("missing one or more parts of data")]
     MissingData,
+    /// A datetime (base time, TOBT, CTOT, etc.) could not be parsed.
     #[error("invalid datetime: {}", .0)]
     InvalidDateTime(#[from] ParseError),
+    /// A duration (de-icing duration, taxi duration, etc.) could not be parsed.
     #[error("invalid duration: {}", .0)]
     InvalidDuration(ParseIntError),
+    /// The speed group of an aircraft could not be parsed.
     #[error("invalid speed group: {}", .0)]
     InvalidSpeedGroup(ParseIntError),
+    /// The weight class of an aircraft could not be parsed.
     #[error(transparent)]
     InvalidWeightClass(#[from] ParseWeightClassError),
+    /// The de-icing status of an aircraft could not be parsed.
     #[error(transparent)]
     InvalidDeiceStatus(#[from] ParseDeiceStatusError),
 }

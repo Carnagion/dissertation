@@ -1,3 +1,5 @@
+//! Conversion of [`Instance`]s to Excel data.
+
 use chrono::NaiveDateTime;
 
 use rust_xlsxwriter::{
@@ -14,6 +16,7 @@ use serde::Deserialize;
 
 use runseq_instance::{flight::Flight, Instance};
 
+/// Serializes an [`Instance`] as an Excel workbook.
 pub fn to_xlsx(instance: &Instance) -> Result<Workbook, XlsxError> {
     let mut workbook = Workbook::new();
 

@@ -1,3 +1,7 @@
+//! Conversion from Milan Linate datasets.
+//!
+//! These problem instances are available on the University of Bologna's [online library of codes and instances](https://site.unibo.it/operations-research/en/research/library-of-codes-and-instances-1).
+
 use std::{num::ParseIntError, time::Duration};
 
 use chrono::{NaiveDateTime, ParseError};
@@ -12,10 +16,12 @@ use runseq_instance::{
 
 const MINUTE: Duration = Duration::from_secs(60);
 
+/// Parses a problem instance from Milan Linate into an [`Instance`].
 pub fn from_furini(flights: &str, separations: &str) -> Result<Instance, FromFuriniError> {
     from_furini_with_limit(flights, separations, usize::MAX)
 }
 
+/// Parses a problem instance from Milan Linate into an [`Instance`], stopping after a certain aircraft limit.
 pub fn from_furini_with_limit(
     flights: &str,
     separations: &str,
@@ -114,23 +120,38 @@ fn parse_flight(line: &str) -> Result<Flight, FromFuriniError> {
     Ok(flight)
 }
 
+/// The error returned when parsing a Milan problem instance fails.
 #[derive(Debug, Error)]
 pub enum FromFuriniError {
+    /// One or more parts of the aircraft data is missing.
     #[error("missing one or more parts of data")]
     MissingData,
+    /// The flight count could not be parsed.
     #[error("invalid flight count: {}", .0)]
     InvalidFlightCount(#[from] ParseIntError),
+    /// The expected flight count does not match the actual number of aircraft in the data.
     #[error("mismatched flight count: expected {}, got {}", .expected, .actual)]
-    MismatchedFlightCount { expected: usize, actual: usize },
+    MismatchedFlightCount {
+        /// The expected flight count.
+        expected: usize,
+        /// The actual number of aircraft parsed.
+        actual: usize,
+    },
+    /// A flight kind (arrival or departure) was invalid.
     #[error("invalid flight kind: {}", .0)]
     InvalidKind(String),
+    /// The base time of an aircraft could not be parsed.
     #[error("invalid flight base time: {}", .0)]
     InvalidTime(#[from] ParseError),
+    /// The separation matrix is not square.
     #[error("invalid separation matrix dimensions")]
     InvalidSeparationLen(#[from] SeparationsLenError),
+    /// The dimensions of the separation matrix do not match the number of aircraft.
     #[error("flight count is {}, but separation matrix has {} rows and columns", .flight_count, .separation_count)]
     MismatchedFlightSeparationsLen {
+        /// The number of aircraft.
         flight_count: usize,
+        /// The number of aircraft according to the separation matrix.
         separation_count: usize,
     },
 }
