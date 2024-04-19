@@ -1,3 +1,10 @@
+//! A two-dimensional, non-resizable aircraft separation matrix.
+//!
+//! Separation matrices are always square and cannot be resized without reassigning their value -
+//! although their elements can be mutated.
+//! This is due to the logical invariant that must be upheld by [`Instance`](crate::Instance) - the dimensions of
+//! the separation matrix must match the number of aircraft in the instance.
+
 use std::{
     marker::PhantomData,
     ops::{Deref, DerefMut, Index, IndexMut},
@@ -15,6 +22,11 @@ use serde_with::{
 
 use thiserror::Error;
 
+/// A square aircraft separation matrix represented as a one-dimensional slice.
+///
+/// The individual separation values in the matrix can be mutated, but the matrix as a whole cannot
+/// be resized.
+/// See the [module-level documentation](self) for more details.
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "Vec<Vec<Duration>>", into = "Vec<Vec<Duration>>")]
 pub struct Separations {
@@ -25,6 +37,8 @@ pub struct Separations {
 }
 
 impl Separations {
+    /// Creates a new separation matrix from the given separations and length, returning [`None`] if there
+    /// are not exactly `len * len` elements.
     pub fn new<S>(data: S, len: usize) -> Option<Self>
     where
         S: Into<Box<[Duration]>>,
@@ -33,32 +47,43 @@ impl Separations {
         (data.len() == len * len).then_some(Self { data, len })
     }
 
+    /// Returns the length of the separation matrix.
+    ///
+    /// This is the number of elements per row or per column.
     pub fn len(&self) -> usize {
         self.len
     }
 
+    /// Returns `true` if the separation matrix is empty, and `false` otherwise.
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
 
+    /// Returns a reference to the separation between two aircraft `from` and `to`, where `from` lands
+    /// or takes off before `to`.
     pub fn get(&self, from: usize, to: usize) -> Option<&Duration> {
         let idx = self.index_of(from, to);
         self.data.get(idx)
     }
 
+    /// Returns a mutable reference to the separation between two aircraft `from` and `to`, where `from` lands
+    /// or takes off before `to`.
     pub fn get_mut(&mut self, from: usize, to: usize) -> Option<&mut Duration> {
         let idx = self.index_of(from, to);
         self.data.get_mut(idx)
     }
 
+    /// Returns the one-dimensional index of a separation indexed by a row and column (i.e. preceeding and succeeding aircraft).
     pub fn index_of(&self, from: usize, to: usize) -> usize {
         from * self.len + to
     }
 
+    /// Extracts the slice of separations from the matrix, consuming it in the process.
     pub fn into_boxed_slice(self) -> Box<[Duration]> {
         self.data
     }
 
+    /// Converts the separation matrix into a two-dimensional grid of [`Vec`]s.
     pub fn to_grid(&self) -> Vec<Vec<Duration>> {
         let len = self.len;
         let mut grid = Vec::with_capacity(len);
@@ -97,6 +122,7 @@ impl IndexMut<(usize, usize)> for Separations {
     }
 }
 
+/// The error produced when trying to construct a [`Separations`] with invalid dimensions.
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Error)]
 #[error("separation matrix has invalid size")]
 pub struct SeparationsLenError;
@@ -128,23 +154,41 @@ impl TryFrom<Vec<Vec<Duration>>> for Separations {
     }
 }
 
+/// A wrapper type for a mutably borrowed separation matrix.
+///
+/// This type exists because an [`Instance`] cannot hand out a mutable reference to its [`Separations`] without
+/// potentially breaking its logical invariant.
+/// [`SeparationsMut`] bridges this gap, allows an instance's separation matrix to be mutated without being resized.
+/// See the [module-level documentation](self) for more details.
 pub struct SeparationsMut<'a> {
     pub(super) inner: &'a mut Separations,
 }
 
 impl SeparationsMut<'_> {
+    /// Returns the length of the underlying separation matrix.
+    ///
+    /// See [`Separations::len`].
     pub fn len(&self) -> usize {
         self.inner.len()
     }
 
+    /// Checks if the underlying separation matrix is empty.
+    ///
+    /// See [`Separations::is_empty`].
     pub fn is_empty(&self) -> bool {
         self.inner.is_empty()
     }
 
+    /// Returns a reference to an element in the separation matrix.
+    ///
+    /// See [`Separations::get`].
     pub fn get(&self, from: usize, to: usize) -> Option<&Duration> {
         self.inner.get(from, to)
     }
 
+    /// Returns a mutable reference to an element in the separation matrix.
+    ///
+    /// See [`Separations::get_mut`].
     pub fn get_mut(&mut self, from: usize, to: usize) -> Option<&mut Duration> {
         self.inner.get_mut(from, to)
     }
@@ -181,6 +225,7 @@ impl IndexMut<(usize, usize)> for SeparationsMut<'_> {
     }
 }
 
+/// A helper type for use with [`serde_with`] to serialize separations as seconds.
 pub struct SeparationsAsSeconds<Fmt = u64, Strt = Strict>(PhantomData<(Fmt, Strt)>);
 
 impl<'de, Fmt, Strt> DeserializeAs<'de, Separations> for SeparationsAsSeconds<Fmt, Strt>
