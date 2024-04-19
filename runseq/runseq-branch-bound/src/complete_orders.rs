@@ -5,6 +5,8 @@ use runseq_instance::{flight::Flight, Instance};
 pub fn separation_identical_complete_orders(instance: &Instance) -> Vec<Vec<usize>> {
     let mut sets = Vec::<Vec<_>>::with_capacity(instance.flights().len().min(1));
 
+    // Goes through all pairs of aircraft and checks if they are separation-identical.
+    // If they are, they are put in the first set for which a complete order exists between all of them.
     'unclassified: for j in 0..instance.flights().len() {
         'sets: for set in &mut sets {
             let separation_identical_complete_order = set.iter().copied().all(|i| {
@@ -25,6 +27,10 @@ pub fn separation_identical_complete_orders(instance: &Instance) -> Vec<Vec<usiz
         sets.push(set);
     }
 
+    // The aircraft in each set are sorted in ascending order according to their release times,
+    // base times, and latest times in their time windows.
+    // If two aircraft have the same values for all of these, the one with the lower index (which will
+    // always be unique) is put first.
     for set in &mut sets {
         set.sort_unstable_by(|&flight_idx, &other_idx| {
             let flight = &instance.flights()[flight_idx];
@@ -76,7 +82,9 @@ fn has_no_ctot(flight: &Flight) -> bool {
 
 fn cmp_latest(flight: &Flight, other: &Flight) -> Ordering {
     match (flight.window(), other.window()) {
+        // The latest time of an aircraft does not matter if the aircraft being compared has no time window.
         (_, None) => Ordering::Equal,
+        // The latest time of an aircraft that has no time window is always greater than the latest time of any other aircraft.
         (None, Some(_)) => Ordering::Greater,
         (Some(flight_window), Some(other_window)) => {
             flight_window.latest().cmp(&other_window.latest())

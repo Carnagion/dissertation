@@ -126,6 +126,8 @@ pub fn departure_cost(sched: &DepartureSchedule, dep: &Departure) -> Cost {
     let runway_hold = match sched.deice {
         None => 0,
         Some(deice) => {
+            // The runway hold time can be calculated as the difference between the departure's latest possible
+            // de-icing time (according to its scheduled take-off time) and its actual de-icing time.
             let deice_duration = dep.deice.as_ref().unwrap().duration;
             let runway_hold =
                 sched.takeoff - dep.lineup_duration - dep.taxi_duration - deice_duration - deice;
@@ -155,6 +157,12 @@ pub fn schedule_cost(sched: &Schedule, instance: &Instance) -> Cost {
     }
 }
 
+/// Calculates the objective value of a runway sequence.
+///
+/// # Panics
+///
+/// This function will panic if the number of aircraft in the sequence does not match the number of aircraft in the instance,
+/// which can happen if the given runway sequence was not produced by solving the given instance.
 pub fn solution_cost(solution: &[Schedule], instance: &Instance) -> Cost {
     solution
         .iter()
@@ -167,8 +175,17 @@ pub fn estimated_remaining_cost(
     state: &BranchBoundState,
     last_sched: &Schedule,
 ) -> Cost {
+    // NOTE: A minimum separation of zero seconds is used as this seems to provide better lower bounds.
     let min_sep = Duration::from_secs(0);
 
+    // To calculate the estimated remaining cost, every remaining aircraft is scheduled as soon as possible,
+    // assuming a minimum separation as above.
+    // A quirk of this method is that first aircraft from each set of complete-ordered aircraft may all assumed to
+    // be scheduled at the same time.
+    // However, this is not an issue, as we only need to calculate a lower bound on the cost of scheduling aircraft
+    // in a quick and cheap way.
+    // Additionally, this method ensures that the lower bound will never exceed the actual cost, since when actually
+    // scheduling aircraft they will never be scheduled to land or take-off at the same time.
     state
         .complete_order_sets
         .iter()
@@ -198,37 +215,4 @@ pub fn estimated_remaining_cost(
             remaining_solution.map(|sched| schedule_cost(&sched, instance))
         })
         .sum()
-
-    // let mut next_offsets = vec![0; state.next_in_complete_order_sets.len()];
-
-    // let mut schedule_estimate =
-    //     Vec::with_capacity(instance.flights().len() - state.current_solution.len() - 1);
-
-    // let mut cost_estimate = Cost::default();
-
-    // while let Some(flight_idx) =
-    //     estimate_next_flight(instance, state, last_sched, &schedule_estimate)
-    // {
-    //     schedule_estimate.push(flight_idx);
-    // }
 }
-
-// fn estimate_next_flight(
-//     instance: &Instance,
-//     state: &BranchBoundState,
-//     last_sched: &Schedule,
-//     schedule_estimate: &[usize],
-// ) -> Option<usize> {
-//     state
-//         .complete_order_sets
-//         .iter()
-//         .zip(&state.next_in_complete_order_sets)
-//         .filter_map(|(complete_order_set, &next_in_set_idx)| {
-//             let next_flight_idxs = complete_order_set.get(next_in_set_idx..)?;
-//             next_flight_idxs.iter().find(|&&flight_idx| {
-//                 flight_idx != last_sched.flight_index() && !schedule_estimate.contains(&flight_idx)
-//             })
-//         })
-//         .min_by_key(|&&flight_idx| instance.flights()[flight_idx].release_time())
-//         .copied()
-// }

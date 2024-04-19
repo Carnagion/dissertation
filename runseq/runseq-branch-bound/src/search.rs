@@ -59,37 +59,48 @@ pub fn branch_bound<E, I>(
     let mut current_cost = Cost::default();
     let mut best_cost = Cost::MAX;
 
+    // Initialise the queue with initial states, taken from first aircraft in each complete-order set
     nodes.extend(branches(instance, state, expand));
 
     while let Some(node) = nodes.pop() {
+        // Reset the cost and complete-order sets to match the current depth
         for removed in state.current_solution.drain(node.depth..) {
             state.next_in_complete_order_sets[removed.complete_order_idx] -= 1;
             current_cost -= removed.cost;
         }
 
+        // Ignore the node and its sub-nodes if the lower bound is worse than the best known cost
         if current_cost + node.cost >= best_cost {
             continue;
         }
 
         let last_sched = node.sched.clone();
 
+        // Update the cost and complete order sets, and add the aircraft to the current solution
         current_cost += node.cost;
         state.next_in_complete_order_sets[node.complete_order_idx] += 1;
         state.current_solution.push(node);
 
+        // If we have sequenced all aircraft according to the rolling horizon size, then update the best solution.
+        // We know that this solution will definitely be the best solution since it is a full solution and since the
+        // costs are compared above.
         if state.current_solution.len() == window.end {
             best_cost = current_cost;
             state.best_solution = state.current_solution[window.clone()].to_vec();
             continue;
         }
 
+        // Ignore the node and its sub-nodes if the current lower bound plus the estimated cost for the
+        // remaining aircraft is worse than the best known cost
         if current_cost + estimated_remaining_cost(instance, state, &last_sched) >= best_cost {
             continue;
         }
 
+        // Expand the node and add its sub-nodes to the queue
         nodes.extend(branches(instance, state, expand));
     }
 
+    // Reset the current solution since we only need the best one
     state.current_solution.drain(window.start..);
 }
 
@@ -111,6 +122,8 @@ where
         })
         .max();
 
+    // Ignore aircraft whose latest times are before the latest release time in the current solution, since
+    // that would mean that the aircraft cannot be sequenced anyways and should have been sequenced before
     let mut next_flights = state
         .complete_order_sets
         .iter()
@@ -134,8 +147,14 @@ where
             }
         })
         .collect::<Vec<_>>();
+
+    // Sort the candidate sub-nodes by the release time of the aircraft, since most of the time the aircraft with the earliest
+    // release time will be scheduled first
     next_flights.sort_unstable_by_key(|(flight, ..)| flight.release_time());
 
+    // Like above - ignore aircraft whose earliest times are after the minimum latest time of any aircraft that are
+    // also being expanded, since that could lead to situations where an aircraft with a disjoint and later time window
+    // is sequenced before one with an earlier time window
     let next_latest = next_flights
         .iter()
         .filter_map(|(flight, ..)| flight.window())
@@ -177,6 +196,8 @@ where
         })
 }
 
+// NOTE: Helper function to iterate between two `NaiveDateTime`s, since they do not impl `Step` which is
+//       still an unstable trait.
 pub fn iter_minutes(
     from: NaiveDateTime,
     to: NaiveDateTime,
